@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版权展示</title>
+    <link href="//unpkg.com/layui@2.9.16/dist/css/layui.css" rel="stylesheet">
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgb(194, 66, 230);
+            padding: 10px;
+            color: #fff; /* 确保文字颜色可见 */
+        }
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .layui-input {
+            padding-right: 30px; /* 留出图标位置 */
+        }
+        .layui-icon-search {
+            position: absolute;
+            right: 10px;
+            font-size: 20px;
+            color: #999;
+        }
+        .layui-nav {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background-color: transparent;
+        }
+        .layui-nav .layui-nav-item {
+            margin-left: 15px;
+        }
+        .layui-nav .layui-nav-item a {
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+        .layui-nav-item a:hover {
+            background-color: #e184cb;
+            border-radius: 4px;
+        }
+        .layui-nav-item img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+        .item {
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            width: 300px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        .item img {
+            border: 2px solid #696767;
+            border-radius: 20px;
+            width: 100%;
+            height: auto;
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .item-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .item-content i {
+            font-weight: bold;
+        }
+        .item-content p {
+            margin: 5px 0;
+        }
+        .item-content a {
+            display: block;
+            padding: 5px 10px;
+            background-color: #696767;
+            color: #fff;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-decoration: none;
+        }   
+    </style>
+</head>
+<body>
+    <div class="layui-form">
+        <div class="header">
+            <h1>版权交易市场</h1>
+            <div class="search-box">
+                <input type="text" class="layui-input" placeholder="搜索项目">
+                <i class="layui-icon layui-icon-search"></i>
+            </div>
+            <ul class="layui-nav">
+                <span>欢迎，<span id="username"></span></span>
+                <li class="layui-nav-item">
+                    <a href="homepage.html">
+                        <img src="https://api.iconify.design/ph:user-circle.svg" alt="用户头像">
+                    </a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="logout.html">退出</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div class="item">
+            <img src="payImage.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>名称：</i><p id="name"></p>
+                <i>价格：</i><p id="price"></p>
+                <i>作者：</i><p id="author"></p>
+                <p>描述：</p><p id="desc"></p>
+                <a href="information.html">查看详情</a>
+            </div>
+        </div>
+        <div class="item">
+            <img src="payImage.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>名称：</i><p id="name1"></p>
+                <i>价格：</i><p id="price1"></p>
+                <i>作者：</i><p id="author1"></p>
+                <p>描述：</p><p id="desc1"></p>
+                <a href="information.html">查看详情</a>
+            </div>
+        </div>
+        <div class="item">
+            <img src="payImage.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>名称：</i><p id="name2"></p>
+                <i>价格：</i><p id="price2"></p>
+                <i>作者：</i><p id="author2"></p>
+                <p>描述：</p><p id="desc2"></p>
+                <a href="information.html">查看详情</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    <script>
+        let username = "wangwu";
+        document.getElementById("username").innerHTML = username;
+        let desc = "这是一件很棒的作品，希望大家能够购买！";
+        document.getElementById("desc").innerHTML = desc;
+        document.getElementById("desc1").innerHTML = desc;
+        document.getElementById("desc2").innerHTML = desc;
+        let name = "作品名称";
+        document.getElementById("name").innerHTML = name;
+        document.getElementById("name1").innerHTML = name;
+        document.getElementById("name2").innerHTML = name;
+        let price = "10000";
+        document.getElementById("price").innerHTML = price;
+        document.getElementById("price1").innerHTML = price;
+        document.getElementById("price2").innerHTML = price;
+        let author = "作者名称";
+        document.getElementById("author").innerHTML = author;
+        document.getElementById("author1").innerHTML = author;
+        document.getElementById("author2").innerHTML = author;
+    </script>
+</body>
+</html>

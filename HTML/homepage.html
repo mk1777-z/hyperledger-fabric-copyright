@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人版权管理界面</title>
+    <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background-color: #9797cf;
+            /* 浅紫色 */
+            height: 15vh;
+            /* 上方1/5部分 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 50px;
+        }
+
+        .content {
+            background-color: #FFFFFF;
+            /* 白色背景 */
+            height: 80vh;
+            /* 下部页面空白 */
+            padding: 20px;
+        }
+
+        .layui-nav {
+            margin-right: 50px;
+            /* 将按钮向左移动 */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>版权资产</h1>
+        <!-- 下拉菜单 -->
+        <ul class="layui-nav" lay-filter="">
+            <li class="layui-nav-item">
+                <a href="javascript:;">管理</a>
+                <dl class="layui-nav-child"> <!-- 二级菜单 -->
+                    <dd><a href="javascript:;" id="uploadOption">上传</a></dd>
+                    <dd><a href="javascript:;" id="deleteOption">删除</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <!-- 下方空白部分 -->
+    </div>
+
+    <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    <script>
+        layui.use('element', function () {
+            var element = layui.element; //导航的Hover效果、二级菜单等功能，需要依赖element模块
+
+            // 上传按钮点击事件
+            document.getElementById('uploadOption').onclick = function () {
+                alert('选择文件上传'); // 这里可以替换为实际上传逻辑
+            };
+
+            // 删除按钮点击事件
+            document.getElementById('deleteOption').onclick = function () {
+                alert('选择文件删除'); // 这里可以替换为实际删除逻辑
+            };
+        });
+    </script>
+</body>
+
+</html>
