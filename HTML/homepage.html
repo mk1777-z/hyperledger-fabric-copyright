@@ -14,14 +14,19 @@
         }
 
         .header {
-            background-color: #9797cf;
-            /* 浅紫色 */
+            background-color: #15b9a87a;
             height: 15vh;
-            /* 上方1/5部分 */
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+        }
+
+        .header a {
+            text-decoration: none;
+            /* position: absolute;
+            right: 60px; */
+            /* 将按钮距离左边20px */
         }
 
         .header h1 {
@@ -31,15 +36,104 @@
 
         .content {
             background-color: #FFFFFF;
-            /* 白色背景 */
-            height: 80vh;
-            /* 下部页面空白 */
             padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: visible;
+            /* 确保父容器的溢出内容可见 */
         }
 
-        .layui-nav {
-            margin-right: 50px;
-            /* 将按钮向左移动 */
+
+
+        .item {
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            width: 300px;
+            /* 固定框的宽度 */
+            height: 480px;
+            /* 固定框的高度 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            overflow: visible;
+            /* 确保 item 容器的溢出内容可见 */
+            position: relative;
+            /* 相对定位，允许子元素溢出 */
+        }
+
+        .item img {
+            border: 2px solid #696767;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .item-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .item-content i {
+            font-weight: bold;
+        }
+
+        .item-content p {
+            margin: 5px 0;
+        }
+
+        /* 添加一个新的 flex 容器来排列按钮和下拉框 */
+        .button-select-container {
+            display: flex;
+            justify-content: space-between;
+            /* 确保按钮和下拉框两端对齐 */
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .item-content a {
+            display: block;
+            padding: 5px 10px;
+            background-color: #696767;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+            text-align: center;
+            width: 45%;
+            /* 确保按钮占据容器宽度的 45% */
+        }
+
+        .layui-form {
+            width: 50%;
+            /* 确保下拉框占据容器宽度的 50% */
+            position: relative;
+            /* 保持相对定位 */
+            z-index: 10;
+            /* 确保下拉框在其他元素之上 */
+        }
+
+
+        .layui-form select {
+            width: 100%;
+            /* 确保下拉框宽度占满容器 */
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            /* 按钮之间的间距 */
         }
     </style>
 </head>
@@ -47,36 +141,133 @@
 <body>
     <div class="header">
         <h1>版权资产</h1>
-        <!-- 下拉菜单 -->
-        <ul class="layui-nav" lay-filter="">
-            <li class="layui-nav-item">
-                <a href="javascript:;">管理</a>
-                <dl class="layui-nav-child"> <!-- 二级菜单 -->
-                    <dd><a href="javascript:;" id="uploadOption">上传</a></dd>
-                    <dd><a href="javascript:;" id="deleteOption">删除</a></dd>
-                </dl>
-            </li>
-        </ul>
+        <div class="button-container">
+            <!-- 上传按钮 -->
+            <a href="/HTML/upload.html" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">上传</a>
+            <!-- layui-btn layui-btn-lg layui-btn-primary layui-btn-radius -->
+            <a href="/HTML/display.html" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">返回</a>
+        </div>
     </div>
+
     <div class="content">
-        <!-- 下方空白部分 -->
+        <div class="item">
+            <img src="/HTML/test1.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>版权名称：</i>
+                <p id="name"></p>
+                <i>版权价格：</i>
+                <p id="price"></p>
+                <i>版权拥有者：</i>
+                <p id="author"></p>
+                <p>描述：</p>
+                <p id="desc"></p>
+                <!-- 新增的 flex 容器来横向排列按钮和下拉框 -->
+                <div class="button-select-container">
+                    <a href="/HTML/information/information.html">查看详情</a>
+                    <div class="layui-form">
+                        <select id="statusSelect" lay-filter="statusFilter">
+                            <option value="selling">在售</option>
+                            <option value="not-selling">非售卖</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="item">
+            <img src="/HTML/test1.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>版权名称：</i>
+                <p id="name1"></p>
+                <i>版权价格：</i>
+                <p id="price1"></p>
+                <i>版权拥有者：</i>
+                <p id="author1"></p>
+                <p>描述：</p>
+                <p id="desc1"></p>
+                <!-- 新增的 flex 容器来横向排列按钮和下拉框 -->
+                <div class="button-select-container">
+                    <a href="/HTML/information/information.html">查看详情</a>
+                    <div class="layui-form">
+                        <select id="statusSelect" lay-filter="statusFilter">
+                            <option value="selling">在售</option>
+                            <option value="not-selling">非售卖</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="item">
+            <img src="/HTML/test1.jpg" alt="版权图片">
+            <div class="item-content">
+                <i>版权名称：</i>
+                <p id="name2"></p>
+                <i>版权价格：</i>
+                <p id="price2"></p>
+                <i>版权拥有者：</i>
+                <p id="author2"></p>
+                <p>描述：</p>
+                <p id="desc2"></p>
+                <!-- 新增的 flex 容器来横向排列按钮和下拉框 -->
+                <div class="button-select-container">
+                    <a href="/HTML/information/information.html">查看详情</a>
+                    <div class="layui-form">
+                        <select id="statusSelect" lay-filter="statusFilter">
+                            <option value="selling">在售</option>
+                            <option value="not-selling">非售卖</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
-        layui.use('element', function () {
-            var element = layui.element; //导航的Hover效果、二级菜单等功能，需要依赖element模块
+        layui.use(['element', 'form'], function () {
+            var element = layui.element;
+            var form = layui.form;
 
             // 上传按钮点击事件
             document.getElementById('uploadOption').onclick = function () {
-                alert('选择文件上传'); // 这里可以替换为实际上传逻辑
+                alert('选择文件上传');
             };
 
             // 删除按钮点击事件
             document.getElementById('deleteOption').onclick = function () {
-                alert('选择文件删除'); // 这里可以替换为实际删除逻辑
+                alert('选择文件删除');
             };
+
+            // 监听下拉框状态切换
+            form.on('select(statusFilter)', function (data) {
+                if (data.value === 'not-selling') {
+                    // 如果选择在售状态，切换成非售卖
+                    data.elem.value = 'not-selling';
+                    alert('状态已切换为：非售卖');
+                } else if (data.value === 'selling') {
+                    // 如果选择非售卖状态，切换成在售
+                    data.elem.value = 'selling';
+                    alert('状态已切换为：在售');
+                }
+                form.render('select');  // 重新渲染下拉框
+            });
         });
+
+        let desc = "这是一件很棒的作品，希望大家能够购买！";
+        document.getElementById("desc").innerHTML = desc;
+        document.getElementById("desc1").innerHTML = desc;
+        document.getElementById("desc2").innerHTML = desc;
+        let name = "肖像版权";
+        document.getElementById("name").innerHTML = name;
+        document.getElementById("name1").innerHTML = name;
+        document.getElementById("name2").innerHTML = name;
+        let price = "10000";
+        document.getElementById("price").innerHTML = price;
+        document.getElementById("price1").innerHTML = price;
+        document.getElementById("price2").innerHTML = price;
+        let author = "某拥有者";
+        document.getElementById("author").innerHTML = author;
+        document.getElementById("author1").innerHTML = author;
+        document.getElementById("author2").innerHTML = author;
     </script>
 </body>
 

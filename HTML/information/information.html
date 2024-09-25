@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版权信息</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="left">
+            <h2>版权信息</h2>
+            <p><strong>版权ID:</strong> 12345</p>
+            <p><strong>版权名称:</strong> 示例版权</p>
+            <p><strong>拥有者:</strong> 张三</p>
+            <p><strong>开始拥有时间:</strong> 2024-01-01</p>
+            <p><strong>简述:</strong> 这是一段简短的版权描述。</p>
+            <p><strong>详情:</strong> 这是一段详细的版权信息介绍。</p>
+            <p><strong>定价:</strong> ¥5000</p>
+            <p><strong>版权拥有溯源:</strong> 版权最初由李四拥有，后转让给张三。</p>
+        </div>
+        <div class="right">
+            <img src="/HTML/test1.jpg" alt="版权图片">
+            <div class="buttons">
+                <button onclick="buyNow()">购买</button>
+                <button onclick="goBack()">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function buyNow() {
+            alert('购买成功！');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+
+</html>
