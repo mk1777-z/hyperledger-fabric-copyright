@@ -17,20 +17,6 @@ document.getElementById('login-btn').addEventListener('click', async function() 
         return;
     }
 
-    // 验证用户名是否是字母和空格（要求使用真实姓名）
-    const realNamePattern = /^[a-zA-Z\s]+$/;
-    if (!realNamePattern.test(username)) {
-        alert('用户名必须是您的真实姓名，只能包含字母和空格。');
-        return;
-    }
-
-    // 防止SQL注入：禁止包含特殊字符
-    const sqlPattern = /['"=;--]/;
-    if (sqlPattern.test(username) || sqlPattern.test(password)) {
-        alert('您的输入包含非法字符。');
-        return;
-    }
-
     // 加密密码
     const encryptedPassword = await hashPassword(password);
 
@@ -54,7 +40,7 @@ document.getElementById('login-btn').addEventListener('click', async function() 
     .then(data => {
         if (data) {
             localStorage.setItem('token', data.token);
-            window.location.href = 'display.html'; // 登录成功后跳转页面
+            window.location.href = '/display'; // 登录成功后跳转页面
         }
     })
     .catch(error => {

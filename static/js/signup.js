@@ -33,7 +33,7 @@ document.getElementById('signup-btn').addEventListener('click', async function()
     const encryptedPassword = await hashPassword(password);
 
     // 发送注册请求到后端
-    fetch('/signup', {
+    fetch('/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ document.getElementById('signup-btn').addEventListener('click', async function()
     .then(response => {
         if (response.status === 200) {
             alert('注册成功，请登录。');
-            window.location.href = 'index.html'; // 注册成功后跳转到登录页面
+            window.location.href = '/'; // 注册成功后跳转到登录页面
         } else {
             console.log('注册失败。');
         }
