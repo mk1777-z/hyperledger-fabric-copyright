@@ -29,12 +29,31 @@ type User struct {
 }
 
 // JWT secret key
-var jwtKey = []byte("123") // 替换为你的密钥
+var jwtKey = []byte("123")
 
 // UserClaims 用于 JWT 的声明
 type UserClaims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
+}
+
+func display(_ context.Context, c *app.RequestContext) {
+	username, _ := c.Get(string(jwtKey))
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", dbUser, dbPassword, dbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	defer db.Close() // 确保关闭数据库连接
+	row, err := db.Query("Select owner from project where owner = ?", username)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, utils.H{
+		"projecct": row,
+	})
 }
 
 func renderHTML(h *server.Hertz) {
@@ -66,6 +85,16 @@ func renderHTML(h *server.Hertz) {
 
 	h.GET("/information", func(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusOK, "information.html", utils.H{
+			"title": "Information",
+		})
+	})
+	h.GET("/display", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "display.html", utils.H{
+			"title": "Information",
+		})
+	})
+	h.GET("/upload", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "upload.html", utils.H{
 			"title": "Information",
 		})
 	})
@@ -171,6 +200,8 @@ func main() {
 	h.POST("/register", register)
 
 	h.POST("/login", login)
+
+	h.POST("/display", display)
 
 	h.Spin()
 }
