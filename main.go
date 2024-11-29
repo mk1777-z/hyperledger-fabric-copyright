@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"hyperledger-fabric-copyright/mv"
 	"net/http"
+	"strings"
 	"time"
 
 	"database/sql"
@@ -24,8 +26,8 @@ const (
 )
 
 type User struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // JWT secret key
@@ -38,21 +40,80 @@ type UserClaims struct {
 }
 
 func display(_ context.Context, c *app.RequestContext) {
-	username, _ := c.Get(string(jwtKey))
+	// 获取 Authorization header
+	tokenString := c.GetHeader("Authorization")
+	if string(tokenString) == "" {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "Authorization token is missing"})
+		return
+	}
+
+	// 提取 Bearer token
+	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
+
+	// 解析 token
+	token, err := jwt.ParseWithClaims(token_String, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		// 返回 JWT 密钥
+		return jwtKey, nil
+	})
+	if err != nil {
+		// 如果 token 无效，返回 401 未授权错误
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token"})
+		return
+	}
+
+	// 验证 token 是否有效
+	claims, ok := token.Claims.(*UserClaims)
+	if !ok || !token.Valid {
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token claims"})
+		return
+	}
+
+	// 打印用户名（调试）
+	fmt.Println("Authenticated user:", claims.Username)
+
+	// 连接数据库
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", dbUser, dbPassword, dbName)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
 		return
 	}
-	defer db.Close() // 确保关闭数据库连接
-	row, err := db.Query("Select owner from project where owner = ?", username)
+	defer db.Close() // 确保数据库连接在结束时关闭
+
+	// 查询数据库，获取该用户的项目列表
+	rows, err := db.Query("SELECT id, name, dsc FROM item WHERE owner = ?", claims.Username)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
 		return
 	}
+	defer rows.Close()
+
+	// 存储查询结果
+	var items []map[string]interface{}
+	for rows.Next() {
+		var id int
+		var name, description string
+		if err := rows.Scan(&id, &name, &description); err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
+			return
+		}
+		items = append(items, map[string]interface{}{
+			"id":          id,
+			"name":        name,
+			"description": description,
+		})
+	}
+
+	// 返回结果
 	c.JSON(http.StatusOK, utils.H{
-		"projecct": row,
+		"message": "Items fetched successfully",
+		"items":   items,
 	})
 }
 
@@ -171,7 +232,7 @@ func login(_ context.Context, c *app.RequestContext) {
 	}
 
 	// 生成 JWT token
-	expirationTime := time.Now().Add(5 * time.Minute) // 设置 token 过期时间
+	expirationTime := time.Now().Add(24 * time.Hour) // 设置 token 过期时间
 	claims := &UserClaims{
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
@@ -179,6 +240,7 @@ func login(_ context.Context, c *app.RequestContext) {
 		},
 	}
 
+	// 使用密钥签名并生成 token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
@@ -186,6 +248,7 @@ func login(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// 返回 token
 	c.JSON(consts.StatusOK, utils.H{
 		"message": "Login successful",
 		"token":   tokenString,
@@ -202,6 +265,8 @@ func main() {
 	h.POST("/login", login)
 
 	h.POST("/display", display)
+
+	_ = h.Group("/auth", mv.MiddlewareFunc())
 
 	h.Spin()
 }
