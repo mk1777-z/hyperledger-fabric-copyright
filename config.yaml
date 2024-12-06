@@ -1,0 +1,6 @@
+mysql:
+  dbUser: root
+  dbPassword: 12345678
+  dbName: fabric
+
+jwtkey: 0123456789

@@ -166,70 +166,183 @@
     </div>
 
     <div class="container">
-        <div class="item">
-            <img src="test1.jpg" alt="版权图片">
-            <div class="item-content">
-                <i>名称：</i>
-                <p id="name"></p>
-                <i>价格：</i>
-                <p id="price"></p>
-                <i>作者：</i>
-                <p id="author"></p>
-                <p>描述：</p>
-                <p id="desc"></p>
-                <a href="information">查看详情</a>
-            </div>
-        </div>
-        <div class="item">
-            <img src="test1.jpg" alt="版权图片">
-            <div class="item-content">
-                <i>名称：</i>
-                <p id="name1"></p>
-                <i>价格：</i>
-                <p id="price1"></p>
-                <i>作者：</i>
-                <p id="author1"></p>
-                <p>描述：</p>
-                <p id="desc1"></p>
-                <a href="information">查看详情</a>
-            </div>
-        </div>
-        <div class="item">
-            <img src="test1.jpg" alt="版权图片">
-            <div class="item-content">
-                <i>名称：</i>
-                <p id="name2"></p>
-                <i>价格：</i>
-                <p id="price2"></p>
-                <i>作者：</i>
-                <p id="author2"></p>
-                <p>描述：</p>
-                <p id="desc2"></p>
-                <a href="information">查看详情</a>
-            </div>
-        </div>
+        <!-- 动态生成的版权项将放置在此处 -->
     </div>
 
     <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
-        let username = "wangwu";
-        document.getElementById("username").innerHTML = username;
-        let desc = "这是一件很棒的作品，希望大家能够购买！";
-        document.getElementById("desc").innerHTML = desc;
-        document.getElementById("desc1").innerHTML = desc;
-        document.getElementById("desc2").innerHTML = desc;
-        let name = "作品名称";
-        document.getElementById("name").innerHTML = name;
-        document.getElementById("name1").innerHTML = name;
-        document.getElementById("name2").innerHTML = name;
-        let price = "10000";
-        document.getElementById("price").innerHTML = price;
-        document.getElementById("price1").innerHTML = price;
-        document.getElementById("price2").innerHTML = price;
-        let author = "作者名称";
-        document.getElementById("author").innerHTML = author;
-        document.getElementById("author1").innerHTML = author;
-        document.getElementById("author2").innerHTML = author;
+        // 页面加载后自动执行
+        // window.onload = function () {
+        //     // 模拟获取的用户名（你可以通过后端接口动态传入这些数据）
+        //     let username = "王五";
+        //     document.getElementById("username").innerHTML = username;
+
+        //     // 获取 localStorage 中的 token
+        //     const token = localStorage.getItem('token'); // 假设 token 存储在 localStorage 的 'token' 键下
+
+        //     // 如果没有 token，可以提示用户登录，或者处理未授权的情况
+        //     if (!token) {
+        //         console.error('未登录或未获取到有效的 token');
+        //         return;
+        //     }
+
+        //     // 构建请求的 POST 数据（如果需要的话）
+        //     const requestData = {
+        //         // userId: 12345, // 示例数据
+        //         // filter: "artworks", // 示例筛选条件
+        //         page: 1 // 页码，假设从第一页开始获取数据
+        //     };
+
+        //     // 向后端接口发送 POST 请求，获取版权项信息
+        //     fetch('/display', {
+        //         method: 'POST', // 设置请求方法为 POST
+        //         headers: {
+        //             'Content-Type': 'application/json', // 设置请求头为 JSON 格式
+        //             'Authorization': `Bearer ${token}` // 将 token 添加到 Authorization 头部
+        //         },
+        //         body: JSON.stringify(requestData) // 将请求数据转为 JSON 字符串
+        //     })
+        //         .then(response => response.json()) // 将响应转换为 JSON 格式
+        //         .then(data => {
+        //             if (data && data.items) {
+        //                 // 获取返回的版权项数组
+        //                 const items = data.items;
+        //                 // 获取容器元素
+        //                 const container = document.querySelector('.container');
+        //                 // 清空现有内容
+        //                 container.innerHTML = '';
+        //                 // 遍历每一个版权项，动态生成 HTML 内容
+        //                 items.forEach((item, index) => {
+        //                     const itemElement = document.createElement('div');
+        //                     itemElement.classList.add('item');
+
+        //                     // 创建图片元素（假设每个项目有一个图片）
+        //                     const img = document.createElement('img');
+        //                     img.src = `test${index + 1}.jpg`; // 使用不同的图片作为示例
+        //                     img.alt = '版权图片';
+
+        //                     // 创建内容部分
+        //                     const contentDiv = document.createElement('div');
+        //                     contentDiv.classList.add('item-content');
+
+        //                     const nameElement = document.createElement('p');
+        //                     nameElement.innerHTML = `<i>名称：</i> ${item.name}`;
+
+        //                     const descriptionElement = document.createElement('p');
+        //                     descriptionElement.innerHTML = `<i>描述：</i> ${item.description}`;
+
+        //                     // 创建链接
+        //                     const detailLink = document.createElement('a');
+        //                     detailLink.href = 'information'; // 链接跳转到详情页
+        //                     detailLink.innerHTML = '查看详情';
+
+        //                     // 将元素添加到内容区
+        //                     contentDiv.appendChild(nameElement);
+        //                     contentDiv.appendChild(descriptionElement);
+        //                     contentDiv.appendChild(detailLink);
+
+        //                     // 将图片和内容部分添加到每个项目元素中
+        //                     itemElement.appendChild(img);
+        //                     itemElement.appendChild(contentDiv);
+
+        //                     // 将新的项目元素添加到容器中
+        //                     container.appendChild(itemElement);
+        //                 });
+        //             } else {
+        //                 console.error('未能获取到项目数据');
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('请求失败:', error);
+        //         });
+        // }
+        window.onload = function () {
+        // 从 localStorage 中读取用户名
+        const username = localStorage.getItem('username');
+
+        // 如果用户名存在，则渲染到页面
+        if (username) {
+            document.getElementById("username").innerHTML = username;
+        } else {
+            console.log("未找到用户名");
+            // 可以选择设置默认值或提示用户登录
+            document.getElementById("username").innerHTML = "未登录";
+        }
+
+        // 获取 localStorage 中的 token
+        const token = localStorage.getItem('token'); // 假设 token 存储在 localStorage 的 'token' 键下
+
+        // 如果没有 token，可以提示用户登录，或者处理未授权的情况
+        if (!token) {
+            console.error('未登录或未获取到有效的 token');
+            return;
+        }
+
+        // 构建请求的 POST 数据（如果需要的话）
+        const requestData = {
+            page: 1 // 页码，假设从第一页开始获取数据
+        };
+
+        // 向后端接口发送 POST 请求，获取版权项信息
+        fetch('/display', {
+            method: 'POST', // 设置请求方法为 POST
+            headers: {
+                'Content-Type': 'application/json', // 设置请求头为 JSON 格式
+                'Authorization': `Bearer ${token}` // 将 token 添加到 Authorization 头部
+            },
+            body: JSON.stringify(requestData) // 将请求数据转为 JSON 字符串
+        })
+            .then(response => response.json()) // 将响应转换为 JSON 格式
+            .then(data => {
+                if (data && data.items) {
+                    const items = data.items;
+                    const container = document.querySelector('.container');
+                    container.innerHTML = '';
+                    items.forEach((item, index) => {
+                        const itemElement = document.createElement('div');
+                        itemElement.classList.add('item');
+
+                        const img = document.createElement('img');
+                        img.src = `test${index + 1}.jpg`;
+                        img.alt = '版权图片';
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.classList.add('item-content');
+
+                        const nameElement = document.createElement('p');
+                        nameElement.innerHTML = `<i>名称：</i> ${item.name}`;
+
+                        const descriptionElement = document.createElement('p');
+                        descriptionElement.innerHTML = `<i>描述：</i> ${item.description}`;
+
+                        const priceElement = document.createElement('p');
+                        descriptionElement.innerHTML = `<i>价格：</i> ${item.price}`;
+
+                        const ownerElement = document.createElement('p');
+                        descriptionElement.innerHTML = `<i>拥有者：</i> ${item.owner}`;
+
+                        const detailLink = document.createElement('a');
+                        detailLink.href = 'information';
+                        detailLink.innerHTML = '查看详情';
+
+                        contentDiv.appendChild(nameElement);
+                        contentDiv.appendChild(descriptionElement);
+                        contentDiv.appendChild(detailLink);
+
+                        itemElement.appendChild(img);
+                        itemElement.appendChild(contentDiv);
+
+                        container.appendChild(itemElement);
+                    });
+                } else {
+                    console.error('未能获取到项目数据');
+                }
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+            });
+    }
+
     </script>
 </body>
 
