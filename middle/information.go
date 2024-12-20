@@ -6,42 +6,17 @@ import (
 	"fmt"
 	"hyperledger-fabric-copyright/conf"
 	"net/http"
-	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/dgrijalva/jwt-go"
 )
 
-func Myproject(_ context.Context, c *app.RequestContext) {
-	// 获取 Authorization header
-	tokenString := c.GetHeader("Authorization")
-	if string(tokenString) == "" {
+func Information(_ context.Context, c *app.RequestContext) {
+	// 从请求中获取商品 ID
+	itemID := c.Query("name")
+	if itemID == "" {
 		c.Status(http.StatusBadRequest)
-		c.JSON(http.StatusBadRequest, utils.H{"message": "Authorization token is missing"})
-		return
-	}
-
-	// 提取 Bearer token
-	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
-
-	// 解析 token
-	token, err := jwt.ParseWithClaims(token_String, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
-		// 返回 JWT 密钥
-		return conf.Con.Jwtkey, nil
-	})
-	if err != nil {
-		// 如果 token 无效，返回 401 未授权错误
-		c.Status(http.StatusUnauthorized)
-		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token"})
-		return
-	}
-
-	// 验证 token 是否有效
-	claims, ok := token.Claims.(*UserClaims)
-	if !ok || !token.Valid {
-		c.Status(http.StatusUnauthorized)
-		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token claims"})
+		c.JSON(http.StatusBadRequest, utils.H{"message": "Item name is missing"})
 		return
 	}
 
@@ -56,8 +31,7 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 	defer db.Close() // 确保数据库连接在结束时关闭
 
 	// 查询数据库，获取该用户的项目列表
-	//rows, err := db.Query("SELECT id, name, simple_dsc , price,img FROM item WHERE owner = ?", claims.Username)
-	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time FROM item WHERE owner = ?", claims.Username)
+	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time FROM item WHERE name = ?")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -69,9 +43,9 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 	var items []map[string]interface{}
 	for rows.Next() {
 		var id int
-		var name, simple_des, img, dsc, owner, start_time string
+		var name, simple_des, owner, dsc, img, start_time string
 		var price float32
-		if err := rows.Scan(&id, &name, &simple_des, &price, &img, &dsc, &owner, &start_time); err != nil {
+		if err := rows.Scan(&id, &name, &simple_des, &price); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
@@ -81,9 +55,9 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 			"name":        name,
 			"description": simple_des,
 			"price":       price,
-			"img":         img,
-			"dsc":         dsc,
 			"owner":       owner,
+			"dsc":         dsc,
+			"img":         img,
 			"start_time":  start_time,
 		})
 	}

@@ -154,5 +154,7 @@ func main() {
 
 	h.POST("/search", middle.Search)
 
+	h.POST("/upload", middle.Upload)
+
 	h.Spin()
 }

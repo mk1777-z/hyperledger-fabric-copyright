@@ -60,7 +60,7 @@ func Display(_ context.Context, c *app.RequestContext) {
 	defer db.Close() // 确保数据库连接在结束时关闭
 
 	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, price FROM item WHERE on_sale=1 ORDER BY RAND() LIMIT 20 ")
+	rows, err := db.Query("SELECT id, name, simple_dsc, owner , price,img FROM item WHERE on_sale=1 ORDER BY RAND() LIMIT 20 ")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -74,16 +74,28 @@ func Display(_ context.Context, c *app.RequestContext) {
 		var id int
 		var name, simple_des string
 		var price float32
-		if err := rows.Scan(&id, &name, &simple_des, &price); err != nil {
+		var owner string
+		var img string // 使用 sql.NullString 来处理可能的 NULL 值
+
+		// 扫描数据
+		if err := rows.Scan(&id, &name, &simple_des, &owner, &price, &img); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
 		}
+
+		if img == "NULL" {
+			img = "noimage"
+		}
+
+		// 将结果添加到 items
 		items = append(items, map[string]interface{}{
 			"id":          id,
 			"name":        name,
 			"description": simple_des,
 			"price":       price,
+			"img":         img,
+			"owner":       owner,
 		})
 	}
 

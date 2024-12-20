@@ -11,54 +11,81 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            background-color: #f4f5f7;
         }
 
         .header {
-            background-color: #15b9a87a;
+            background-color: #0a6c78;
+            color: #fff;
             height: 15vh;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .header .button-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .header a {
             text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-align: center;
+            line-height: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .header a:hover {
+            background-color: #064c54;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 50px;
+            font-size: 36px;
         }
 
         .content {
-            background-color: #FFFFFF;
+            background-color: #ffffff;
             padding: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
             align-items: flex-start;
-            overflow: visible;
         }
 
         .item {
             box-sizing: border-box;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
-            background-color: #f9f9f9;
-            width: 300px;
-            height: 480px;
+            background-color: #fdfdfd;
+            width: 320px;
+            height: 500px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 15px;
+            padding: 20px;
             position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
         .item img {
-            border: 2px solid #696767;
+            border: 2px solid #ccc;
             border-radius: 20px;
             width: 100%;
             max-width: 200px;
@@ -69,51 +96,76 @@
         .item-content {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+            align-items: flex-start;
+            text-align: left;
             margin-top: 10px;
             width: 100%;
+            padding-left: 10px;
         }
 
         .item-content i {
             font-weight: bold;
+            color: #555;
         }
 
         .item-content p {
             margin: 5px 0;
+            font-size: 14px;
+            color: #333;
         }
 
         .button-select-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 20px;
             width: 100%;
             margin-top: 10px;
         }
 
         .item-content a {
-            display: block;
-            padding: 5px 10px;
-            background-color: #696767;
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #0a6c78;
             color: #fff;
-            border-radius: 4px;
+            border-radius: 5px;
             text-decoration: none;
             text-align: center;
-            width: 45%;
+            transition: background-color 0.3s ease;
+        }
+
+        .item-content a:hover {
+            background-color: #064c54;
         }
 
         .layui-form {
-            width: 50%;
-            position: relative;
-            z-index: 10;
+            width: 45%;
         }
 
         .layui-form select {
             width: 100%;
         }
 
-        .button-container {
-            display: flex;
-            gap: 10px;
+        .modify-button {
+            background-color: #ffa500;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .modify-button:hover {
+            background-color: #cc8400;
+        }
+
+        .layui-layer-title {
+            font-size: 18px;
+        }
+
+        .layui-layer-content {
+            padding: 20px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -133,101 +185,146 @@
 
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
-        layui.use(['element', 'form'], function () {
+        layui.use(['element', 'form', 'layer'], function () {
             var element = layui.element;
             var form = layui.form;
+            var layer = layui.layer;
 
-            // 监听下拉框状态切换
             form.on('select(statusFilter)', function (data) {
                 if (data.value === 'not-selling') {
-                    data.elem.value = 'not-selling';
                     alert('状态已切换为：非售卖');
                 } else if (data.value === 'selling') {
-                    data.elem.value = 'selling';
                     alert('状态已切换为：在售');
                 }
                 form.render('select');
             });
+
+            // 显示版权详情
+            window.showDetails = function (item) {
+                layer.open({
+                    type: 1,
+                    title: '版权详情',
+                    content: `<div>
+                    <p><strong>ID：</strong>${item.id}</p>
+                    <p><strong>版权名称：</strong>${item.name}</p>
+                    <p><strong>简短描述：</strong>${item.simple_dsc}</p>
+                    <p><strong>版权价格：</strong>${item.price}</p>
+                    <p><strong>详细描述：</strong>${item.dsc}</p>
+                    <p><strong>拥有者：</strong>${item.owner}</p>
+                    <p><strong>开始时间：</strong>${item.start_time}</p>
+                  </div>`,
+                    area: ['400px', '400px'] // 弹窗区域大小
+                });
+            };
+
+            // 修改版权信息
+            window.modifyItem = function (item) {
+                layer.open({
+                    type: 1,
+                    title: '修改版权',
+                    content: `<div>
+                    <form class="layui-form" style="padding: 20px;">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">版权名称</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="name" required value="${item.name}" placeholder="请输入版权名称" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">简短描述</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="simple_dsc" required value="${item.simple_dsc}" placeholder="请输入简短描述" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">版权价格</label>
+                            <div class="layui-input-block">
+                                <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">详细描述</label>
+                            <div class="layui-input-block">
+                                <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc}</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button type="submit" class="layui-btn layui-btn-normal">保存修改</button>
+                        </div>
+                    </form>
+                  </div>`,
+                    area: ['400px', '500px'] // 弹窗区域大小
+                });
+            };
+
         });
 
         window.onload = function () {
-            // 获取本地存储中的 token
             const token = localStorage.getItem('token');
-
-            // 如果没有 token，则输出错误信息并终止执行
             if (!token) {
                 console.error('未登录或未获取到有效的 token');
                 return;
             }
 
-            // 请求的数据（例如用户 ID 和筛选条件）
             const requestData = {
-                // userId: 12345, // 用户 ID，假设是 12345
-                // filter: "artworks", // 筛选条件，假设是要筛选“artworks”类型的版权项目
-                page: 1 // 页码，假设从第一页开始获取数据
+                page: 1
             };
 
-            // 向后端发送 POST 请求，获取版权项目数据
             fetch('/myproject', {
-                method: 'POST', // 使用 POST 方法发送请求
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // 设置请求头为 JSON 格式
-                    'Authorization': `Bearer ${token}` // 在请求头中加入 Bearer Token 进行身份验证
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(requestData) // 将请求数据转换为 JSON 字符串
+                body: JSON.stringify(requestData)
             })
-                .then(response => response.json()) // 将响应转换为 JSON 格式
+                .then(response => response.json())
                 .then(data => {
-                    if (data && data.items) { // 如果获取到了有效的数据
-                        const items = data.items; // 获取项目列表
-                        const content = document.getElementById('content'); // 获取页面中用于展示项目的容器
-                        content.innerHTML = ''; // 清空容器内容
+                    if (data && data.items) {
+                        const items = data.items;
+                        const content = document.getElementById('content');
+                        content.innerHTML = '';
 
-                        // 遍历返回的项目数据，生成对应的 HTML 元素
                         items.forEach((item, index) => {
-                            // 创建每个项目的容器元素
                             const itemElement = document.createElement('div');
                             itemElement.classList.add('item');
 
-                            // 创建项目图片元素
                             const img = document.createElement('img');
-                            img.src = item.imageUrl || `/HTML/test${index + 1}.jpg`; // 如果有图片 URL 则使用，否则使用默认图片
+                            img.src = item.imageUrl || `/HTML/test${index + 1}.jpg`;
                             img.alt = '版权图片';
 
-                            // 创建项目内容容器
                             const contentDiv = document.createElement('div');
                             contentDiv.classList.add('item-content');
 
-                            // 创建版权名称元素
                             const nameElement = document.createElement('p');
                             nameElement.innerHTML = `<i>版权名称：</i> ${item.name}`;
 
-                            // 创建版权价格元素
                             const priceElement = document.createElement('p');
                             priceElement.innerHTML = `<i>版权价格：</i> ${item.price}`;
 
-                            // 创建版权拥有者元素
-                            const authorElement = document.createElement('p');
-                            authorElement.innerHTML = `<i>版权拥有者：</i> ${item.author}`;
-
-                            // 创建描述元素
                             const descElement = document.createElement('p');
                             descElement.innerHTML = `<i>描述：</i> ${item.description}`;
 
-                            // 创建按钮和下拉框的容器
                             const buttonSelectContainer = document.createElement('div');
                             buttonSelectContainer.classList.add('button-select-container');
 
-                            // 创建查看详情按钮
                             const detailLink = document.createElement('a');
-                            detailLink.href = 'information'; // 设置链接地址
                             detailLink.innerHTML = '查看详情';
+                            detailLink.onclick = function () {
+                                window.showDetails(item);
+                            };
 
-                            // 创建下拉框元素容器
+
+                            const modifyButton = document.createElement('a');
+                            modifyButton.classList.add('modify-button');
+                            modifyButton.innerHTML = '修改';
+                            modifyButton.onclick = function () {
+                                window.modifyItem(item);
+                            };
+
                             const formDiv = document.createElement('div');
                             formDiv.classList.add('layui-form');
 
-                            // 创建下拉框元素
                             const select = document.createElement('select');
                             select.id = 'statusSelect';
                             select.innerHTML = `
@@ -236,30 +333,24 @@
                             `;
                             formDiv.appendChild(select);
 
-                            // 将按钮和下拉框添加到容器中
                             buttonSelectContainer.appendChild(detailLink);
-                            buttonSelectContainer.appendChild(formDiv);
+                            buttonSelectContainer.appendChild(modifyButton);
 
-                            // 将内容部分的元素添加到内容容器中
                             contentDiv.appendChild(nameElement);
                             contentDiv.appendChild(priceElement);
-                            contentDiv.appendChild(authorElement);
                             contentDiv.appendChild(descElement);
                             contentDiv.appendChild(buttonSelectContainer);
 
-                            // 将图片和内容部分添加到项目元素中
                             itemElement.appendChild(img);
                             itemElement.appendChild(contentDiv);
 
-                            // 将项目元素添加到页面的内容容器中
                             content.appendChild(itemElement);
                         });
                     } else {
-                        console.error('未能获取到项目数据'); // 如果数据为空，输出错误信息
+                        console.error('未能获取到项目数据');
                     }
                 })
                 .catch(error => {
-                    // 请求失败时输出错误信息
                     console.error('请求失败:', error);
                 });
         };
