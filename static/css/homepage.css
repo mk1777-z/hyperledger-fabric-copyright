@@ -1,0 +1,160 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f5f7;
+}
+
+.header {
+    background-color: #0a6c78;
+    color: #fff;
+    height: 15vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header .button-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-align: center;
+    line-height: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.header a:hover {
+    background-color: #064c54;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 36px;
+}
+
+.content {
+    background-color: #ffffff;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.item {
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fdfdfd;
+    width: 320px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.item img {
+    border: 2px solid #ccc;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.item-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 10px;
+    width: 100%;
+    padding-left: 10px;
+}
+
+.item-content i {
+    font-weight: bold;
+    color: #555;
+}
+
+.item-content p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.button-select-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.item-content a {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #0a6c78;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.item-content a:hover {
+    background-color: #064c54;
+}
+
+.layui-form {
+    width: 45%;
+}
+
+.layui-form select {
+    width: 100%;
+}
+
+.modify-button {
+    background-color: #ffa500;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.modify-button:hover {
+    background-color: #cc8400;
+}
+
+.layui-layer-title {
+    font-size: 18px;
+}
+
+.layui-layer-content {
+    padding: 20px;
+    font-size: 14px;
+}

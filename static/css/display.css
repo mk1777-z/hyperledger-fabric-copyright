@@ -1,0 +1,206 @@
+/* 页面整体样式 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f5f7;
+}
+
+/* 导航部分背景色透明或继承头部背景色 */
+.header .layui-nav {
+    background-color: inherit;
+}
+
+/* 用户头像背景色去掉 */
+.layui-nav img {
+    background-color: transparent;
+}
+
+/* 欢迎词文字及周围背景设置透明 */
+.layui-nav span,
+.layui-nav a {
+    background-color: transparent;
+    color: #fff;
+    /* 文字颜色可根据需要调整 */
+}
+
+
+
+/* 页头样式 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    /* 左中右布局 */
+    align-items: center;
+    /* 垂直居中 */
+    background-color: #006d77;
+    color: #fff;
+    padding: 15px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 页头标题 */
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* 搜索框 */
+.search-box {
+    flex: 1;
+    /* 占据中间空间 */
+    display: flex;
+    justify-content: center;
+    /* 水平居中搜索框 */
+    position: relative;
+}
+
+.search-box input {
+    max-width: 300px;
+    width: 100%;
+    height: 35px;
+    padding: 0 40px 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #eaf4f4;
+    color: #333;
+}
+
+.search-box input:focus {
+    border-color: #006d77;
+    box-shadow: 0 0 5px rgba(0, 109, 119, 0.5);
+}
+
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #006d77;
+    cursor: pointer;
+}
+
+/* 用户导航菜单 */
+.layui-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 20px;
+    align-items: center;
+}
+
+.layui-nav span {
+    font-size: 16px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.layui-nav a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+}
+
+.layui-nav a:hover {
+    color: #d6d6d6;
+}
+
+/* 用户头像样式 */
+.layui-nav img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+}
+
+/* 退出按钮样式 */
+.layui-nav .logout {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffdddd;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.layui-nav .logout:hover {
+    color: #ff5c5c;
+}
+
+/* 容器样式 */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* 每个版权项的卡片样式 */
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 280px;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 图片样式 */
+.item img {
+    width: 100%;
+    max-width: 200px;
+    height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* 内容样式 */
+.item-content {
+    text-align: left;
+    width: 100%;
+}
+
+.item-content p {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #333;
+}
+
+.item-content i {
+    font-weight: bold;
+    color: #555;
+}
+
+/* 查看详情链接样式 */
+.item-content a {
+    display: inline-block;
+    padding: 8px 15px;
+    margin-top: 10px;
+    background-color: #006d77;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.item-content a:hover {
+    background-color: #004d5b;
+}

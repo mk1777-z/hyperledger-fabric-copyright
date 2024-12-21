@@ -12,8 +12,15 @@ import (
 )
 
 func Information(_ context.Context, c *app.RequestContext) {
+	var body RequestBody
+	if err := c.Bind(&body); err != nil {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "Invalid request body"})
+		return
+	}
+
+	itemID := body.Name
 	// 从请求中获取商品 ID
-	itemID := c.Query("name")
 	if itemID == "" {
 		c.Status(http.StatusBadRequest)
 		c.JSON(http.StatusBadRequest, utils.H{"message": "Item name is missing"})
@@ -31,7 +38,7 @@ func Information(_ context.Context, c *app.RequestContext) {
 	defer db.Close() // 确保数据库连接在结束时关闭
 
 	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time FROM item WHERE name = ?")
+	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time FROM item WHERE name = ?", itemID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -45,7 +52,7 @@ func Information(_ context.Context, c *app.RequestContext) {
 		var id int
 		var name, simple_des, owner, dsc, img, start_time string
 		var price float32
-		if err := rows.Scan(&id, &name, &simple_des, &price); err != nil {
+		if err := rows.Scan(&id, &name, &simple_des, &price, &dsc, &owner, &img, &start_time); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return

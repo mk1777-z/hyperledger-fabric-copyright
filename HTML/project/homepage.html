@@ -6,168 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人版权管理界面</title>
     <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f5f7;
-        }
-
-        .header {
-            background-color: #0a6c78;
-            color: #fff;
-            height: 15vh;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .header .button-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .header a {
-            text-decoration: none;
-            color: #fff;
-            font-weight: bold;
-            font-size: 16px;
-            padding: 10px 20px;
-            border-radius: 20px;
-            text-align: center;
-            line-height: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .header a:hover {
-            background-color: #064c54;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 36px;
-        }
-
-        .content {
-            background-color: #ffffff;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .item {
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #fdfdfd;
-            width: 320px;
-            height: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .item img {
-            border: 2px solid #ccc;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 200px;
-            max-height: 200px;
-            object-fit: cover;
-        }
-
-        .item-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            margin-top: 10px;
-            width: 100%;
-            padding-left: 10px;
-        }
-
-        .item-content i {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .item-content p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .button-select-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .item-content a {
-            display: inline-block;
-            padding: 8px 15px;
-            background-color: #0a6c78;
-            color: #fff;
-            border-radius: 5px;
-            text-decoration: none;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .item-content a:hover {
-            background-color: #064c54;
-        }
-
-        .layui-form {
-            width: 45%;
-        }
-
-        .layui-form select {
-            width: 100%;
-        }
-
-        .modify-button {
-            background-color: #ffa500;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .modify-button:hover {
-            background-color: #cc8400;
-        }
-
-        .layui-layer-title {
-            font-size: 18px;
-        }
-
-        .layui-layer-content {
-            padding: 20px;
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="static/css/homepage.css">
 </head>
 
 <body>
@@ -199,7 +38,6 @@
                 form.render('select');
             });
 
-            // 显示版权详情
             window.showDetails = function (item) {
                 layer.open({
                     type: 1,
@@ -207,55 +45,123 @@
                     content: `<div>
                     <p><strong>ID：</strong>${item.id}</p>
                     <p><strong>版权名称：</strong>${item.name}</p>
-                    <p><strong>简短描述：</strong>${item.simple_dsc}</p>
+                    <p><strong>简短描述：</strong>${item.description}</p>
                     <p><strong>版权价格：</strong>${item.price}</p>
                     <p><strong>详细描述：</strong>${item.dsc}</p>
                     <p><strong>拥有者：</strong>${item.owner}</p>
                     <p><strong>开始时间：</strong>${item.start_time}</p>
+                    <p><strong>是否售卖：</strong>${item.on_sale}</p>
                   </div>`,
-                    area: ['400px', '400px'] // 弹窗区域大小
+                    area: ['400px', '400px']
                 });
             };
 
-            // 修改版权信息
             window.modifyItem = function (item) {
                 layer.open({
                     type: 1,
                     title: '修改版权',
-                    content: `<div>
-                    <form class="layui-form" style="padding: 20px;">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">版权名称</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="name" required value="${item.name}" placeholder="请输入版权名称" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">简短描述</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="simple_dsc" required value="${item.simple_dsc}" placeholder="请输入简短描述" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">版权价格</label>
-                            <div class="layui-input-block">
-                                <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">详细描述</label>
-                            <div class="layui-input-block">
-                                <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc}</textarea>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <button type="submit" class="layui-btn layui-btn-normal">保存修改</button>
-                        </div>
-                    </form>
-                  </div>`,
-                    area: ['400px', '500px'] // 弹窗区域大小
+                    content: `
+        <div>
+            <form class="layui-form" id="modifyForm" style="padding: 20px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">简短描述</label>
+                    <div class="layui-input-block" style="width: calc(100% - 110px);">
+                        <input type="text" name="description" required value="${item.description}" placeholder="请输入简短描述" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">版权价格</label>
+                    <div class="layui-input-block" style="width: calc(100% - 110px);">
+                        <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">详细描述</label>
+                    <div class="layui-input-block" style="width: calc(100% - 110px);">
+                        <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否售卖</label>
+                    <div class="layui-input-block" style="width: calc(100% - 110px);">
+                        <select name="on_sale" id="on_sale" lay-filter="on_sale">
+                            <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
+                            <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <button type="submit" class="layui-btn layui-btn-normal">保存修改</button>
+                </div>
+            </form>
+        </div>`,
+                    area: ['800px', '500px']
                 });
+
+                // 渲染表单
+                layui.use(['form'], function () {
+                    var form = layui.form;
+                    form.render('select'); // 渲染 select
+                });
+
+                // 表单提交事件
+                const form = document.getElementById('modifyForm');
+                form.onsubmit = function (event) {
+                    event.preventDefault(); // 阻止表单默认提交
+
+                    // 获取表单数据
+                    const formData = new FormData(form);
+                    const updatedItem = {
+                        id: item.id, // 保留原始ID，供后端识别
+                        name: item.name, // 用户输入的名称
+                        description: formData.get('description'), // 用户输入的简短描述
+                        price: parseFloat(formData.get('price')), // 用户输入的价格，转为浮点数
+                        dsc: formData.get('dsc'), // 用户输入的详细描述
+                        on_sale: formData.get('on_sale') === "1" ? true : false // 转换为布尔值
+                    };
+
+                    console.log('Sending updatedItem to server:', updatedItem);
+
+                    // 发送修改后的数据到后端
+                    fetch('/updateItem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}` // 验证用户身份
+                        },
+                        body: JSON.stringify(updatedItem) // 转为 JSON 格式
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // 更新页面中当前 `item` 的内容
+                                const itemElements = document.querySelectorAll('.item');
+                                itemElements.forEach((itemElement) => {
+                                    const itemId = parseInt(itemElement.getAttribute('data-id'));
+                                    if (itemId === updatedItem.id) {
+                                        // 修改页面中的内容为最新数据
+                                        itemElement.querySelector('.item-content p:nth-child(1)').innerHTML = `<i>版权名称：</i> ${updatedItem.name}`;
+                                        itemElement.querySelector('.item-content p:nth-child(2)').innerHTML = `<i>版权价格：</i> ${updatedItem.price}`;
+                                        itemElement.querySelector('.item-content p:nth-child(3)').innerHTML = `<i>描述：</i> ${updatedItem.description}`;
+                                    }
+                                });
+
+                                layer.closeAll(); // 关闭弹窗
+                                alert('修改成功！');
+                            } else {
+                                alert('修改失败：' + data.message); // 提示错误信息
+                            }
+                        })
+                        .catch(error => {
+                            console.error('修改请求失败:', error);
+                            alert('修改请求失败，请稍后重试');
+                        });
+                };
+
             };
+
+
 
         });
 
@@ -288,6 +194,7 @@
                         items.forEach((item, index) => {
                             const itemElement = document.createElement('div');
                             itemElement.classList.add('item');
+                            itemElement.setAttribute('data-id', item.id); // 添加data-id属性
 
                             const img = document.createElement('img');
                             img.src = item.imageUrl || `/HTML/test${index + 1}.jpg`;

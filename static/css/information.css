@@ -1,80 +1,94 @@
-* {
+body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #f4f5f7;
 }
 
 .container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
     padding: 20px;
+    background-color: #ffffff;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    gap: 20px;
 }
 
 .left {
-    width: 60%;
-    background-color: #fff;
+    flex: 1;
+    min-width: 300px;
     padding: 20px;
-    border-radius: 8px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fdfdfd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .left h2 {
-    margin-bottom: 20px;
     font-size: 24px;
-    color: #444;
+    color: #0a6c78;
+    margin-bottom: 15px;
 }
 
 .left p {
-    margin-bottom: 10px;
+    font-size: 16px;
     line-height: 1.6;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.left p strong {
+    font-weight: bold;
+    color: #555;
 }
 
 .right {
-    width: 35%;
+    flex: 1;
+    min-width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fdfdfd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .right img {
     width: 100%;
     max-width: 300px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    border: 2px solid #ccc;
     margin-bottom: 20px;
+    object-fit: cover;
 }
 
 .buttons {
     display: flex;
-    justify-content: space-around;
-    width: 100%;
+    gap: 20px;
 }
 
-button {
+.buttons button {
     padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: #28a745;
+    background-color: #0a6c78;
+    color: #fff;
     border: none;
     border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #218838;
+.buttons button:hover {
+    background-color: #064c54;
 }
 
-button:last-child {
-    background-color: #dc3545;
-}
-
-button:last-child:hover {
-    background-color: #c82333;
+.buttons button:active {
+    transform: scale(0.98);
 }

@@ -57,7 +57,7 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 
 	// 查询数据库，获取该用户的项目列表
 	//rows, err := db.Query("SELECT id, name, simple_dsc , price,img FROM item WHERE owner = ?", claims.Username)
-	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time FROM item WHERE owner = ?", claims.Username)
+	rows, err := db.Query("SELECT id, name, simple_dsc, price, owner, dsc, img, start_time, on_sale FROM item WHERE owner = ?", claims.Username)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -71,7 +71,8 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 		var id int
 		var name, simple_des, img, dsc, owner, start_time string
 		var price float32
-		if err := rows.Scan(&id, &name, &simple_des, &price, &img, &dsc, &owner, &start_time); err != nil {
+		var on_sale bool
+		if err := rows.Scan(&id, &name, &simple_des, &price, &owner, &dsc, &img, &start_time, &on_sale); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
@@ -85,6 +86,7 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 			"dsc":         dsc,
 			"owner":       owner,
 			"start_time":  start_time,
+			"on_sale":     on_sale,
 		})
 	}
 
