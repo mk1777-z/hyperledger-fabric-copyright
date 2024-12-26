@@ -41,35 +41,38 @@
     <script>
         let currentPage = 1; // 当前页码
         let totalPages = 1; // 总页数
-        const pageSize = 20; // 每页显示的条数
+        const pageSize = 15; // 每页显示的条数
         let allItems = []; // 保存从后端获取的所有项目数据
-
+        let token; // 用于保存获取到的token，解决作用域问题
+    
         // 退出功能
         function logout() {
             localStorage.clear(); // 清空 localStorage
             window.location.href = '/'; // 跳转到登录页面
         }
-
+    
         // 页面加载时初始化
         window.onload = function () {
             // 获取用户名
             const username = localStorage.getItem('username');
             if (username) {
-                document.getElementById("username").innerHTML = username;
+                document.getElementById("username").textContent = username;
             } else {
                 console.error("未找到用户名");
             }
-
+    
             // 检查登录状态
-            const token = localStorage.getItem('token');
+            token = localStorage.getItem('token'); // 获取token并保存到外层作用域可访问的变量
             if (!token) {
                 console.error('未登录或未获取到有效的 token');
+                alert('请登录'); // 添加提示信息
+                window.location.href = '/'; // 跳转到登录页面
                 return;
             }
-
+    
             // 初始请求数据，获取所有项目
             fetchAllItems();
-
+    
             // 设置分页按钮的点击事件
             document.getElementById('prev-page').addEventListener('click', () => {
                 if (currentPage > 1) {
@@ -77,7 +80,7 @@
                     updatePageContent();
                 }
             });
-
+    
             document.getElementById('next-page').addEventListener('click', () => {
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -85,51 +88,62 @@
                 }
             });
         };
-
+    
         // 请求所有项目数据
         function fetchAllItems() {
-            const token = localStorage.getItem('token');
-            fetch('/display', {
+            fetchData('/display', { page: currentPage, pageSize: pageSize })
+                .then(data => {
+                    console.log('从后端获取到的数据:', data); // 输出后端数据
+                    if (data && data.items) {
+                        allItems = data.items; // 保存所有项目数据
+                        totalPages = Math.ceil(allItems.length / pageSize); // 计算总页数
+                        updatePageContent(); // 初始化显示第一页内容
+                    } else {
+                        console.error('未能获取到项目数据');
+                    }
+                })
+                .catch(error => {
+                    console.error('请求失败:', error);
+                });
+        }
+    
+        // 通用fetch请求函数
+        function fetchData(url, data) {
+            return fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({page: 1, pageSize: 9999}) // 请求所有数据
+                body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(data => {
-                console.log('从后端获取到的数据:', data); // 输出后端数据
-                if (data && data.items) {
-                    allItems = data.items; // 保存所有项目数据
-                    totalPages = Math.ceil(allItems.length / pageSize); // 计算总页数
-                    updatePageContent(); // 初始化显示第一页内容
-                } else {
-                    console.error('未能获取到项目数据');
-                }
-            })
-            .catch(error => {
-                console.error('请求失败:', error);
-            });
+            .catch(error => console.error('请求失败:', error));
         }
-
+    
         // 更新页面内容：渲染当前页的数据
         function updatePageContent() {
             const startIndex = (currentPage - 1) * pageSize; // 当前页的起始索引
             const endIndex = startIndex + pageSize; // 当前页的结束索引
             const currentItems = allItems.slice(startIndex, endIndex); // 获取当前页的数据
-
+    
             renderItems(currentItems); // 渲染当前页数据
             updatePagination(); // 更新分页信息
         }
-
+    
         // 渲染项目数据
         function renderItems(items) {
             const container = document.querySelector('.container');
             container.innerHTML = ''; // 清空容器
 
+            if (items.length === 0) {
+                container.innerHTML = '<p>没有数据可显示</p>';
+                return;
+            }
+
             items.forEach(item => {
                 const itemElement = document.createElement('div');
+                itemElement.id = item.name;
                 itemElement.classList.add('item');
 
                 const img = document.createElement('img');
@@ -140,54 +154,25 @@
                 contentDiv.classList.add('item-content');
 
                 const nameElement = document.createElement('p');
-                nameElement.innerHTML = `<i>名称：</i>${item.name}`;
+                nameElement.textContent = `名称：${item.name}`;
 
                 const descriptionElement = document.createElement('p');
-                descriptionElement.innerHTML = `<i>描述：</i>${item.description}`;
+                descriptionElement.textContent = `描述：${item.description}`;
 
                 const priceElement = document.createElement('p');
-                priceElement.innerHTML = `<i>价格：</i>${item.price}`;
+                priceElement.textContent = `价格：${item.price}`;
 
                 const ownerElement = document.createElement('p');
-                ownerElement.innerHTML = `<i>拥有者：</i>${item.owner}`;
+                ownerElement.textContent = `拥有者：${item.owner}`;
 
                 const detailLink = document.createElement('a');
                 detailLink.href = '#';
-                detailLink.innerHTML = '查看详情';
-                detailLink.onclick = function (e) {
-                    e.preventDefault(); // 阻止默认跳转行为
-                    const token = localStorage.getItem('token');
-                    const itemName = item.name; // 获取项目名称
-
-                    console.log('发送请求获取项目详细信息:', itemName); // 输出请求项目信息
-
-                    // 发送 POST 请求到 /information 接口
-                    fetch('/information', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({ name: itemName }) // 将 item.name 发送到后端
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('从后端获取到项目信息:', data); // 输出返回的数据
-                        if (data && data.item) {
-                            // 将项目信息保存到 localStorage
-                            localStorage.setItem('itemDetails', JSON.stringify(data.item));
-                            // 延时跳转到 information.html 页面
-                            setTimeout(() => {
-                                window.location.href = 'information.html';
-                            }, 200); // 延时 200 毫秒
-                        } else {
-                            console.error('未能获取到项目信息');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('请求失败:', error);
-                    });
-                };
+                detailLink.textContent = '查看详情';
+                detailLink.onclick = function () {
+                    // 使用 sessionStorage 将项目详细信息传递到 information 页面
+                    sessionStorage.setItem('itemDetails', JSON.stringify(item));
+                    window.location.href = '/information'; // 跳转到 information 页面
+                }
 
                 contentDiv.appendChild(nameElement);
                 contentDiv.appendChild(descriptionElement);
@@ -202,25 +187,30 @@
             });
         }
 
+    
         // 更新分页按钮和信息
         function updatePagination() {
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages;
-            document.getElementById('page-info').innerText = `第 ${currentPage} 页 / ${totalPages} 页`;
+            document.getElementById('page-info').textContent = `第 ${currentPage} 页 / ${totalPages} 页`;
         }
-        
+    
         // 搜索功能
         function searchItems() {
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
-
+    
             if (searchQuery === '') {
                 fetchAllItems(); // 如果没有输入搜索内容，重新加载所有项
             } else {
                 const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(searchQuery));
-                renderItems(filteredItems); // 渲染过滤后的项
+                if (filteredItems.length === 0) {
+                    alert('未找到相关项');
+                } else {
+                    renderItems(filteredItems); // 渲染过滤后的项
+                }
             }
         }
-
+    
         // 监听键盘事件
         function handleSearchKey(event) {
             if (event.key === 'Enter') {
@@ -228,5 +218,6 @@
             }
         }
     </script>
+    
 </body>
 </html>

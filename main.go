@@ -160,5 +160,7 @@ func main() {
 
 	h.POST("/updateItem", middle.UpdateItem)
 
+	h.POST("/transaction", middle.Transaction)
+
 	h.Spin()
 }

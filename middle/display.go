@@ -31,7 +31,7 @@ func Display(_ context.Context, c *app.RequestContext) {
 	defer db.Close() // 确保数据库连接在结束时关闭
 
 	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, owner, price,img FROM item WHERE on_sale= 1")
+	rows, err := db.Query("SELECT id, name, simple_dsc, owner, price,img FROM item WHERE on_sale = 1")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})

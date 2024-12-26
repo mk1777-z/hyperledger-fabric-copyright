@@ -7,6 +7,35 @@
     <title>个人版权管理界面</title>
     <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
     <link rel="stylesheet" href="static/css/homepage.css">
+    <style>
+        .pagination {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.pagination button {
+    margin: 0 5px;
+    padding: 8px 16px; /* 适当增大内边距，让按钮看起来更饱满美观 */
+    background-color: #d8daba; /* 更改背景色为一种比较协调的中性色 */
+    border: 1px solid #495057; /* 更改边框颜色与背景色搭配 */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* 为更多属性添加过渡效果 */
+    color: white; /* 设置文字颜色为白色，与背景搭配更协调 */
+}
+
+.pagination button:hover {
+    background-color: #5a6268; /* 鼠标悬停时的背景色，稍作加深，体现交互效果 */
+    border-color: #343a40; /* 悬停时边框颜色也稍作变化 */
+}
+
+.pagination button.active {
+    background-color: #007bff; /* 当前选中页按钮的背景色，保持原来的蓝色，比较醒目 */
+    border-color: #007bff; /* 当前选中页按钮的边框颜色与背景一致 */
+    color: white; /* 当前选中页按钮的文字颜色保持白色 */
+}
+    </style>
 </head>
 
 <body>
@@ -20,6 +49,10 @@
 
     <div class="content" id="content">
         <!-- 动态生成的项目将放置在此处 -->
+    </div>
+
+    <div class="pagination">
+        <!-- 分页按钮等元素会动态生成在这里 -->
     </div>
 
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
@@ -85,8 +118,8 @@
                     <label class="layui-form-label">是否售卖</label>
                     <div class="layui-input-block" style="width: calc(100% - 110px);">
                         <select name="on_sale" id="on_sale" lay-filter="on_sale">
-                            <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
-                            <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
+                            <option value="1" ${item.on_sale? 'selected' : ''}>是</option>
+                            <option value="0" ${!item.on_sale? 'selected' : ''}>否</option>
                         </select>
                     </div>
                 </div>
@@ -118,7 +151,7 @@
                         description: formData.get('description'), // 用户输入的简短描述
                         price: parseFloat(formData.get('price')), // 用户输入的价格，转为浮点数
                         dsc: formData.get('dsc'), // 用户输入的详细描述
-                        on_sale: formData.get('on_sale') === "1" ? true : false // 转换为布尔值
+                        on_sale: formData.get('on_sale') === "1"? true : false // 转换为布尔值
                     };
 
                     console.log('Sending updatedItem to server:', updatedItem);
@@ -132,8 +165,8 @@
                         },
                         body: JSON.stringify(updatedItem) // 转为 JSON 格式
                     })
-                        .then(response => response.json())
-                        .then(data => {
+                      .then(response => response.json())
+                      .then(data => {
                             if (data.success) {
                                 // 更新页面中当前 `item` 的内容
                                 const itemElements = document.querySelectorAll('.item');
@@ -153,7 +186,7 @@
                                 alert('修改失败：' + data.message); // 提示错误信息
                             }
                         })
-                        .catch(error => {
+                      .catch(error => {
                             console.error('修改请求失败:', error);
                             alert('修改请求失败，请稍后重试');
                         });
@@ -161,106 +194,149 @@
 
             };
 
+            window.onload = function () {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.error('未登录或未获取到有效的 token');
+                    return;
+                }
 
+                const requestData = {
+                    page: 1,
+                    pageSize: 15 // 添加每页显示数量的参数
+                };
 
-        });
-
-        window.onload = function () {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('未登录或未获取到有效的 token');
-                return;
-            }
-
-            const requestData = {
-                page: 1
-            };
-
-            fetch('/myproject', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(requestData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.items) {
-                        const items = data.items;
-                        const content = document.getElementById('content');
-                        content.innerHTML = '';
-
-                        items.forEach((item, index) => {
-                            const itemElement = document.createElement('div');
-                            itemElement.classList.add('item');
-                            itemElement.setAttribute('data-id', item.id); // 添加data-id属性
-
-                            const img = document.createElement('img');
-                            img.src = item.imageUrl || `/HTML/test${index + 1}.jpg`;
-                            img.alt = '版权图片';
-
-                            const contentDiv = document.createElement('div');
-                            contentDiv.classList.add('item-content');
-
-                            const nameElement = document.createElement('p');
-                            nameElement.innerHTML = `<i>版权名称：</i> ${item.name}`;
-
-                            const priceElement = document.createElement('p');
-                            priceElement.innerHTML = `<i>版权价格：</i> ${item.price}`;
-
-                            const descElement = document.createElement('p');
-                            descElement.innerHTML = `<i>描述：</i> ${item.description}`;
-
-                            const buttonSelectContainer = document.createElement('div');
-                            buttonSelectContainer.classList.add('button-select-container');
-
-                            const detailLink = document.createElement('a');
-                            detailLink.innerHTML = '查看详情';
-                            detailLink.onclick = function () {
-                                window.showDetails(item);
-                            };
-
-
-                            const modifyButton = document.createElement('a');
-                            modifyButton.classList.add('modify-button');
-                            modifyButton.innerHTML = '修改';
-                            modifyButton.onclick = function () {
-                                window.modifyItem(item);
-                            };
-
-                            const formDiv = document.createElement('div');
-                            formDiv.classList.add('layui-form');
-
-                            const select = document.createElement('select');
-                            select.id = 'statusSelect';
-                            select.innerHTML = `
-                                <option value="selling" ${item.status === 'selling' ? 'selected' : ''}>在售</option>
-                                <option value="not-selling" ${item.status === 'not-selling' ? 'selected' : ''}>非售卖</option>
-                            `;
-                            formDiv.appendChild(select);
-
-                            buttonSelectContainer.appendChild(detailLink);
-                            buttonSelectContainer.appendChild(modifyButton);
-
-                            contentDiv.appendChild(nameElement);
-                            contentDiv.appendChild(priceElement);
-                            contentDiv.appendChild(descElement);
-                            contentDiv.appendChild(buttonSelectContainer);
-
-                            itemElement.appendChild(img);
-                            itemElement.appendChild(contentDiv);
-
-                            content.appendChild(itemElement);
-                        });
-                    } else {
-                        console.error('未能获取到项目数据');
-                    }
+                fetch('/myproject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestData)
                 })
-                .catch(error => {
-                    console.error('请求失败:', error);
-                });
-        };
+                  .then(response => response.json())
+                  .then(data => {
+                        if (data && data.items) {
+                            const items = data.items;
+                            const content = document.getElementById('content');
+                            const pagination = document.querySelector('.pagination');
+                            content.innerHTML = '';
+                            pagination.innerHTML = '';
+
+                            const itemsPerPage = 10;
+                            const totalPages = Math.ceil(items.length / itemsPerPage);
+                            let currentPage = 1;
+
+                            // 根据项目数量判断是否需要渲染分页按钮
+                            if (totalPages > 1) {
+                                // 渲染分页按钮
+                                function renderPagination() {
+                                    for (let i = 1; i <= totalPages; i++) {
+                                        const pageButton = document.createElement('button');
+                                        pageButton.textContent = i;
+                                        pageButton.addEventListener('click', function () {
+                                            currentPage = i;
+                                            // 移除所有按钮的active类
+                                            const allButtons = document.querySelectorAll('.pagination button');
+                                            allButtons.forEach((button) => {
+                                                button.classList.remove('active');
+                                            });
+                                            // 为当前点击的按钮添加active类
+                                            this.classList.add('active');
+                                            loadItems();
+                                        });
+                                        pagination.appendChild(pageButton);
+                                    }
+                                }
+                                renderPagination();
+                            }
+
+                            function loadItems() {
+                                const content = document.getElementById('content');
+                                // 清空之前的项目元素，避免重复显示
+                                content.innerHTML = ''; 
+                                const startIndex = (currentPage - 1) * itemsPerPage;
+                                const endIndex = startIndex + itemsPerPage;
+                                const currentItems = items.slice(startIndex, endIndex);
+                                currentItems.forEach((item, index) => {
+                                    // 以下创建项目元素并添加到页面的逻辑保持不变
+                                    const itemElement = document.createElement('div');
+                                    itemElement.classList.add('item');
+                                    itemElement.setAttribute('data-id', item.id); // 添加data-id属性
+
+                                    const img = document.createElement('img');
+                                    if (item.img.length >= 100) {
+                                        img.src = item.img;
+                                    } else {
+                                        img.src = 'https://api.iconify.design/icon-park:fail-picture.svg';
+                                    }
+                                    img.alt = '版权图片';
+
+                                    const contentDiv = document.createElement('div');
+                                    contentDiv.classList.add('item-content');
+
+                                    const nameElement = document.createElement('p');
+                                    nameElement.innerHTML = `<i>版权名称：</i> ${item.name}`;
+
+                                    const priceElement = document.createElement('p');
+                                    priceElement.innerHTML = `<i>版权价格：</i> ${item.price}`;
+
+                                    const descElement = document.createElement('p');
+                                    descElement.innerHTML = `<i>描述：</i> ${item.description}`;
+
+                                    const buttonSelectContainer = document.createElement('div');
+                                    buttonSelectContainer.classList.add('button-select-container');
+
+                                    const detailLink = document.createElement('a');
+                                    detailLink.innerHTML = '查看详情';
+                                    detailLink.onclick = function () {
+                                        window.showDetails(item);
+                                    };
+
+
+                                    const modifyButton = document.createElement('a');
+                                    modifyButton.classList.add('modify-button');
+                                    modifyButton.innerHTML = '修改';
+                                    modifyButton.onclick = function () {
+                                        window.modifyItem(item);
+                                    };
+
+                                    const formDiv = document.createElement('div');
+                                    formDiv.classList.add('layui-form');
+
+                                    const select = document.createElement('select');
+                                    select.id = 'statusSelect';
+                                    select.innerHTML = `
+                                        <option value="selling" ${item.status === 'selling'? 'selected' : ''}>在售</option>
+                                        <option value="not-selling" ${item.status === 'not-selling'? 'selected' : ''}>非售卖</option>
+                                    `;
+                                    formDiv.appendChild(select);
+
+                                    buttonSelectContainer.appendChild(detailLink);
+                                    buttonSelectContainer.appendChild(modifyButton);
+
+                                    contentDiv.appendChild(nameElement);
+                                    contentDiv.appendChild(priceElement);
+                                    contentDiv.appendChild(descElement);
+                                    contentDiv.appendChild(buttonSelectContainer);
+
+                                    itemElement.appendChild(img);
+                                    itemElement.appendChild(contentDiv);
+
+                                    content.appendChild(itemElement);
+                                });
+                            }
+
+                            loadItems();
+                        } else {
+                            console.error('未能获取到项目数据');
+                        }
+                    })
+                  .catch(error => {
+                        console.error('请求失败:', error);
+                    });
+            };
+        });
     </script>
 </body>
 

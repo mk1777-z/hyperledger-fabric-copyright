@@ -76,7 +76,7 @@ func Upload(_ context.Context, c *app.RequestContext) {
 	}
 	defer db.Close()
 
-	exists, _ := db.Query("SELECT * FROM item WHERE name = ? AND id = ? ", uploadInfo.Name, uploadInfo.ID)
+	exists, _ := db.Query("SELECT * FROM item WHERE name = ? OR id = ? ", uploadInfo.Name, uploadInfo.ID)
 	if exists.Next() {
 		c.Status(http.StatusConflict)
 		c.JSON(http.StatusConflict, utils.H{"message": "Item Already Exist"})

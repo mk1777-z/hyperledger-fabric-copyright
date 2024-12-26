@@ -1,7 +1,5 @@
 package conf
 
-import "github.com/hyperledger/fabric-contract-api-go/contractapi"
-
 type Mysql struct {
 	DbUser     string `yaml:"dbUser"`
 	DbPassword string `yaml:"dbPassword"`
@@ -36,6 +34,11 @@ type UpdateItem struct {
 	Dsc         string  `json:"dsc"`
 	Sale        bool    `json:"on_sale"`
 }
-type SimpleContract struct {
-	contractapi.Contract
+type Createtrans struct {
+	ID        string
+	Name      string
+	Seller    string
+	Purchaser string
+	Price     float64
+	Transtime string
 }
