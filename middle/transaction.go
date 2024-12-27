@@ -20,7 +20,7 @@ import (
 func createAsset(contract *client.Contract, trans conf.Createtrans) {
 	fmt.Printf("\n--> Submit Transaction<-- \n")
 
-	_, err := contract.SubmitTransaction("CreateCreatetrans", trans.ID, trans.Name, trans.Seller, trans.Purchaser, trans.Purchaser, strconv.FormatFloat(trans.Price, 'f', -1, 64), trans.Transtime)
+	_, err := contract.SubmitTransaction("CreateCreatetrans", trans.ID, trans.Name, trans.Seller, trans.Purchaser, strconv.FormatFloat(trans.Price, 'f', -1, 64), trans.Transtime)
 	if err != nil {
 		log.Fatal("failed to submit transaction: %w", err)
 		return
@@ -75,19 +75,41 @@ func Transaction(_ context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
 		return
 	}
-	defer db.Close() // 确保数据库连接在结束时关闭
-	rows, err := db.Query("SELECT price, owner,transID FROM item WHERE name = ?", name.Name)
+	defer db.Close()
+	rows, err := db.Query("SELECT price, owner, transID FROM item WHERE name = ?", name.Name)
 	if err != nil {
-		log.Fatal("Query DataBase err:", err)
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
+		return
 	}
+	defer rows.Close()
+
 	var price float64
 	var seller string
-	var transID string
-	rows.Scan(&price, &seller, &transID)
-	trans := conf.Createtrans{ID: assetId, Name: name.Name, Seller: seller, Purchaser: claims.Username, Price: price, Transtime: now.Format("Basic short date")}
+	var transID *string
+	for rows.Next() {
+		if err := rows.Scan(&price, &seller, &transID); err != nil {
+			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, utils.H{"message": "Failed to scan database row"})
+			return
+		}
+	}
+	if rows.Err() != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Error during row iteration"})
+		return
+	}
+	trans := conf.Createtrans{ID: assetId, Name: name.Name, Seller: seller, Purchaser: claims.Username, Price: price, Transtime: time.Now().Format("2006-01-02")}
 	createAsset(conf.Contract, trans)
-	transID = transID + " " + assetId
-	_, err = db.Exec("UPDATE item SET owner=? transID =? WHERE name = ?", claims.Username, transID, name.Name)
+
+	if transID == nil {
+		transID = new(string)
+		*transID = assetId
+	} else {
+		*transID = *transID + " " + assetId
+	}
+
+	_, err = db.Exec("UPDATE item SET owner=?, transID =? WHERE name = ?", claims.Username, &transID, name.Name)
 	if err != nil {
 		log.Fatal("Update DataBase err:", err)
 	}

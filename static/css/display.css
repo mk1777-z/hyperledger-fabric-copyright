@@ -25,6 +25,10 @@ body {
 }
 
 
+span.layui-nav-bar {
+    position: absolute;
+}
+
 
 /* 页头样式 */
 .header {
@@ -107,9 +111,9 @@ body {
     transition: color 0.3s ease;
 }
 
-.layui-nav a:hover {
+/* .layui-nav a:hover {
     color: #d6d6d6;
-}
+} */
 
 /* 用户头像样式 */
 .layui-nav img {
@@ -129,9 +133,9 @@ body {
     transition: color 0.3s ease;
 }
 
-.layui-nav .logout:hover {
+/* .layui-nav .logout:hover {
     color: #ff5c5c;
-}
+} */
 
 /* 容器样式 */
 .container {

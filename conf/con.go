@@ -40,8 +40,8 @@ func Init() {
 	if err != nil {
 		log.Fatal("解析 yaml 文件失败：", err)
 	}
+
 	clientConnection := newGrpcConnection()
-	defer clientConnection.Close()
 	id := newIdentity()
 	sign := newSign()
 
@@ -60,7 +60,6 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	defer gw.Close()
 
 	// Override default values for chaincode and channel name as they may differ in testing contexts.
 	chaincodeName := "basic"

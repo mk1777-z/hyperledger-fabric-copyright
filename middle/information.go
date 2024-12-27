@@ -76,14 +76,15 @@ func Information(_ context.Context, c *app.RequestContext) {
 	var items []map[string]interface{}
 	for rows.Next() {
 		var id int
-		var name, simple_des, owner, dsc, img, start_time, transID string
+		var name, simple_des, owner, dsc, img, start_time string
+		var transID *string
 		var price float32
 		if err := rows.Scan(&id, &name, &simple_des, &price, &dsc, &owner, &img, &start_time, &transID); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
 		}
-		trace := strings.Split(transID, " ")
+		trace := strings.Split(*transID, " ")
 		for i := 0; i < len(trace); i++ {
 			readAssetByID(conf.Contract, trace[i])
 		}
