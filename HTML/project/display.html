@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +8,21 @@
     <link href="//unpkg.s/layui.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/display.css">
 </head>
+
 <body>
     <div class="header">
         <h1>版权展示</h1>
         <div class="search-box">
-            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目" onkeydown="handleSearchKey(event)">
-            <i class="layui-icon layui-icon-search" id="search-btn" onclick="searchItems()"></i>
+            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
+                onkeydown="handleSearchKey(event)">
+            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
+
         </div>
         <ul class="layui-nav">
             <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
             <li class="layui-nav-item">
                 <a href="homepage">
-                    <img src="https://api.iconify.design/ph:user-circle.svg" alt="用户头像" class="user-avatar">
+                    <img src="https://api.iconify.design/fluent-emoji-flat:face-with-head-bandage.svg" alt="用户头像" class="user-avatar">
                 </a>
             </li>
             <li class="layui-nav-item">
@@ -39,185 +43,165 @@
 
     <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
-        let currentPage = 1; // 当前页码
-        let totalPages = 1; // 总页数
-        const pageSize = 15; // 每页显示的条数
-        let allItems = []; // 保存从后端获取的所有项目数据
-        let token; // 用于保存获取到的token，解决作用域问题
-    
-        // 退出功能
-        function logout() {
-            localStorage.clear(); // 清空 localStorage
-            window.location.href = '/'; // 跳转到登录页面
-        }
-    
+        let currentPage = 1, totalPages = 1;
+        const pageSize = 15;
+        let allItems = [], token;
+
         // 页面加载时初始化
         window.onload = function () {
-            // 获取用户名
             const username = localStorage.getItem('username');
-            if (username) {
-                document.getElementById("username").textContent = username;
-            } else {
-                console.error("未找到用户名");
-            }
-    
-            // 检查登录状态
-            token = localStorage.getItem('token'); // 获取token并保存到外层作用域可访问的变量
+            document.getElementById("username").textContent = username || "未登录";
+            token = localStorage.getItem('token');
             if (!token) {
-                console.error('未登录或未获取到有效的 token');
-                alert('请登录'); // 添加提示信息
-                window.location.href = '/'; // 跳转到登录页面
-                return;
+                alert('请登录');
+                return (window.location.href = '/');
             }
-    
-            // 初始请求数据，获取所有项目
+
             fetchAllItems();
-    
-            // 设置分页按钮的点击事件
-            document.getElementById('prev-page').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updatePageContent();
-                }
-            });
-    
-            document.getElementById('next-page').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updatePageContent();
-                }
-            });
+            bindPaginationEvents();
         };
-    
-        // 请求所有项目数据
-        function fetchAllItems() {
-            fetchData('/display', { page: currentPage, pageSize: pageSize })
-                .then(data => {
-                    console.log('从后端获取到的数据:', data); // 输出后端数据
-                    if (data && data.items) {
-                        allItems = data.items; // 保存所有项目数据
-                        totalPages = Math.ceil(allItems.length / pageSize); // 计算总页数
-                        updatePageContent(); // 初始化显示第一页内容
-                    } else {
-                        console.error('未能获取到项目数据');
-                    }
-                })
-                .catch(error => {
-                    console.error('请求失败:', error);
-                });
+
+        // 退出功能
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
         }
-    
+
         // 通用fetch请求函数
-        function fetchData(url, data) {
-            return fetch(url, {
+        const fetchData = (url, data) =>
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .catch(error => console.error('请求失败:', error));
+            }).then(res => res.json()).catch(console.error);
+
+        // 请求所有项目数据
+        function fetchAllItems() {
+            fetchData('/display', { page: currentPage, pageSize })
+                .then(data => {
+                    if (data?.items) {
+                        allItems = data.items;
+                        totalPages = Math.ceil(allItems.length / pageSize);
+                        updatePageContent();
+                    } else {
+                        console.error('未能获取到项目数据');
+                    }
+                });
         }
-    
-        // 更新页面内容：渲染当前页的数据
+
+        // 更新页面内容
         function updatePageContent() {
-            const startIndex = (currentPage - 1) * pageSize; // 当前页的起始索引
-            const endIndex = startIndex + pageSize; // 当前页的结束索引
-            const currentItems = allItems.slice(startIndex, endIndex); // 获取当前页的数据
-    
-            renderItems(currentItems); // 渲染当前页数据
-            updatePagination(); // 更新分页信息
+            const currentItems = allItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            renderItems(currentItems);
+            updatePagination();
         }
-    
+
         // 渲染项目数据
         function renderItems(items) {
             const container = document.querySelector('.container');
-            container.innerHTML = ''; // 清空容器
+            container.innerHTML = items.length
+                ? items.map(item => `
+                    <div id="${item.name}" class="item">
+                        <img src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}" alt="版权图片">
+                        <div class="item-content">
+                            <p>名称：${item.name}</p>
+                            <p>描述：${item.description}</p>
+                            <p>价格：${item.price}</p>
+                            <p>拥有者：${item.owner}</p>
+                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                        </div>
+                    </div>
+                `).join('') : '<p>没有数据可显示</p>';
+        }
 
-            if (items.length === 0) {
-                container.innerHTML = '<p>没有数据可显示</p>';
+
+        function viewDetails(itemName) {
+            if (!token) {
+                alert('用户未登录，请先登录！');
                 return;
             }
 
-            items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.id = item.name;
-                itemElement.classList.add('item');
+            if (!itemName) {
+                alert('无效的项目名称！');
+                return;
+            }
 
-                const img = document.createElement('img');
-                img.src = item.img && item.img !== "noimage" ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片';
-                img.alt = '版权图片';
-
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('item-content');
-
-                const nameElement = document.createElement('p');
-                nameElement.textContent = `名称：${item.name}`;
-
-                const descriptionElement = document.createElement('p');
-                descriptionElement.textContent = `描述：${item.description}`;
-
-                const priceElement = document.createElement('p');
-                priceElement.textContent = `价格：${item.price}`;
-
-                const ownerElement = document.createElement('p');
-                ownerElement.textContent = `拥有者：${item.owner}`;
-
-                const detailLink = document.createElement('a');
-                detailLink.href = '#';
-                detailLink.textContent = '查看详情';
-                detailLink.onclick = function () {
-                    // 使用 sessionStorage 将项目详细信息传递到 information 页面
-                    sessionStorage.setItem('itemDetails', JSON.stringify(item));
-                    window.location.href = '/information'; // 跳转到 information 页面
-                }
-
-                contentDiv.appendChild(nameElement);
-                contentDiv.appendChild(descriptionElement);
-                contentDiv.appendChild(priceElement);
-                contentDiv.appendChild(ownerElement);
-                contentDiv.appendChild(detailLink);
-
-                itemElement.appendChild(img);
-                itemElement.appendChild(contentDiv);
-
-                container.appendChild(itemElement);
-            });
+            fetch('/information', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ name: itemName })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(err => {
+                            console.error('查看详情请求失败:', err);
+                            alert('查看详情失败，请稍后重试！');
+                        });
+                    }
+                })
+                .then(data => {
+                    if (data && data.items && data.items.length > 0) {
+                        const item = data.items[0];
+                        const processedItem = {
+                            ...item,
+                            img: item.img === "NULL" ? "https://via.placeholder.com/200x120?text=暂无图片" : item.img
+                        };
+                        sessionStorage.setItem('itemDetails', JSON.stringify(processedItem)); 
+                        window.location.href = '/information';
+                    } else {
+                        console.error('未找到相关项');
+                        alert('未找到相关项');
+                    }
+                })
+                .catch(error => {
+                    console.error('网络错误:', error);
+                    alert('网络错误，请稍后重试！');
+                });
         }
 
-    
-        // 更新分页按钮和信息
+
+
+
+        // 更新分页信息
         function updatePagination() {
             document.getElementById('prev-page').disabled = currentPage === 1;
             document.getElementById('next-page').disabled = currentPage === totalPages;
             document.getElementById('page-info').textContent = `第 ${currentPage} 页 / ${totalPages} 页`;
         }
-    
+
         // 搜索功能
         function searchItems() {
-            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
-    
-            if (searchQuery === '') {
-                fetchAllItems(); // 如果没有输入搜索内容，重新加载所有项
-            } else {
-                const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(searchQuery));
-                if (filteredItems.length === 0) {
-                    alert('未找到相关项');
-                } else {
-                    renderItems(filteredItems); // 渲染过滤后的项
-                }
-            }
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!query) return fetchAllItems();
+            const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(query));
+            if (!filteredItems.length) alert('未找到相关项');
+            //renderItems(filteredItems);
+            // 渲染所有搜索结果，不分页
+            renderItems(filteredItems);
+
+            // 隐藏分页控件
+            document.querySelector('.pagination-container').style.display = 'none';
         }
-    
+
         // 监听键盘事件
         function handleSearchKey(event) {
-            if (event.key === 'Enter') {
-                searchItems(); // 按下回车键时触发搜索
-            }
+            if (event.key === 'Enter') searchItems();
+        }
+
+        // 绑定分页按钮事件
+        function bindPaginationEvents() {
+            document.getElementById('prev-page').onclick = () => currentPage > 1 && (--currentPage, updatePageContent());
+            document.getElementById('next-page').onclick = () => currentPage < totalPages && (++currentPage, updatePageContent());
         }
     </script>
-    
 </body>
+
 </html>

@@ -1,7 +1,7 @@
 package middle
 
 import (
-	"bytes"
+	//"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -15,29 +15,29 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
-// Format JSON data
-func formatJSON(data []byte) string {
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, data, "", "  "); err != nil {
-		panic(fmt.Errorf("failed to parse JSON: %w", err))
-	}
-	return prettyJSON.String()
-}
-
 // Evaluate a transaction by assetID to query ledger state.
-func readAssetByID(contract *client.Contract, assetId string) {
+func readAssetByID(contract *client.Contract, assetId string) (map[string]interface{}, error) {
 	fmt.Printf("\n--> Evaluate Transaction: ReadAsset, function returns asset attributes\n")
 
 	evaluateResult, err := contract.EvaluateTransaction("ReadCreatetrans", assetId)
 	if err != nil {
 		panic(fmt.Errorf("failed to evaluate transaction: %w", err))
 	}
-	result := formatJSON(evaluateResult)
 
-	fmt.Printf("*** Result:%s\n", result)
+	// Deserialize the JSON result into a map
+	var transactionDetails map[string]interface{}
+	err = json.Unmarshal(evaluateResult, &transactionDetails)
+	if err != nil {
+		panic(fmt.Errorf("failed to parse transaction details: %w", err))
+	}
+
+	return transactionDetails, nil
 }
 
 func Information(_ context.Context, c *app.RequestContext) {
+	type RequestBody struct {
+		Name string
+	}
 	var body RequestBody
 	if err := c.Bind(&body); err != nil {
 		c.Status(http.StatusBadRequest)
@@ -45,9 +45,9 @@ func Information(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	itemID := body.Name
+	itemName := body.Name
 	// 从请求中获取商品 ID
-	if itemID == "" {
+	if itemName == "" {
 		c.Status(http.StatusBadRequest)
 		c.JSON(http.StatusBadRequest, utils.H{"message": "Item name is missing"})
 		return
@@ -64,7 +64,7 @@ func Information(_ context.Context, c *app.RequestContext) {
 	defer db.Close() // 确保数据库连接在结束时关闭
 
 	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time,transID FROM item WHERE name = ?", itemID)
+	rows, err := db.Query("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time,transID FROM item WHERE name = ?", itemName)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -84,19 +84,41 @@ func Information(_ context.Context, c *app.RequestContext) {
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
 		}
-		trace := strings.Split(*transID, " ")
-		for i := 0; i < len(trace); i++ {
-			readAssetByID(conf.Contract, trace[i])
+
+		// 初始化交易链上的详细信息
+		var transactions []map[string]interface{}
+
+		// 检查 transID 是否为空
+		if transID != nil && *transID != "" {
+			trace := strings.Split(*transID, " ")
+			for _, assetID := range trace {
+				transactionDetails, err := readAssetByID(conf.Contract, assetID)
+				if err != nil {
+					fmt.Printf("Failed to fetch transaction details for assetID %s: %v\n", assetID, err)
+					continue // 跳过错误的交易记录
+				}
+				transactions = append(transactions, map[string]interface{}{
+					"ID":        transactionDetails["ID"],
+					"Name":      transactionDetails["Name"],
+					"Price":     fmt.Sprintf("%.2f", transactionDetails["Price"]), // 确保价格是字符串或数值
+					"Purchaser": transactionDetails["Purchaser"],
+					"Seller":    transactionDetails["Seller"],
+					"Transtime": transactionDetails["Transtime"],
+				})
+			}
 		}
+
+		// 将当前结果添加到 items 中
 		items = append(items, map[string]interface{}{
-			"id":          id,
-			"name":        name,
-			"description": simple_des,
-			"price":       price,
-			"owner":       owner,
-			"dsc":         dsc,
-			"img":         img,
-			"start_time":  start_time,
+			"id":           id,
+			"name":         name,
+			"description":  simple_des,
+			"price":        price,
+			"owner":        owner,
+			"dsc":          dsc,
+			"img":          img,
+			"start_time":   start_time,
+			"transactions": transactions, // 如果 transID 为空，则 transactions 为空切片
 		})
 	}
 

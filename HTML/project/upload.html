@@ -64,8 +64,8 @@
                 <label class="layui-form-label">是否售卖</label>
                 <div class="layui-btn-container">
                     <button class="layui-btn demo-dropdown-base">
-                      <span>请选择</span>
-                      <i class="layui-icon layui-icon-down layui-font-12"></i>
+                        <span>请选择</span>
+                        <i class="layui-icon layui-icon-down layui-font-12"></i>
                     </button>
                 </div>
             </div>
@@ -81,7 +81,7 @@
 
     <script>
         let OnSale = 0;
-        layui.use(function(){
+        layui.use(function () {
             var dropdown = layui.dropdown;
             dropdown.render({
                 elem: '.demo-dropdown-base',
@@ -92,14 +92,15 @@
                     title: '否',
                     id: 101
                 }],
-                click: function(obj){
+                click: function (obj) {
                     this.elem.find('span').text(obj.title);
-                    if(this.title === '是'){
-                        OnSale = 1;
+                    if (obj.id === 100) {
+                        OnSale = (obj.id === 100); // 修改为布尔值
                     } else {
-                        OnSale = 0;
+                        OnSale = (obj.id === 101);
                     }
                 }
+
             });
         });
 
@@ -133,7 +134,7 @@
                 on_sale: OnSale,
                 img: imageBase64
             };
-            console.log("整理后的上传信息（JSON格式）：", uploadInfo);
+            console.log("整理后的上传信息（JSON格式）：", uploadInfo.on_sale);
             // 实际应用中，以下部分需要通过AJAX等方式将uploadInfo发送到后端接口
             // 例如使用fetch API：
             fetch('/upload', {
@@ -144,28 +145,28 @@
                 },
                 body: JSON.stringify(uploadInfo)
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.json(); // 如果状态码在200系列，则解析JSON数据
-                } else if (response.status >= 400 && response.status < 500) {
-                    return response.json().then(json => {
-                        throw new Error(`客户端错误: ${response.status} - ${JSON.stringify(json)}`);
-                    });
-                } else if (response.status >= 500) {
-                    return response.json().then(json => {
-                        throw new Error(`服务器端错误: ${response.status} - ${JSON.stringify(json)}`);
-                    });
-                }
-            })
-            .then(data => {
-                alert('上传成功');
-                console.log('上传成功，后端返回的数据:', data);
-                window.location.href = '/display'; // 修改为正确的方式
-            })
-            .catch(error => {
-                alert('上传失败',error);
-                console.log('请求出现错误:', error);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); // 如果状态码在200系列，则解析JSON数据
+                    } else if (response.status >= 400 && response.status < 500) {
+                        return response.json().then(json => {
+                            throw new Error(`客户端错误: ${response.status} - ${JSON.stringify(json)}`);
+                        });
+                    } else if (response.status >= 500) {
+                        return response.json().then(json => {
+                            throw new Error(`服务器端错误: ${response.status} - ${JSON.stringify(json)}`);
+                        });
+                    }
+                })
+                .then(data => {
+                    alert('上传成功');
+                    console.log('上传成功，后端返回的数据:', data);
+                    window.location.href = '/display'; // 修改为正确的方式
+                })
+                .catch(error => {
+                    alert('上传失败', error);
+                    console.log('请求出现错误:', error);
+                });
 
         });
 

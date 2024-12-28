@@ -152,8 +152,6 @@ func main() {
 
 	h.POST("/display", middle.Display)
 
-	//h.POST("/search", middle.Search)
-
 	h.POST("/upload", middle.Upload)
 
 	h.POST("/information", middle.Information)

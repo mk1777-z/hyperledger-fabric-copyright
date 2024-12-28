@@ -99,7 +99,12 @@ func Transaction(_ context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Error during row iteration"})
 		return
 	}
-	trans := conf.Createtrans{ID: assetId, Name: name.Name, Seller: seller, Purchaser: claims.Username, Price: price, Transtime: time.Now().Format("2006-01-02")}
+	if seller == claims.Username {
+		c.JSON(400, utils.H{
+			"message": "Owner and Purchaser can't be the same person",
+		})
+	}
+	trans := conf.Createtrans{ID: assetId, Name: name.Name, Seller: seller, Purchaser: claims.Username, Price: price, Transtime: time.Now().Format("2006-01-02 15:04:05")}
 	createAsset(conf.Contract, trans)
 
 	if transID == nil {

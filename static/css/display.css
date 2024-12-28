@@ -2,87 +2,77 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f5f7;
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f9fafb;
+    /* 更浅的背景色 */
+    color: #333;
+    /* 通用文字颜色 */
 }
-
-/* 导航部分背景色透明或继承头部背景色 */
-.header .layui-nav {
-    background-color: inherit;
-}
-
-/* 用户头像背景色去掉 */
-.layui-nav img {
-    background-color: transparent;
-}
-
-/* 欢迎词文字及周围背景设置透明 */
-.layui-nav span,
-.layui-nav a {
-    background-color: transparent;
-    color: #fff;
-    /* 文字颜色可根据需要调整 */
-}
-
-
-span.layui-nav-bar {
-    position: absolute;
-}
-
 
 /* 页头样式 */
 .header {
     display: flex;
     justify-content: space-between;
-    /* 左中右布局 */
     align-items: center;
-    /* 垂直居中 */
-    background-color: #006d77;
+    background: linear-gradient(90deg, #006d77, #004d5b);
+    /* 渐变背景 */
     color: #fff;
     padding: 15px 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 页头标题 */
 .header h1 {
     margin: 0;
     font-size: 24px;
+    font-weight: bold;
 }
 
-/* 搜索框 */
+/* 搜索框样式 */
 .search-box {
     flex: 1;
-    /* 占据中间空间 */
     display: flex;
     justify-content: center;
-    /* 水平居中搜索框 */
     position: relative;
+    max-width: 500px;
+    /* 搜索框和按钮宽度限制 */
 }
 
 .search-box input {
-    max-width: 300px;
     width: 100%;
-    height: 35px;
-    padding: 0 40px 0 10px;
+    height: 38px;
+    padding: 0 50px 0 15px;
+    /* 搜索框内部间距 */
     border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #eaf4f4;
+    border-radius: 20px;
+    background-color: #f1f1f1;
     color: #333;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
 .search-box input:focus {
     border-color: #006d77;
-    box-shadow: 0 0 5px rgba(0, 109, 119, 0.5);
+    box-shadow: 0 0 8px rgba(0, 109, 119, 0.3);
 }
 
-.search-box i {
+.search-box button {
     position: absolute;
-    right: 15px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
-    color: #006d77;
+    height: 30px;
+    width: 70px;
+    background-color: #006d77;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 15px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-box button:hover {
+    background-color: #004d5b;
 }
 
 /* 用户导航菜单 */
@@ -97,13 +87,11 @@ span.layui-nav-bar {
 
 .layui-nav span {
     font-size: 16px;
-    color: #fff;
     font-weight: bold;
 }
 
 .layui-nav a {
     text-decoration: none;
-    color: #fff;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -111,11 +99,6 @@ span.layui-nav-bar {
     transition: color 0.3s ease;
 }
 
-/* .layui-nav a:hover {
-    color: #d6d6d6;
-} */
-
-/* 用户头像样式 */
 .layui-nav img {
     width: 40px;
     height: 40px;
@@ -123,19 +106,6 @@ span.layui-nav-bar {
     border: 2px solid #fff;
     object-fit: cover;
 }
-
-/* 退出按钮样式 */
-.layui-nav .logout {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffdddd;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-/* .layui-nav .logout:hover {
-    color: #ff5c5c;
-} */
 
 /* 容器样式 */
 .container {
@@ -146,7 +116,7 @@ span.layui-nav-bar {
     padding: 20px;
 }
 
-/* 每个版权项的卡片样式 */
+/* 卡片样式 */
 .item {
     display: flex;
     flex-direction: column;
@@ -155,7 +125,7 @@ span.layui-nav-bar {
     padding: 15px;
     background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -168,8 +138,8 @@ span.layui-nav-bar {
 /* 图片样式 */
 .item img {
     width: 100%;
-    max-width: 200px;
-    height: 120px;
+    max-width: 250px;
+    height: 140px;
     border-radius: 8px;
     object-fit: cover;
     margin-bottom: 10px;
@@ -179,6 +149,7 @@ span.layui-nav-bar {
 .item-content {
     text-align: left;
     width: 100%;
+    padding: 10px 0;
 }
 
 .item-content p {
@@ -187,12 +158,6 @@ span.layui-nav-bar {
     color: #333;
 }
 
-.item-content i {
-    font-weight: bold;
-    color: #555;
-}
-
-/* 查看详情链接样式 */
 .item-content a {
     display: inline-block;
     padding: 8px 15px;
@@ -207,4 +172,52 @@ span.layui-nav-bar {
 
 .item-content a:hover {
     background-color: #004d5b;
+}
+
+/* 分页容器样式 */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pagination-container button {
+    height: 38px;
+    padding: 0 20px;
+    border: none;
+    background-color: #006d77;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-container button:hover {
+    background-color: #004d5b;
+}
+
+.pagination-container span {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+span.layui-nav-bar {
+    position: absolute;
+}
+
+/* 响应式样式 */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .item {
+        width: 100%;
+        max-width: 400px;
+    }
 }
