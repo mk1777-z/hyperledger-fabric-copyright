@@ -92,7 +92,7 @@ func Information(_ context.Context, c *app.RequestContext) {
 		if transID != nil && *transID != "" {
 			trace := strings.Split(*transID, " ")
 			for _, assetID := range trace {
-				transactionDetails, err := readAssetByID(conf.Contract, assetID)
+				transactionDetails, err := readAssetByID(conf.BasicContract, assetID)
 				if err != nil {
 					fmt.Printf("Failed to fetch transaction details for assetID %s: %v\n", assetID, err)
 					continue // 跳过错误的交易记录

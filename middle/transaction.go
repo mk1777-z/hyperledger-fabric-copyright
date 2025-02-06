@@ -99,13 +99,30 @@ func Transaction(_ context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Error during row iteration"})
 		return
 	}
+
 	if seller == claims.Username {
-		c.JSON(400, utils.H{
-			"message": "Owner and Purchaser can't be the same person",
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "不可购买自己的版权",
 		})
+		return // 提前返回，避免后续操作
 	}
+
+	// 新增：调用资金链 Transfer 函数
+	_, err = conf.FundsContract.SubmitTransaction(
+		"Transfer",
+		claims.Username, // from（买家）
+		seller,          // to（卖家）
+		strconv.FormatFloat(price, 'f', -1, 64),
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "余额不足，请先至个人中心充值",
+		})
+		return
+	}
+
 	trans := conf.Createtrans{ID: assetId, Name: name.Name, Seller: seller, Purchaser: claims.Username, Price: price, Transtime: time.Now().Format("2006-01-02 15:04:05")}
-	createAsset(conf.Contract, trans)
+	createAsset(conf.BasicContract, trans)
 
 	if transID == nil {
 		transID = new(string)

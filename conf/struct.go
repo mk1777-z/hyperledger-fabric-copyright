@@ -34,6 +34,7 @@ type UpdateItem struct {
 	Dsc         string  `json:"dsc"`
 	Sale        bool    `json:"on_sale"`
 }
+
 type Createtrans struct {
 	ID        string
 	Name      string
@@ -41,4 +42,9 @@ type Createtrans struct {
 	Purchaser string
 	Price     float64
 	Transtime string
+}
+
+type Asset struct {
+	Owner   string
+	Balance float64
 }

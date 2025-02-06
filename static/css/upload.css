@@ -1,222 +1,211 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f5f7;
-    /* 背景颜色 */
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f9fafb;
     color: #333;
+    line-height: 1.6;
 }
 
+/* 页面头部 */
 .header {
     text-align: center;
-    padding: 40px 20px;
-    background-color: #0a6c78;
-    /* 主题色 */
-    color: white;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    /* 添加阴影 */
+    padding: 30px 20px;
+    background: linear-gradient(90deg, #006d77, #004d5b);
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header h1 {
     margin: 0;
-    font-size: 36px;
-    /* 调整字体大小 */
+    font-size: 28px;
     font-weight: bold;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-    /* 添加文本阴影 */
 }
 
+/* 页面内容容器 */
 .content {
-    background-color: #ffffff;
-    /* 内容背景颜色 */
-    width: 70%;
+    width: 80%;
+    max-width: 1000px;
     margin: 40px auto;
-    padding: 30px;
+    padding: 20px 30px;
+    background-color: #fff;
     border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    /* 内容的阴影 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 表单样式 */
 .layui-form-item {
     margin-bottom: 20px;
 }
 
 .layui-form-label {
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: bold;
     color: #333;
-    /* 标签文字颜色 */
-}
-
-.layui-input-block {
-    margin-left: 140px;
 }
 
 .layui-input,
 .layui-textarea,
 .layui-select {
     width: 100%;
-    border-radius: 5px;
-    /* 边框圆角 */
     padding: 10px;
-    border: 1px solid #ddd;
-    /* 输入框边框颜色 */
     font-size: 14px;
-    color: #555;
-    /* 输入框文字颜色 */
+    color: #333;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    /* 内部阴影 */
     transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
 .layui-input:focus,
 .layui-textarea:focus {
-    border-color: #0a6c78;
-    /* 聚焦时边框颜色 */
-    box-shadow: 0 0 5px rgba(10, 108, 120, 0.3);
-    /* 聚焦时阴影 */
+    border-color: #006d77;
+    box-shadow: 0 0 6px rgba(0, 109, 119, 0.3);
+    outline: none;
 }
 
+/* 按钮样式 */
 .layui-btn {
-    background-color: #0a6c78;
-    /* 按钮背景颜色 */
-    color: white;
+    background-color: #006d77;
+    color: #fff;
     border-radius: 20px;
-    /* 按钮圆角 */
     font-size: 14px;
     padding: 10px 20px;
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    /* 使用 flexbox 对齐 */
+    display: inline-flex;
     justify-content: center;
-    /* 水平居中 */
     align-items: center;
-    /* 垂直居中 */
     text-align: center;
-    /* 文本居中 */
     height: 40px;
-    /* 确保按钮高度固定 */
 }
 
 .layui-btn:hover {
-    background-color: #064c54;
-    /* 按钮悬停时的背景颜色 */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-    /* 按钮悬停时的阴影 */
+    background-color: #004d5b;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* 次级按钮 */
 .layui-btn-primary {
-    background-color: #e0e0e0;
-    /* 次级按钮背景颜色 */
-    color: #666;
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
     border-radius: 20px;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    /* 使用 flexbox 对齐 */
-    justify-content: center;
-    /* 水平居中 */
-    align-items: center;
-    /* 垂直居中 */
-    text-align: center;
-    /* 文本居中 */
-    height: 40px;
-    /* 确保按钮高度固定 */
 }
 
 .layui-btn-primary:hover {
-    background-color: #ccc;
-    /* 次级按钮悬停时的背景颜色 */
+    background-color: #e0e0e0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.demo-dropdown-base {
-    display: flex;
-    /* 使用 flexbox 对齐 */
-    justify-content: center;
-    /* 水平居中 */
-    align-items: center;
-    /* 垂直居中 */
-    background-color: #0a6c78;
-    /* 下拉按钮背景颜色 */
-    color: white;
-    border-radius: 20px;
-    /* 按钮圆角 */
-    font-size: 14px;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-    /* 文本居中 */
-    height: 40px;
-    /* 确保按钮高度固定 */
-}
-
-.demo-dropdown-base:hover {
-    background-color: #064c54;
-    /* 下拉按钮悬停时的背景颜色 */
-}
-
-.upload-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
+/* 上传按钮 */
 .upload-btn {
-    background-color: #0a6c78;
-    /* 上传按钮背景颜色 */
+    background-color: #006d77;
     color: white;
     border-radius: 20px;
-    /* 上传按钮圆角 */
+    padding: 10px 20px;
     font-size: 14px;
-    cursor: pointer;
     border: none;
+    cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    margin-bottom: 20px;
 }
 
-.button-container {
+.upload-btn:hover {
+    background-color: #004d5b;
+}
+
+/* 卡片样式 */
+.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.card-title {
+    font-size: 18px;
+    color: #333;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.card-description {
+    font-size: 14px;
+    color: #666;
+}
+
+.card-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #006d77;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.card-btn:hover {
+    background-color: #004d5b;
+}
+
+/* 分页样式 */
+.pagination {
     display: flex;
-    justify-content: space-between;
-    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
     margin-top: 30px;
 }
 
-.button-container .layui-btn {
-    width: 45%;
-    /* 按钮宽度 */
+.pagination button {
+    background-color: #006d77;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-@media (max-width: 768px) {
+.pagination button:hover {
+    background-color: #004d5b;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
     .content {
         width: 90%;
+        padding: 15px;
     }
 
-    .header h1 {
-        font-size: 32px;
+    .card {
+        max-width: 100%;
+        margin: 10px 0;
     }
 
-    .layui-btn {
-        padding: 10px 18px;
-        font-size: 14px;
-    }
-
-    .upload-btn {
-        padding: 12px 20px;
-        font-size: 16px;
-    }
-
-    .button-container {
+    .pagination {
         flex-direction: column;
-        gap: 10px;
-    }
-
-    .button-container .layui-btn {
-        width: 100%;
-        /* 在小屏幕下按钮全宽显示 */
+        gap: 5px;
     }
 }

@@ -19,9 +19,16 @@ const (
 	tlsCertPath  = cryptoPath + "/peers/peer0.org1.example.com/tls/ca.crt"
 	peerEndpoint = "dns:///localhost:7051"
 	gatewayPeer  = "peer0.org1.example.com"
+
+	basicChaincodeName = "basic" // 资产交易链码
+	fundsChaincodeName = "funds" // 资金操作链码
+	channelName        = "mychannel"
 )
 
-var Contract *client.Contract
+var (
+	BasicContract *client.Contract // 资产交易合约
+	FundsContract *client.Contract // 资金操作合约
+)
 var Con Config
 
 func Init() {
@@ -45,13 +52,12 @@ func Init() {
 	id := newIdentity()
 	sign := newSign()
 
-	// Create a Gateway connection for a specific client identity
+	// Create a Gateway connection
 	gw, err := client.Connect(
 		id,
 		client.WithSign(sign),
 		client.WithHash(hash.SHA256),
 		client.WithClientConnection(clientConnection),
-		// Default timeouts for different gRPC calls
 		client.WithEvaluateTimeout(5*time.Second),
 		client.WithEndorseTimeout(15*time.Second),
 		client.WithSubmitTimeout(5*time.Second),
@@ -61,18 +67,8 @@ func Init() {
 		panic(err)
 	}
 
-	// Override default values for chaincode and channel name as they may differ in testing contexts.
-	chaincodeName := "basic"
-	if ccname := os.Getenv("CHAINCODE_NAME"); ccname != "" {
-		chaincodeName = ccname
-	}
-
-	channelName := "mychannel"
-	if cname := os.Getenv("CHANNEL_NAME"); cname != "" {
-		channelName = cname
-	}
-
+	// 初始化两个合约
 	network := gw.GetNetwork(channelName)
-	Initcontract := network.GetContract(chaincodeName)
-	Contract = Initcontract
+	BasicContract = network.GetContract(basicChaincodeName)
+	FundsContract = network.GetContract(fundsChaincodeName)
 }

@@ -1,0 +1,36 @@
+2025/01/02 14:18:40.282203 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/static/*filepath         --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/01/02 14:18:40.282382 engine.go:669: [Debug] HERTZ: Method=HEAD   absolutePath=/static/*filepath         --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/01/02 14:18:40.282421 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/homepage                 --> handlerName=main.renderHTML.func1 (num=2 handlers)
+2025/01/02 14:18:40.282451 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/                         --> handlerName=main.renderHTML.func2 (num=2 handlers)
+2025/01/02 14:18:40.282474 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/signup                   --> handlerName=main.renderHTML.func3 (num=2 handlers)
+2025/01/02 14:18:40.282495 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/information              --> handlerName=main.renderHTML.func4 (num=2 handlers)
+2025/01/02 14:18:40.282527 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/display                  --> handlerName=main.renderHTML.func5 (num=2 handlers)
+2025/01/02 14:18:40.282549 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/upload                   --> handlerName=main.renderHTML.func6 (num=2 handlers)
+正在执行Init
+2025/01/02 14:18:40.282932 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/register                 --> handlerName=main.register (num=2 handlers)
+2025/01/02 14:18:40.282975 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/login                    --> handlerName=main.login (num=2 handlers)
+2025/01/02 14:18:40.283001 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/myproject                --> handlerName=hyperledger-fabric-copyright/middle.Myproject (num=2 handlers)
+2025/01/02 14:18:40.283024 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/display                  --> handlerName=hyperledger-fabric-copyright/middle.Display (num=2 handlers)
+2025/01/02 14:18:40.283044 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/upload                   --> handlerName=hyperledger-fabric-copyright/middle.Upload (num=2 handlers)
+2025/01/02 14:18:40.283066 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/information              --> handlerName=hyperledger-fabric-copyright/middle.Information (num=2 handlers)
+2025/01/02 14:18:40.283087 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/updateItem               --> handlerName=hyperledger-fabric-copyright/middle.UpdateItem (num=2 handlers)
+2025/01/02 14:18:40.283108 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/transaction              --> handlerName=hyperledger-fabric-copyright/middle.Transaction (num=2 handlers)
+2025/01/02 14:18:40.283229 engine.go:397: [Info] HERTZ: Using network library=netpoll
+2025/01/02 14:18:40.283416 transport.go:140: [Info] HERTZ: HTTP server listening on address=[::]:8888
+2025/01/02 14:19:06 Incorrect password for username 王越
+2025/01/02 19:06:09 User 张三 registered successfully
+2025/01/02 19:07:57 Username 张三 already exists
+2025/01/02 19:08:01 Username 张三 already exists
+2025/01/02 19:08:02 Username 张三 already exists
+2025/01/02 19:08:02 Username 张三 already exists
+2025/01/02 19:08:02 Username 张三 already exists
+2025/01/02 19:08:02 Username 张三 already exists
+2025/01/02 19:08:03 Username 张三 already exists
+2025/01/02 19:09:34 User 李四 registered successfully
+
+--> Evaluate Transaction: ReadAsset, function returns asset attributes
+
+--> Evaluate Transaction: ReadAsset, function returns asset attributes
+
+--> Evaluate Transaction: ReadAsset, function returns asset attributes
+signal: killed

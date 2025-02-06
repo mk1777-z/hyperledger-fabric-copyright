@@ -9,32 +9,76 @@
     <link rel="stylesheet" href="static/css/homepage.css">
     <style>
         .pagination {
-    text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
 
-.pagination button {
-    margin: 0 5px;
-    padding: 8px 16px; /* 适当增大内边距，让按钮看起来更饱满美观 */
-    background-color: #d8daba; /* 更改背景色为一种比较协调的中性色 */
-    border: 1px solid #495057; /* 更改边框颜色与背景色搭配 */
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* 为更多属性添加过渡效果 */
-    color: white; /* 设置文字颜色为白色，与背景搭配更协调 */
-}
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 16px;
+            /* 适当增大内边距，让按钮看起来更饱满美观 */
+            background-color: #d8daba;
+            /* 更改背景色为一种比较协调的中性色 */
+            border: 1px solid #495057;
+            /* 更改边框颜色与背景色搭配 */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            /* 为更多属性添加过渡效果 */
+            color: white;
+            /* 设置文字颜色为白色，与背景搭配更协调 */
+        }
 
-.pagination button:hover {
-    background-color: #5a6268; /* 鼠标悬停时的背景色，稍作加深，体现交互效果 */
-    border-color: #343a40; /* 悬停时边框颜色也稍作变化 */
-}
+        .pagination button:hover {
+            background-color: #5a6268;
+            /* 鼠标悬停时的背景色，稍作加深，体现交互效果 */
+            border-color: #343a40;
+            /* 悬停时边框颜色也稍作变化 */
+        }
 
-.pagination button.active {
-    background-color: #007bff; /* 当前选中页按钮的背景色，保持原来的蓝色，比较醒目 */
-    border-color: #007bff; /* 当前选中页按钮的边框颜色与背景一致 */
-    color: white; /* 当前选中页按钮的文字颜色保持白色 */
-}
+        .pagination button.active {
+            background-color: #007bff;
+            /* 当前选中页按钮的背景色，保持原来的蓝色，比较醒目 */
+            border-color: #007bff;
+            /* 当前选中页按钮的边框颜色与背景一致 */
+            color: white;
+            /* 当前选中页按钮的文字颜色保持白色 */
+        }
+
+        /* 修改余额显示样式 */
+        .balance-box {
+            display: inline-block;
+            padding: 0 15px;
+            margin-right: 20px;
+        }
+
+        .balance-text {
+            color: #fff;
+            margin-right: 8px;
+            font-size: 18px;
+            /* 放大字体 */
+        }
+
+        .balance-number {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 20px;
+            /* 放大字体 */
+        }
+
+        /* 修改按钮样式 */
+        .button-container .layui-btn {
+            margin-right: 10px;
+            /* 按钮间距 */
+        }
+
+        /* 新增：统一所有按钮的字体粗细 */
+        .button-container .layui-btn {
+            margin-right: 10px;
+            font-weight: bold;
+            /* 强制加粗 */
+        }
     </style>
 </head>
 
@@ -42,6 +86,12 @@
     <div class="header">
         <h1>版权资产</h1>
         <div class="button-container">
+            <div class="balance-box">
+                <span class="balance-text">当前余额：</span>
+                <span id="balanceValue" class="balance-number">加载中...</span>
+            </div>
+            <button class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius" onclick="showTopup()">充值</button>
+            <button class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius" onclick="showWithdraw()">提现</button>
             <a href="/upload" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">上传</a>
             <a href="/display" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">返回</a>
         </div>
@@ -61,6 +111,105 @@
             var element = layui.element;
             var form = layui.form;
             var layer = layui.layer;
+
+            // 解析 JWT Token 获取用户名（假设 token 格式是标准的 JWT 格式）
+            function getUsernameFromToken(token) {
+                try {
+                    // 解码 base64 编码的 payload 部分
+                    const payloadBase64 = token.split('.')[1];
+
+                    // 使用 decodeURIComponent 和 escape 来正确解码
+                    const decodedPayload = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+                    const decodedPayloadWithEncoding = decodeURIComponent(escape(decodedPayload));
+
+                    // 假设用户名保存在 payload 的 'username' 字段中
+                    const payload = JSON.parse(decodedPayloadWithEncoding);
+                    return payload.username;
+                } catch (error) {
+                    console.error('解析 Token 失败:', error);
+                    return null;
+                }
+            }
+
+
+            // 充值弹窗
+            window.showTopup = function () {
+                const token = localStorage.getItem('token');
+                const username = getUsernameFromToken(token);
+                if (!username) {
+                    layer.msg('用户身份验证失败');
+                    return;
+                }
+                layer.prompt({
+                    title: '请输入充值金额',
+                    formType: 0
+                }, function (value, index) {
+                    const amount = parseFloat(value);
+                    if (isNaN(amount) || amount <= 0) {
+                        layer.msg('请输入有效金额');
+                        return;
+                    }
+
+                    fetch('/account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                            //'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            action: 'topup',
+                            owner: username,
+                            amount: amount
+                        })
+                    }).then(res => res.json()).then(data => {
+                        if (data.message.includes('success')) {
+                            layer.msg('充值成功');
+                            updateBalance();
+                        } else {
+                            layer.msg('失败: ' + data.message);
+                        }
+                    }).catch(() => layer.msg('网络错误'));
+                    layer.close(index);
+                });
+            };
+
+            // 提现弹窗
+            window.showWithdraw = function () {
+                const token = localStorage.getItem('token');
+                const username = getUsernameFromToken(token);
+                layer.prompt({
+                    title: '请输入提现金额',
+                    formType: 0
+                }, function (value, index) {
+                    const amount = parseFloat(value);
+                    if (isNaN(amount) || amount <= 0) {
+                        layer.msg('请输入有效金额');
+                        return;
+                    }
+
+                    fetch('/account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                        },
+                        body: JSON.stringify({
+                            action: 'withdraw',
+                            owner: username,
+                            amount: amount
+                        })
+                    }).then(res => res.json()).then(data => {
+                        if (data.message.includes('success')) {
+                            layer.msg('提现成功');
+                            updateBalance();
+                        } else {
+                            layer.msg('失败: ' + data.message);
+                        }
+                    }).catch(() => layer.msg('网络错误'));
+                    layer.close(index);
+                });
+            };
 
             form.on('select(statusFilter)', function (data) {
                 if (data.value === 'not-selling') {
@@ -118,8 +267,8 @@
                     <label class="layui-form-label">是否售卖</label>
                     <div class="layui-input-block" style="width: calc(100% - 110px);">
                         <select name="on_sale" id="on_sale" lay-filter="on_sale">
-                            <option value="1" ${item.on_sale? 'selected' : ''}>是</option>
-                            <option value="0" ${!item.on_sale? 'selected' : ''}>否</option>
+                            <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
+                            <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
                         </select>
                     </div>
                 </div>
@@ -131,6 +280,7 @@
         </div>`,
                     area: ['800px', '500px']
                 });
+
 
                 // 渲染表单
                 layui.use(['form'], function () {
@@ -151,7 +301,7 @@
                         description: formData.get('description'), // 用户输入的简短描述
                         price: parseFloat(formData.get('price')), // 用户输入的价格，转为浮点数
                         dsc: formData.get('dsc'), // 用户输入的详细描述
-                        on_sale: formData.get('on_sale') === "1"? true : false // 转换为布尔值
+                        on_sale: formData.get('on_sale') === "1" ? true : false // 转换为布尔值
                     };
 
                     console.log('Sending updatedItem to server:', updatedItem);
@@ -165,8 +315,8 @@
                         },
                         body: JSON.stringify(updatedItem) // 转为 JSON 格式
                     })
-                      .then(response => response.json())
-                      .then(data => {
+                        .then(response => response.json())
+                        .then(data => {
                             if (data.success) {
                                 // 更新页面中当前 `item` 的内容
                                 const itemElements = document.querySelectorAll('.item');
@@ -186,7 +336,7 @@
                                 alert('修改失败：' + data.message); // 提示错误信息
                             }
                         })
-                      .catch(error => {
+                        .catch(error => {
                             console.error('修改请求失败:', error);
                             alert('修改请求失败，请稍后重试');
                         });
@@ -194,7 +344,39 @@
 
             };
 
+            // 更新余额
+            function updateBalance() {
+                document.getElementById('balanceValue').textContent = '加载中...';
+
+                fetch('/account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        action: 'query'
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.balance !== undefined) {
+                            const balance = data.balance.toFixed(2);
+                            document.getElementById('balanceValue').textContent = balance;
+                        } else {
+                            document.getElementById('balanceValue').textContent = '0.00';
+                            console.error('未获取到余额数据');
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('balanceValue').textContent = '加载失败';
+                        console.error('获取余额失败:', error);
+                    });
+            }
+
             window.onload = function () {
+                updateBalance();
+
                 const token = localStorage.getItem('token');
                 if (!token) {
                     console.error('未登录或未获取到有效的 token');
@@ -214,8 +396,8 @@
                     },
                     body: JSON.stringify(requestData)
                 })
-                  .then(response => response.json())
-                  .then(data => {
+                    .then(response => response.json())
+                    .then(data => {
                         if (data && data.items) {
                             const items = data.items;
                             const content = document.getElementById('content');
@@ -254,7 +436,7 @@
                             function loadItems() {
                                 const content = document.getElementById('content');
                                 // 清空之前的项目元素，避免重复显示
-                                content.innerHTML = ''; 
+                                content.innerHTML = '';
                                 const startIndex = (currentPage - 1) * itemsPerPage;
                                 const endIndex = startIndex + itemsPerPage;
                                 const currentItems = items.slice(startIndex, endIndex);
@@ -307,8 +489,8 @@
                                     const select = document.createElement('select');
                                     select.id = 'statusSelect';
                                     select.innerHTML = `
-                                        <option value="selling" ${item.status === 'selling'? 'selected' : ''}>在售</option>
-                                        <option value="not-selling" ${item.status === 'not-selling'? 'selected' : ''}>非售卖</option>
+                                        <option value="selling" ${item.status === 'selling' ? 'selected' : ''}>在售</option>
+                                        <option value="not-selling" ${item.status === 'not-selling' ? 'selected' : ''}>非售卖</option>
                                     `;
                                     formDiv.appendChild(select);
 
@@ -332,7 +514,7 @@
                             console.error('未能获取到项目数据');
                         }
                     })
-                  .catch(error => {
+                    .catch(error => {
                         console.error('请求失败:', error);
                     });
             };

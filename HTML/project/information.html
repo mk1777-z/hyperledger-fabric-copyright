@@ -30,7 +30,8 @@
             gap: 30px;
         }
 
-        .item-info, .transaction-history {
+        .item-info,
+        .transaction-history {
             width: 48%;
             background: white;
             padding: 30px;
@@ -62,6 +63,7 @@
         #buy-button {
             position: relative;
         }
+
         .back-button {
             margin-left: 20px;
         }
@@ -122,7 +124,8 @@
                 align-items: center;
             }
 
-            .item-info, .transaction-history {
+            .item-info,
+            .transaction-history {
                 width: 90%;
                 margin-bottom: 20px;
             }
@@ -131,7 +134,8 @@
                 font-size: 20px;
             }
         }
-        .layui-btn{
+
+        .layui-btn {
             border-radius: 20px;
         }
     </style>
@@ -166,39 +170,40 @@
         <p>请仔细阅读以下协议内容并点击“确认”以完成购买：</p>
         <p><strong>合同条款：</strong></p>
         <p>
-            1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为“<span id="item-name-contract"></span>”，其具体描述为：<span id="item-description-contract"></span>。
+            1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为“<span
+                id="item-name-contract"></span>”，其具体描述为：<span id="item-description-contract"></span>。
         </p>
         <p>
             2. <strong style="color: red;">交易价格：</strong>买方应支付的交易价格为人民币<span id="item-price-contract"></span>元。
         </p>
         <p>
             3. <strong style="color: red;">交易双方：</strong>本合同的签订双方为：
-            <ul>
-                <li><strong>卖方：</strong><span id="item-owner-contract"></span></li>
-                <li><strong>买方：</strong><span id="buyer-name"></span></li>
-            </ul>
+        <ul>
+            <li><strong>卖方：</strong><span id="item-owner-contract"></span></li>
+            <li><strong>买方：</strong><span id="buyer-name"></span></li>
+        </ul>
         </p>
         <p>
             4. <strong style="color: red;">知识产权转让：</strong>
-            <ul>
-                <li>卖方声明其拥有交易标的物的完整知识产权，且交易标的物不存在侵权行为或法律争议。</li>
-                <li>交易完成后，卖方同意将交易标的物的知识产权（包括但不限于所有权、使用权、修改权、再分发权）转让给买方。</li>
-                <li><strong style="color: red;">卖方在交易完成后，不得继续使用、出售或转让该交易标的物的知识产权。</strong></li>
-            </ul>
+        <ul>
+            <li>卖方声明其拥有交易标的物的完整知识产权，且交易标的物不存在侵权行为或法律争议。</li>
+            <li>交易完成后，卖方同意将交易标的物的知识产权（包括但不限于所有权、使用权、修改权、再分发权）转让给买方。</li>
+            <li><strong style="color: red;">卖方在交易完成后，不得继续使用、出售或转让该交易标的物的知识产权。</strong></li>
+        </ul>
         </p>
         <p>
             5. <strong style="color: red;">交付条款：</strong>
-            <ul>
-                <li>卖方在收到交易款项后，应立即将交易标的物及相关文件（如版权证明、源文件）交付买方。</li>
-                <li><strong style="color: red;">买方确认收到交易标的物及相关文件后，本合同即视为履行完成。</strong></li>
-            </ul>
+        <ul>
+            <li>卖方在收到交易款项后，应立即将交易标的物及相关文件（如版权证明、源文件）交付买方。</li>
+            <li><strong style="color: red;">买方确认收到交易标的物及相关文件后，本合同即视为履行完成。</strong></li>
+        </ul>
         </p>
         <p>
             6. <strong style="color: red;">合同解除：</strong>
-            <ul>
-                <li><strong style="color: red;">若因卖方原因导致交易标的物存在质量或知识产权问题，买方有权解除合同并要求退款。</strong></li>
-                <li>若买方未按约定支付交易款项，卖方有权解除合同并保留交易标的物的所有权。</li>
-            </ul>
+        <ul>
+            <li><strong style="color: red;">若因卖方原因导致交易标的物存在质量或知识产权问题，买方有权解除合同并要求退款。</strong></li>
+            <li>若买方未按约定支付交易款项，卖方有权解除合同并保留交易标的物的所有权。</li>
+        </ul>
         </p>
         <p>
             7. <strong style="color: red;">保密条款：</strong>
@@ -212,7 +217,7 @@
             9. <strong style="color: red;">特别约定：</strong>
             若本合同内容与双方另行签署的协议不一致，以另行签署的协议为准。
         </p>
-        
+
         <div class="modal-buttons">
             <button id="confirm-button" class="layui-btn">确认</button>
             <button id="cancel-button" class="layui-btn layui-btn-danger">取消</button>
@@ -264,7 +269,8 @@
                 }
 
                 const token = localStorage.getItem('token');
-                if (token && item.owner !== localStorage.getItem("username")) {
+
+                if (token) {
                     buyButton.disabled = false;
                     console.log("解锁")
                 }
