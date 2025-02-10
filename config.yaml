@@ -1,6 +1,8 @@
 mysql:
+  dbHost: "localhost" # 添加这行
+  dbPort: 3306 
   dbUser: root
-  dbPassword: 12345678
+  dbPassword: "Fabric@2024"
   dbName: fabric
 
 jwtkey: 0123456789

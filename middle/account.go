@@ -60,21 +60,33 @@ func withdraw(contract *client.Contract, owner string, amount float64) {
 }
 
 // 充值
+// func topUp(contract *client.Contract, owner string, amount float64) {
+// 	fmt.Printf("\n--> Submit Transaction: TopUp <--\n")
+
+//		// 尝试读取现有账户
+//		_, err := contract.EvaluateTransaction("ReadAsset", owner)
+//		if err != nil {
+//			// 如果不存在则初始化
+//			initAccount(contract, owner, amount)
+//		} else {
+//			// 存在则充值
+//			_, err = contract.SubmitTransaction("TopUp", owner, strconv.FormatFloat(amount, 'f', -1, 64))
+//			if err != nil {
+//				log.Fatalf("failed to submit transaction: %v", err)
+//			}
+//		}
+//		fmt.Printf("*** TopUp successful: Owner=%s, Amount=%.2f\n", owner, amount)
+//	}
 func topUp(contract *client.Contract, owner string, amount float64) {
 	fmt.Printf("\n--> Submit Transaction: TopUp <--\n")
 
-	// 尝试读取现有账户
-	_, err := contract.EvaluateTransaction("ReadAsset", owner)
+	// 直接充值（不再检查账户是否存在）
+	_, err := contract.SubmitTransaction("TopUp", owner, strconv.FormatFloat(amount, 'f', -1, 64))
 	if err != nil {
-		// 如果不存在则初始化
-		initAccount(contract, owner, amount)
-	} else {
-		// 存在则充值
-		_, err = contract.SubmitTransaction("TopUp", owner, strconv.FormatFloat(amount, 'f', -1, 64))
-		if err != nil {
-			log.Fatalf("failed to submit transaction: %v", err)
-		}
+		log.Fatalf("failed to submit transaction: %v", err)
+		return
 	}
+
 	fmt.Printf("*** TopUp successful: Owner=%s, Amount=%.2f\n", owner, amount)
 }
 
@@ -109,24 +121,6 @@ func HandleAccount(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// // 验证 JWT Token
-	// tokenBytes := c.GetHeader("Authorization")
-	// if len(tokenBytes) == 0 {
-	// 	c.Status(http.StatusBadRequest)
-	// 	c.JSON(http.StatusBadRequest, utils.H{"message": "Authorization token is missing"})
-	// 	return
-	// }
-
-	// // 提取并解析 Token
-	// tokenString := strings.Replace(string(tokenBytes), "Bearer ", "", -1)
-	// token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
-	// 	return conf.Con.Jwtkey, nil
-	// })
-	// if err != nil || !token.Valid {
-	// 	c.Status(http.StatusUnauthorized)
-	// 	c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token"})
-	// 	return
-	// }
 	tokenString := c.GetHeader("Authorization")
 	if string(tokenString) == "" {
 		c.Status(http.StatusBadRequest)

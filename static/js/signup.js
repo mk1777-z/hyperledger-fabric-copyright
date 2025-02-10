@@ -41,6 +41,11 @@ document.getElementById('signup-btn').addEventListener('click', async function (
             if (response.status === 200) {
                 alert('注册成功，请登录。');
                 window.location.href = '/'; // 注册成功后跳转到登录页面
+            }
+            else if (response.status === 400) {
+                response.json().then(data => {
+                    alert(data.error); // 显示后端返回的错误信息
+                });
             } else {
                 console.log('注册失败。');
             }

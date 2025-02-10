@@ -249,19 +249,35 @@
 
                 if (item.transactions && item.transactions.length > 0) {
                     const timelineContainer = document.getElementById('transaction-timeline');
-                    item.transactions.forEach(transaction => {
+                    item.transactions.forEach((transaction, index) => {
                         const timelineItem = document.createElement('li');
                         timelineItem.className = 'layui-timeline-item';
-                        timelineItem.innerHTML = ` 
-                            <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
-                            <div class="layui-timeline-content layui-text">
-                                <h3 class="layui-timeline-title">交易时间：${transaction.Transtime}</h3>
-                                <p>
-                                    <strong>卖家:</strong> ${transaction.Seller}<br>
-                                    <strong>买家:</strong> ${transaction.Purchaser}<br>
-                                    <strong>价格:</strong> ${transaction.Price} 元
-                                </p>
-                            </div>`;
+                        const uploadDate = transaction.Transtime.substring(0, 10);
+
+
+                        // 第一条特殊处理
+                        if (index === 0) {
+                            timelineItem.innerHTML = ` 
+                    <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
+                    <div class="layui-timeline-content layui-text">
+                        <h3 class="layui-timeline-title">上传时间：${uploadDate}</h3>
+                        <p>
+                            <strong>拥有者:</strong> ${transaction.Purchaser}
+                        </p>
+                    </div>`;
+                        } else {
+                            // 其他记录保持原样
+                            timelineItem.innerHTML = ` 
+                    <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
+                    <div class="layui-timeline-content layui-text">
+                        <h3 class="layui-timeline-title">交易时间：${transaction.Transtime}</h3>
+                        <p>
+                            <strong>卖家:</strong> ${transaction.Seller}<br>
+                            <strong>买家:</strong> ${transaction.Purchaser}<br>
+                            <strong>价格:</strong> ${transaction.Price} 元
+                        </p>
+                    </div>`;
+                        }
                         timelineContainer.appendChild(timelineItem);
                     });
                 } else {

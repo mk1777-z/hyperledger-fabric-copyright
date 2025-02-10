@@ -19,56 +19,56 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func register(ctx context.Context, c *app.RequestContext) {
-	var user conf.User
-	if err := c.Bind(&user); err != nil {
-		log.Printf("Error binding user data: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
+// func register(ctx context.Context, c *app.RequestContext) {
+// 	var user conf.User
+// 	if err := c.Bind(&user); err != nil {
+// 		log.Printf("Error binding user data: %v", err)
+// 		c.Status(http.StatusInternalServerError)
+// 		return
+// 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		log.Printf("Error opening database connection: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Printf("Error closing database connection: %v", err)
-		}
-	}()
+// 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+// 	db, err := sql.Open("mysql", dsn)
+// 	if err != nil {
+// 		log.Printf("Error opening database connection: %v", err)
+// 		c.Status(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	defer func() {
+// 		if err := db.Close(); err != nil {
+// 			log.Printf("Error closing database connection: %v", err)
+// 		}
+// 	}()
 
-	// 检查用户名是否存在
-	rows, err := db.Query("SELECT username FROM user WHERE username = ?", user.Username)
-	if err != nil {
-		log.Printf("Error querying database: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Printf("Error closing rows: %v", err)
-		}
-	}()
+// 	// 检查用户名是否存在
+// 	rows, err := db.Query("SELECT username FROM user WHERE username = ?", user.Username)
+// 	if err != nil {
+// 		log.Printf("Error querying database: %v", err)
+// 		c.Status(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	defer func() {
+// 		if err := rows.Close(); err != nil {
+// 			log.Printf("Error closing rows: %v", err)
+// 		}
+// 	}()
 
-	if rows.Next() { // 如果存在该用户
-		log.Printf("Username %s already exists", user.Username)
-		c.Status(http.StatusBadRequest) // 返回400错误，表示用户已存在
-		return
-	}
+// 	if rows.Next() { // 如果存在该用户
+// 		log.Printf("Username %s already exists", user.Username)
+// 		c.Status(http.StatusBadRequest) // 返回400错误，表示用户已存在
+// 		return
+// 	}
 
-	// 插入新用户
-	if _, err := db.Exec("INSERT INTO user (username, password) VALUES (?, ?)", user.Username, user.Password); err != nil {
-		log.Printf("Error inserting new user: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
+// 	// 插入新用户
+// 	if _, err := db.Exec("INSERT INTO user (username, password) VALUES (?, ?)", user.Username, user.Password); err != nil {
+// 		log.Printf("Error inserting new user: %v", err)
+// 		c.Status(http.StatusInternalServerError)
+// 		return
+// 	}
 
-	log.Printf("User %s registered successfully", user.Username)
-	c.Status(consts.StatusOK)
-}
+// 	log.Printf("User %s registered successfully", user.Username)
+// 	c.Status(consts.StatusOK)
+// }
 
 // login 函数
 func login(_ context.Context, c *app.RequestContext) {
@@ -144,7 +144,7 @@ func main() {
 
 	conf.Init()
 
-	h.POST("/register", register)
+	h.POST("/register", middle.Register)
 
 	h.POST("/login", login)
 

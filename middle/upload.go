@@ -83,8 +83,11 @@ func Upload(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
+	startTime := time.Now()                                     // 使用上传时间作为 start_time
+	assetID := fmt.Sprintf("asset%d", startTime.UnixNano()/1e6) // 生成唯一 ID
+
 	_, err = db.Exec(
-		"INSERT INTO item (id, name, owner, simple_dsc, dsc, price, img, on_sale, start_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO item (id, name, owner, simple_dsc, dsc, price, img, on_sale, start_time, transID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		uploadInfo.ID,
 		uploadInfo.Name,
 		token.Claims.(*UserClaims).Username,
@@ -94,11 +97,32 @@ func Upload(_ context.Context, c *app.RequestContext) {
 		uploadInfo.Img,
 		uploadInfo.On_sale,
 		time.Now(),
+		assetID,
 	)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Internal Server Error"})
 		log.Fatal(err)
+		return
+	}
+
+	_, err = conf.BasicContract.SubmitTransaction(
+		"CreateCreatetrans",
+		assetID,                                 // 交易 ID
+		uploadInfo.Name,                         // 版权名称
+		"admin",                                 // 卖家固定为 admin
+		token.Claims.(*UserClaims).Username,     // 买家为当前用户
+		"0",                                     // 初始价格为 0
+		startTime.Format("2006-01-02 15:04:05"), // 格式化时间
+	)
+
+	if err != nil {
+		// 错误处理（建议回滚数据库操作）
+		log.Printf("区块链交易失败: %v", err)
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "版权上传成功，但区块链记录失败",
+		})
 		return
 	}
 	c.Status(http.StatusOK)
