@@ -7,10 +7,23 @@
     <title>版权信息</title>
     <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
     <style>
+        /* CSS 变量定义 */
+        :root {
+            --primary-color: #00796b;
+            --text-color: #333;
+            --background-light: #f8f8f8;
+            --background-body: #e3f2fd;
+            --card-background: white;
+            --box-shadow-card: 0 8px 16px rgba(0, 0, 0, 0.1);
+            --border-radius-card: 15px;
+            --border-radius-button: 20px;
+        }
+
         body {
             font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+            background: linear-gradient(to bottom, var(--background-body), #ffffff);
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,6 +32,21 @@
             height: 100vh;
             overflow: hidden;
         }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            /* 确保 main 元素占据全宽 */
+            height: 100%;
+            /* 确保 main 元素占据全高 */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
 
         .container {
             display: flex;
@@ -30,17 +58,44 @@
             gap: 30px;
         }
 
-        .item-info,
-        .transaction-history {
-            width: 48%;
-            background: white;
+        /* 公共卡片样式 */
+        .card-container {
+            background: var(--card-background);
             padding: 30px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            border-radius: 15px;
+            box-shadow: var(--box-shadow-card);
+            border-radius: var(--border-radius-card);
         }
 
+        .item-info {
+            width: 48%;
+            display: flex;
+            /* 启用 Flexbox */
+            flex-direction: column;
+            /* 垂直布局 */
+            align-items: center;
+            /* 水平居中对齐 */
+            text-align: center;
+        }
+
+        .transaction-history {
+            width: 48%;
+        }
+
+        .chat-container {
+            width: 48%;
+            background: var(--card-background);
+            padding: 20px;
+            box-shadow: var(--box-shadow-card);
+            border-radius: var(--border-radius-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 500px; /* 增大 chat-container 的高度 */
+        }
+
+
         .item-info h2 {
-            color: #00796b;
+            color: var(--primary-color);
             margin-bottom: 10px;
         }
 
@@ -58,6 +113,8 @@
             margin-top: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            /* 水平居中按钮 */
         }
 
         #buy-button {
@@ -81,7 +138,7 @@
             width: 90%;
             max-width: 400px;
             padding: 20px;
-            background: white;
+            background: var(--card-background);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             display: none;
@@ -125,7 +182,8 @@
             }
 
             .item-info,
-            .transaction-history {
+            .transaction-history,
+            .chat-container {
                 width: 90%;
                 margin-bottom: 20px;
             }
@@ -136,216 +194,504 @@
         }
 
         .layui-btn {
-            border-radius: 20px;
+            border-radius: var(--border-radius-button);
+        }
+
+        /* 聊天框样式 */
+        .chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            border-radius: var(--border-radius-button);
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        .send-button {
+            border-radius: var(--border-radius-button);
+        }
+
+        .user-message {
+            text-align: right;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            background-color: #e6f7ff;
+            padding: 8px 15px;
+            border-radius: var(--border-radius-button);
+            align-self: flex-end;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .bot-message {
+            text-align: left;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            background-color: var(--background-light);
+            padding: 8px 15px;
+            border-radius: var(--border-radius-button);
+            align-self: flex-start;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Markdown 样式覆盖，使 bot-message 中的 markdown 内容应用 github-markdown-css 样式 */
+        .bot-message .markdown-body {
+            padding: 0; /* 移除 markdown-body 默认的 padding */
+            background-color: transparent; /* 使 markdown-body 背景透明 */
+            color: var(--text-color); /* 确保文字颜色与 bot-message 一致 */
+        }
+
+        .waiting-message {
+            text-align: left;
+            margin-bottom: 5px;
+            color: grey;
+            font-style: italic;
+            align-self: flex-start;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="item-info" style="flex-direction: column;display: flex;flex-wrap: wrap;align-content: center;">
-            <h2 id="item-name"></h2>
-            <p><strong>描述：</strong><span id="item-description"></span></p>
-            <p><strong>价格：</strong><span id="item-price"></span></p>
-            <p><strong>拥有者：</strong><span id="item-owner"></span></p>
-            <img id="item-image" src="" alt="项目信息图片" />
-            <div class="purchase-button">
-                <button id="buy-button" class="layui-btn" disabled>购买</button>
-                <div class="back-button">
-                    <a href="/display" class="layui-btn">返回列表</a>
+    <main>
+        <div class="container">
+            <div class="item-info card-container">
+                <h2 id="item-name"></h2>
+                <p><strong>描述：</strong><span id="item-description"></span></p>
+                <p><strong>价格：</strong><span id="item-price"></span></p>
+                <p><strong>拥有者：</strong><span id="item-owner"></span></p>
+                <img id="item-image" src="" alt="项目信息图片" />
+                <div class="purchase-button">
+                    <button id="buy-button" class="layui-btn" disabled>购买</button>
+                    <div class="back-button">
+                        <a href="/display" class="layui-btn">返回列表</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transaction-history card-container">
+                <h3>交易历史：</h3>
+                <ul class="timelineContainer" id="transaction-timeline"></ul>
+            </div>
+
+            <div class="chat-container card-container">
+                <h3>AI 助手</h3>
+                <div class="chat-history" id="chat-history">
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="请输入您的问题..."
+                        onkeydown="handleEnter(event)">
+                    <button class="layui-btn send-button" id="send-button">发送</button>
                 </div>
             </div>
         </div>
 
-        <!-- 交易历史部分 -->
-        <div class="transaction-history">
-            <h3>交易历史：</h3>
-            <ul class="timelineContainer" id="transaction-timeline"></ul>
+        <div id="modal-overlay"></div>
+        <div id="contract-modal">
+            <h3>合同协议</h3>
+            <p>请仔细阅读以下协议内容并点击“确认”以完成购买：</p>
+            <p><strong>合同条款：</strong></p>
+            <p>
+                1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为“<span
+                    id="item-name-contract"></span>”，其具体描述为：<span id="item-description-contract"></span>。
+            </p>
+            <p>
+                2. <strong style="color: red;">交易价格：</strong>买方应支付的交易价格为人民币<span
+                    id="item-price-contract"></span>元。
+            </p>
+            <p>
+                3. <strong style="color: red;">交易双方：</strong>本合同的签订双方为：
+                <ul>
+                    <li><strong>卖方：</strong><span id="item-owner-contract"></span></li>
+                    <li><strong>买方：</strong><span id="buyer-name"></span></li>
+                </ul>
+            </p>
+            <p>
+                4. <strong style="color: red;">知识产权转让：</strong>
+                <ul>
+                    <li>卖方声明其拥有交易标的物的完整知识产权，且交易标的物不存在侵权行为或法律争议。</li>
+                    <li>交易完成后，卖方同意将交易标的物的知识产权（包括但不限于所有权、使用权、修改权、再分发权）转让给买方。</li>
+                    <li><strong style="color: red;">卖方在交易完成后，不得继续使用、出售或转让该交易标的物的知识产权。</strong></li>
+                </ul>
+            </p>
+            <p>
+                5. <strong style="color: red;">交付条款：</strong>
+                <ul>
+                    <li>卖方在收到交易款项后，应立即将交易标的物及相关文件（如版权证明、源文件）交付买方。</li>
+                    <li><strong style="color: red;">买方确认收到交易标的物及相关文件后，本合同即视为履行完成。</strong></li>
+                </ul>
+            </p>
+            <p>
+                6. <strong style="color: red;">合同解除：</strong>
+                <ul>
+                    <li><strong style="color: red;">若因卖方原因导致交易标的物存在质量或知识产权问题，买方有权解除合同并要求退款。</strong></li>
+                    <li>若买方未按约定支付交易款项，卖方有权解除合同并保留交易标的物的所有权。</li>
+                </ul>
+            </p>
+            <p>
+                7. <strong style="color: red;">保密条款：</strong>
+                双方承诺对交易过程中涉及的商业秘密或技术信息予以保密，未经对方书面许可，不得向任何第三方披露。
+            </p>
+            <p>
+                8. <strong style="color: red;">争议解决：</strong>
+                双方因本合同产生的争议应友好协商解决；协商不成的，任何一方均可向交易标的物所在地人民法院提起诉讼。
+            </p>
+            <p>
+                9. <strong style="color: red;">特别约定：</strong>
+                若本合同内容与双方另行签署的协议不一致，以另行签署的协议为准。
+            </p>
+
+            <div class="modal-buttons">
+                <button id="confirm-button" class="layui-btn">确认</button>
+                <button id="cancel-button" class="layui-btn layui-btn-danger">取消</button>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <div id="modal-overlay"></div>
-    <div id="contract-modal">
-        <h3>合同协议</h3>
-        <p>请仔细阅读以下协议内容并点击“确认”以完成购买：</p>
-        <p><strong>合同条款：</strong></p>
-        <p>
-            1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为“<span
-                id="item-name-contract"></span>”，其具体描述为：<span id="item-description-contract"></span>。
-        </p>
-        <p>
-            2. <strong style="color: red;">交易价格：</strong>买方应支付的交易价格为人民币<span id="item-price-contract"></span>元。
-        </p>
-        <p>
-            3. <strong style="color: red;">交易双方：</strong>本合同的签订双方为：
-        <ul>
-            <li><strong>卖方：</strong><span id="item-owner-contract"></span></li>
-            <li><strong>买方：</strong><span id="buyer-name"></span></li>
-        </ul>
-        </p>
-        <p>
-            4. <strong style="color: red;">知识产权转让：</strong>
-        <ul>
-            <li>卖方声明其拥有交易标的物的完整知识产权，且交易标的物不存在侵权行为或法律争议。</li>
-            <li>交易完成后，卖方同意将交易标的物的知识产权（包括但不限于所有权、使用权、修改权、再分发权）转让给买方。</li>
-            <li><strong style="color: red;">卖方在交易完成后，不得继续使用、出售或转让该交易标的物的知识产权。</strong></li>
-        </ul>
-        </p>
-        <p>
-            5. <strong style="color: red;">交付条款：</strong>
-        <ul>
-            <li>卖方在收到交易款项后，应立即将交易标的物及相关文件（如版权证明、源文件）交付买方。</li>
-            <li><strong style="color: red;">买方确认收到交易标的物及相关文件后，本合同即视为履行完成。</strong></li>
-        </ul>
-        </p>
-        <p>
-            6. <strong style="color: red;">合同解除：</strong>
-        <ul>
-            <li><strong style="color: red;">若因卖方原因导致交易标的物存在质量或知识产权问题，买方有权解除合同并要求退款。</strong></li>
-            <li>若买方未按约定支付交易款项，卖方有权解除合同并保留交易标的物的所有权。</li>
-        </ul>
-        </p>
-        <p>
-            7. <strong style="color: red;">保密条款：</strong>
-            双方承诺对交易过程中涉及的商业秘密或技术信息予以保密，未经对方书面许可，不得向任何第三方披露。
-        </p>
-        <p>
-            8. <strong style="color: red;">争议解决：</strong>
-            双方因本合同产生的争议应友好协商解决；协商不成的，任何一方均可向交易标的物所在地人民法院提起诉讼。
-        </p>
-        <p>
-            9. <strong style="color: red;">特别约定：</strong>
-            若本合同内容与双方另行签署的协议不一致，以另行签署的协议为准。
-        </p>
+<script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        <div class="modal-buttons">
-            <button id="confirm-button" class="layui-btn">确认</button>
-            <button id="cancel-button" class="layui-btn layui-btn-danger">取消</button>
-        </div>
-    </div>
+<script>
+    const itemNameElement = document.getElementById('item-name');
+    const itemDescriptionElement = document.getElementById('item-description');
+    const itemPriceElement = document.getElementById('item-price');
+    const itemOwnerElement = document.getElementById('item-owner');
+    const itemNameContractElement = document.getElementById('item-name-contract');
+    const itemDescriptionContractElement = document.getElementById('item-description-contract');
+    const itemPriceContractElement = document.getElementById('item-price-contract');
+    const itemOwnerContractElement = document.getElementById('item-owner-contract');
+    const buyerNameElement = document.getElementById('buyer-name');
+    const itemImageElement = document.getElementById('item-image');
+    const transactionTimelineElement = document.getElementById('transaction-timeline');
+    const buyButton = document.getElementById('buy-button');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const contractModal = document.getElementById('contract-modal');
+    const confirmButton = document.getElementById('confirm-button');
+    const cancelButton = document.getElementById('cancel-button');
+    const chatHistory = document.getElementById('chat-history');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-button');
 
-    <script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
-    <script>
-        const itemDetails = sessionStorage.getItem('itemDetails');
-        const item = itemDetails ? JSON.parse(itemDetails) : null;
-        const buyButton = document.getElementById('buy-button');
+    let websocketInstance;
+    let currentItem;
+    let waitingMessageElement = null;
+    let systemPrompt;
+    let messageBuffer = '';
+    let currentMessageElement = null;
 
-        window.onload = function () {
-            if (item) {
-                document.getElementById('item-name').textContent = `名称：${item.name}`;
-                document.getElementById('item-description').textContent = item.description;
-                document.getElementById('item-price').textContent = item.price;
-                document.getElementById('item-owner').textContent = item.owner;
+    function addUserMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'user-message';
+        messageElement.textContent = message;
+        chatHistory.appendChild(messageElement);
+        scrollToChatBottom();
+    }
 
-                document.getElementById('item-name-contract').textContent = item.name;
-                document.getElementById('item-description-contract').textContent = item.description;
-                document.getElementById('item-price-contract').textContent = item.price;
-                document.getElementById('item-owner-contract').textContent = item.owner;
-                document.getElementById('buyer-name').textContent = localStorage.getItem("username");
+    function addBotMessage(message) {
+        if (!message || message.trim() === "") return;
 
-                const img = document.getElementById('item-image');
-                img.src = item.img && item.img.length >= 10 ? item.img : 'https://api.iconify.design/icon-park:fail-picture.svg';
-                img.alt = '版权图片';
+        if (message === "Full response stream handled.") {
+            finalizeBotMessage();
+            return;
+        }
 
-                if (item.transactions && item.transactions.length > 0) {
-                    const timelineContainer = document.getElementById('transaction-timeline');
-                    item.transactions.forEach((transaction, index) => {
-                        const timelineItem = document.createElement('li');
-                        timelineItem.className = 'layui-timeline-item';
-                        const uploadDate = transaction.Transtime.substring(0, 10);
+        if (!currentMessageElement || !messageBuffer) {
+            currentMessageElement = document.createElement('div');
+            currentMessageElement.className = 'bot-message';
 
+            // 创建 markdown-body 容器
+            const markdownBody = document.createElement('div');
+            markdownBody.className = 'markdown-body';
+            currentMessageElement.appendChild(markdownBody);
 
-                        // 第一条特殊处理
-                        if (index === 0) {
-                            timelineItem.innerHTML = ` 
-                    <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
-                    <div class="layui-timeline-content layui-text">
-                        <h3 class="layui-timeline-title">上传时间：${uploadDate}</h3>
-                        <p>
-                            <strong>拥有者:</strong> ${transaction.Purchaser}
-                        </p>
-                    </div>`;
-                        } else {
-                            // 其他记录保持原样
-                            timelineItem.innerHTML = ` 
-                    <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
-                    <div class="layui-timeline-content layui-text">
-                        <h3 class="layui-timeline-title">交易时间：${transaction.Transtime}</h3>
-                        <p>
-                            <strong>卖家:</strong> ${transaction.Seller}<br>
-                            <strong>买家:</strong> ${transaction.Purchaser}<br>
-                            <strong>价格:</strong> ${transaction.Price} 元
-                        </p>
-                    </div>`;
-                        }
-                        timelineContainer.appendChild(timelineItem);
-                    });
-                } else {
-                    document.getElementById('transaction-timeline').innerHTML = '<p>暂无交易历史</p>';
-                }
+            chatHistory.appendChild(currentMessageElement);
+            messageBuffer = '';
+        }
 
-                const token = localStorage.getItem('token');
+        // 替换换行符
+        message = message.replace(/\n/g, '<br>');
 
-                if (token) {
-                    buyButton.disabled = false;
-                    console.log("解锁")
-                }
+        messageBuffer += message;
+        // 使用 marked.parse 渲染 Markdown 内容并设置到 markdown-body 容器中
+        currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
+        scrollToChatBottom();
+    }
 
-                buyButton.addEventListener('click', function () {
-                    if (!token) {
-                        alert('请先登录后再购买！');
-                        return;
-                    }
-
-                    const modalOverlay = document.getElementById('modal-overlay');
-                    const contractModal = document.getElementById('contract-modal');
-
-                    modalOverlay.style.display = 'block';
-                    contractModal.style.display = 'block';
-
-                    document.getElementById('confirm-button').onclick = async function () {
-                        modalOverlay.style.display = 'none';
-                        contractModal.style.display = 'none';
-                        try {
-                            buyButton.disabled = true;  // 禁用购买按钮
-                            const response = await fetch('/transaction', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    Authorization: `Bearer ${token}`
-                                },
-                                body: JSON.stringify({
-                                    name: item.name
-                                })
-                            });
-
-                            const result = await response.json();
-                            if (response.ok) {
-                                alert('购买成功！感谢您的支持！');
-                                window.location = '/display';
-                            } else {
-                                alert(`购买失败：${result.message || '未知错误'}`);
-                            }
-                        } catch (error) {
-                            console.error('购买失败', error);
-                            alert('购买请求失败，请稍后重试。');
-                        } finally {
-                            buyButton.disabled = false;  // 交易完成后启用购买按钮
-                        }
-                    };
-
-                    document.getElementById('cancel-button').onclick = function () {
-                        modalOverlay.style.display = 'none';
-                        contractModal.style.display = 'none';
-                    };
-                });
-
-            } else {
-                console.error('没有找到项目交易信息');
-                alert('项目信息加载失败，请稍后重试！');
+    function finalizeBotMessage() {
+        if (currentMessageElement) {
+            if (messageBuffer.trim()) {
+                // 最终消息也渲染 markdown
+                currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
             }
-        };
-    </script>
+            currentMessageElement = null;
+            messageBuffer = '';
+        }
+    }
+
+    function addErrorMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'error-message';
+        messageElement.textContent = message;
+        chatHistory.appendChild(messageElement);
+        scrollToChatBottom();
+    }
+
+    async function initializeWebSocket() {
+        return new Promise((resolve, reject) => {
+            websocketInstance = new WebSocket(`ws://123.60.41.116:8888/chat_ws`);
+
+            websocketInstance.onopen = () => {
+                console.log("WebSocket connected");
+                resolve();
+            };
+
+            websocketInstance.onmessage = onWebSocketMessage;
+            websocketInstance.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                reject(error);
+            };
+            websocketInstance.onclose = () => {
+                console.log("WebSocket closed");
+            };
+        });
+    }
+
+    function onWebSocketMessage(event) {
+        hideWaitingMessage();
+        try {
+            const response = JSON.parse(event.data);
+            if (response.response && typeof response.response === 'string') {
+                const cleanMessage = response.response.trim();
+                if (cleanMessage) {
+                    if (cleanMessage === "Full response stream handled.") {
+                        finalizeBotMessage();
+                    } else {
+                        addBotMessage(cleanMessage);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Message parsing error:", error);
+            addErrorMessage("消息处理出错，请重试");
+            finalizeBotMessage();
+        }
+    }
+
+    window.onload = async function () {
+        currentItem = getItemDetailsFromSessionStorage();
+        if (currentItem) {
+            populateItemDetails(currentItem);
+            generateTransactionTimeline(currentItem.transactions);
+            initializeSystemPrompt(currentItem);
+            try {
+                await initializeWebSocket();
+            } catch (error) {
+                addErrorMessage("Failed to connect to chat service.");
+            }
+            setupEventListeners();
+        } else {
+            handleItemLoadError();
+        }
+        enableBuyButtonIfLoggedIn();
+        scrollToChatBottom();
+    };
+
+    function getItemDetailsFromSessionStorage() {
+        const itemDetails = sessionStorage.getItem('itemDetails');
+        return itemDetails ? JSON.parse(itemDetails) : null;
+    }
+
+    function populateItemDetails(item) {
+        itemNameElement.textContent = `名称：${item.name}`;
+        itemDescriptionElement.textContent = item.description;
+        itemPriceElement.textContent = item.price;
+        itemOwnerElement.textContent = item.owner;
+        itemNameContractElement.textContent = item.name;
+        itemDescriptionContractElement.textContent = item.description;
+        itemPriceContractElement.textContent = item.price;
+        itemOwnerContractElement.textContent = item.owner;
+        buyerNameElement.textContent = localStorage.getItem("username");
+
+        itemImageElement.src = item.img && item.img.length >= 10 ? item.img : 'https://api.iconify.design/icon-park:fail-picture.svg';
+        itemImageElement.alt = '版权图片';
+    }
+
+    function generateTransactionTimeline(transactions) {
+        transactionTimelineElement.innerHTML = '';
+        if (transactions && transactions.length > 0) {
+            transactions.forEach((transaction, index) => {
+                const timelineItem = createTimelineItem(transaction, index);
+                transactionTimelineElement.appendChild(timelineItem);
+            });
+        } else {
+            transactionTimelineElement.innerHTML = '<p>暂无交易历史</p>';
+        }
+    }
+
+    function createTimelineItem(transaction, index) {
+        const timelineItem = document.createElement('li');
+        timelineItem.className = 'layui-timeline-item';
+        const uploadDate = transaction.Transtime.substring(0, 10);
+        timelineItem.innerHTML = `
+            <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">${index === 0 ? `上传时间：${uploadDate}` : `交易时间：${transaction.Transtime}`}</h3>
+                <p>${index === 0 ? `<strong>拥有者:</strong> ${transaction.Purchaser}` : `<strong>卖家:</strong> ${transaction.Seller}<br><strong>买家:</strong> ${transaction.Purchaser}<br><strong>价格:</strong> ${transaction.Price} 元`}</p>
+            </div>`;
+        return timelineItem;
+    }
+
+    function initializeSystemPrompt(item) {
+        systemPrompt = `你是一个专业的项目介绍和答疑助手。以下是关于 **${item.name}** 版权项目的信息：**项目名称:** ${item.name}**描述:** ${item.description}**价格:** ${item.price} 元**拥有者:** ${item.owner}**交易历史:**${item.transactions && item.transactions.length > 0 ? item.transactions.map((transaction, index) => { if (index === 0) { return ` - 上传时间: ${transaction.Transtime.substring(0, 10)}, 拥有者: ${transaction.Purchaser}`; } else { return ` - 交易时间: ${transaction.Transtime}, 卖家: ${transaction.Seller}, 买家: ${transaction.Purchaser}, 价格: ${transaction.Price} 元`; } }).join('') : '暂无交易历史'}请基于以上项目信息，回答用户关于该项目的问题。`;
+    }
+
+    function handleItemLoadError() {
+        console.error('没有找到项目交易信息');
+        alert('项目信息加载失败，请稍后重试！');
+    }
+
+    function enableBuyButtonIfLoggedIn() {
+        const token = localStorage.getItem('token');
+        if (token) {
+            buyButton.disabled = false;
+        }
+    }
+
+    function setupEventListeners() {
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', handleEnter);
+        buyButton.addEventListener('click', handleBuyButtonClick);
+        confirmButton.onclick = handleConfirmButtonClick;
+        cancelButton.onclick = handleCancelButtonClick;
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function handleBuyButtonClick() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('请先登录后再购买！');
+            return;
+        }
+        modalOverlay.style.display = 'block';
+        contractModal.style.display = 'block';
+    }
+
+    async function handleConfirmButtonClick() {
+        modalOverlay.style.display = 'none';
+        contractModal.style.display = 'none';
+        try {
+            buyButton.disabled = true;
+            const token = localStorage.getItem('token');
+            const response = await fetch('/transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: currentItem.name })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                alert('购买成功！感谢您的支持！');
+                window.location = '/display';
+            } else {
+                alert(`购买失败：${result.message || '未知错误'}`);
+            }
+        } catch (error) {
+            console.error('购买失败', error);
+            alert('购买请求失败，请稍后重试。');
+        } finally {
+            buyButton.disabled = false;
+        }
+    }
+
+    function handleCancelButtonClick() {
+        modalOverlay.style.display = 'none';
+        contractModal.style.display = 'none';
+    }
+
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        if (message.length > 1000) {
+            addErrorMessage("消息过长，请缩短后重试");
+            return;
+        }
+
+        try {
+            finalizeBotMessage();
+            addUserMessage(message);
+            chatInput.value = '';
+            showWaitingMessage();
+
+            if (websocketInstance?.readyState !== WebSocket.OPEN) {
+                throw new Error("WebSocket connection lost");
+            }
+
+            websocketInstance.send(JSON.stringify({
+                message: message,
+                prompt: systemPrompt
+            }));
+        } catch (error) {
+            console.error("Send message error:", error);
+            hideWaitingMessage();
+            addErrorMessage("发送失败，请刷新页面重试");
+            await reconnectWebSocket();
+        }
+    }
+
+    async function reconnectWebSocket() {
+        try {
+            await initializeWebSocket();
+        } catch (error) {
+            console.error("Reconnection failed:", error);
+            addErrorMessage("重新连接失败，请刷新页面");
+        }
+    }
+
+    function showWaitingMessage() {
+        hideWaitingMessage();
+        waitingMessageElement = document.createElement('div');
+        waitingMessageElement.className = 'waiting-message';
+        waitingMessageElement.textContent = '等待回复...';
+        chatHistory.appendChild(waitingMessageElement);
+        scrollToChatBottom();
+    }
+
+    function hideWaitingMessage() {
+        if (waitingMessageElement && waitingMessageElement.parentNode === chatHistory) {
+            chatHistory.removeChild(waitingMessageElement);
+            waitingMessageElement = null;
+        }
+    }
+
+    function scrollToChatBottom() {
+        chatHistory.scrollTo({
+            top: chatHistory.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
 </body>
 
 </html>

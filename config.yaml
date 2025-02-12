@@ -1,5 +1,5 @@
 mysql:
-  dbHost: "localhost" # 添加这行
+  dbHost: "localhost"
   dbPort: 3306 
   dbUser: root
   dbPassword: "Fabric@2024"

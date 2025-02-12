@@ -3,10 +3,12 @@ module hyperledger-fabric-copyright
 go 1.22.7
 
 require (
-	github.com/cloudwego/hertz v0.9.3
+	github.com/cloudwego/hertz v0.9.4-0.20241021100040-3477b0309b81
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/hertz-contrib/websocket v0.2.0
 	github.com/hyperledger/fabric-gateway v1.7.1
+	github.com/sashabaranov/go-openai v1.37.0
 	google.golang.org/grpc v1.69.2
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -32,7 +34,7 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
