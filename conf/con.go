@@ -40,10 +40,12 @@ func Init() {
 	var temp struct {
 		Mysql  Mysql  `yaml:"mysql"`
 		Jwtkey string `yaml:"jwtkey"`
+		APIKey string `yaml:"APIKey"`
 	}
 	err = yaml.Unmarshal(dataBytes, &temp)
 	Con.Mysql = temp.Mysql
 	Con.Jwtkey = []byte(temp.Jwtkey)
+	Con.APIKey = temp.APIKey
 	if err != nil {
 		log.Fatal("解析 yaml 文件失败：", err)
 	}

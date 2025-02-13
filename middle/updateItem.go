@@ -34,7 +34,7 @@ func UpdateItem(_ context.Context, c *app.RequestContext) {
 	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
 
 	// 解析 token
-	token, err := jwt.ParseWithClaims(token_String, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
 		// 返回 JWT 密钥
 		return conf.Con.Jwtkey, nil
 	})

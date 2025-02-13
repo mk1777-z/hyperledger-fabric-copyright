@@ -38,7 +38,7 @@ func Upload(_ context.Context, c *app.RequestContext) {
 	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
 
 	// 解析 Token
-	token, err := jwt.ParseWithClaims(token_String, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
 		// 验证签名方法是否匹配
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
@@ -90,7 +90,7 @@ func Upload(_ context.Context, c *app.RequestContext) {
 		"INSERT INTO item (id, name, owner, simple_dsc, dsc, price, img, on_sale, start_time, transID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		uploadInfo.ID,
 		uploadInfo.Name,
-		token.Claims.(*UserClaims).Username,
+		token.Claims.(*conf.UserClaims).Username,
 		uploadInfo.Simple_dsc,
 		uploadInfo.Dsc,
 		uploadInfo.Price,
@@ -108,12 +108,12 @@ func Upload(_ context.Context, c *app.RequestContext) {
 
 	_, err = conf.BasicContract.SubmitTransaction(
 		"CreateCreatetrans",
-		assetID,                                 // 交易 ID
-		uploadInfo.Name,                         // 版权名称
-		"admin",                                 // 卖家固定为 admin
-		token.Claims.(*UserClaims).Username,     // 买家为当前用户
-		"0",                                     // 初始价格为 0
-		startTime.Format("2006-01-02 15:04:05"), // 格式化时间
+		assetID,                                  // 交易 ID
+		uploadInfo.Name,                          // 版权名称
+		"admin",                                  // 卖家固定为 admin
+		token.Claims.(*conf.UserClaims).Username, // 买家为当前用户
+		"0",                                      // 初始价格为 0
+		startTime.Format("2006-01-02 15:04:05"),  // 格式化时间
 	)
 
 	if err != nil {

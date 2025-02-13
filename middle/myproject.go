@@ -26,7 +26,7 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
 
 	// 解析 token
-	token, err := jwt.ParseWithClaims(token_String, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
 		// 返回 JWT 密钥
 		return conf.Con.Jwtkey, nil
 	})
@@ -38,7 +38,7 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 	}
 
 	// 验证 token 是否有效
-	claims, ok := token.Claims.(*UserClaims)
+	claims, ok := token.Claims.(*conf.UserClaims)
 	if !ok || !token.Valid {
 		c.Status(http.StatusUnauthorized)
 		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token claims"})

@@ -107,7 +107,7 @@ func Login(_ context.Context, c *app.RequestContext) {
 
 	// 生成 JWT token
 	expirationTime := time.Now().Add(24 * time.Hour) // 设置 token 过期时间
-	claims := UserClaims{
+	claims := conf.UserClaims{
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

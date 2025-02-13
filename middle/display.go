@@ -10,13 +10,11 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/dgrijalva/jwt-go"
 )
 
-// UserClaims 用于 JWT 的声明
-type UserClaims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
+type Paging struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
 }
 
 func Display(_ context.Context, c *app.RequestContext) {
@@ -30,8 +28,37 @@ func Display(_ context.Context, c *app.RequestContext) {
 	}
 	defer db.Close() // 确保数据库连接在结束时关闭
 
-	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, owner, price,img FROM item WHERE on_sale = 1")
+	var page Paging
+	page.Page = 1
+	page.PageSize = 10
+
+	err = c.Bind(&page)
+	if err != nil {
+		log.Fatal("Bind parameter error")
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Bind parameter error"})
+		return
+	}
+
+	// 构建基础查询 SQL
+	baseQuery := "SELECT id, name, simple_dsc, owner, price, img FROM item WHERE on_sale = 1"
+	var query string
+	var rows *sql.Rows
+	var totalItems int
+
+	query = baseQuery + " LIMIT ? OFFSET ?"
+
+	// 查询总项目数 (用于计算 totalPages)
+	countQuery := "SELECT COUNT(*) FROM item WHERE on_sale = 1"
+	err = db.QueryRow(countQuery).Scan(&totalItems)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database count query error"})
+		return
+	}
+
+	rows, err = db.Query(query, page.PageSize, (page.Page-1)*page.PageSize) // 注意参数顺序
+
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -71,9 +98,12 @@ func Display(_ context.Context, c *app.RequestContext) {
 		})
 	}
 
-	// 返回结果
+	// 计算总页数
+	totalPages := (totalItems + page.PageSize - 1) / page.PageSize
+
+	// 返回结果，包含 totalPages
 	c.JSON(http.StatusOK, utils.H{
 		"items":      items,
-		"totalItems": len(items),
+		"totalPages": totalPages, // 添加 totalPages
 	})
 }

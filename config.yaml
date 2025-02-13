@@ -6,3 +6,4 @@ mysql:
   dbName: fabric
 
 jwtkey: 0123456789
+APIKey: 11287629-5941-41e1-bb3b-50bfad7cf422

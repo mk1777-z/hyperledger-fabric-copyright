@@ -38,15 +38,9 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            /* 确保 main 元素占据全宽 */
             height: 100%;
-            /* 确保 main 元素占据全高 */
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-
 
         .container {
             display: flex;
@@ -69,11 +63,8 @@
         .item-info {
             width: 48%;
             display: flex;
-            /* 启用 Flexbox */
             flex-direction: column;
-            /* 垂直布局 */
             align-items: center;
-            /* 水平居中对齐 */
             text-align: center;
         }
 
@@ -90,9 +81,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 500px; /* 增大 chat-container 的高度 */
+            height: 500px;
         }
-
 
         .item-info h2 {
             color: var(--primary-color);
@@ -114,7 +104,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 水平居中按钮 */
         }
 
         #buy-button {
@@ -248,11 +237,10 @@
             white-space: pre-wrap;
         }
 
-        /* Markdown 样式覆盖，使 bot-message 中的 markdown 内容应用 github-markdown-css 样式 */
         .bot-message .markdown-body {
-            padding: 0; /* 移除 markdown-body 默认的 padding */
-            background-color: transparent; /* 使 markdown-body 背景透明 */
-            color: var(--text-color); /* 确保文字颜色与 bot-message 一致 */
+            padding: 0;
+            background-color: transparent;
+            color: var(--text-color);
         }
 
         .waiting-message {
@@ -261,6 +249,11 @@
             color: grey;
             font-style: italic;
             align-self: flex-start;
+        }
+
+        /* 新增图表容器样式（若需要可调整） */
+        .chart-container {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -285,6 +278,11 @@
             <div class="transaction-history card-container">
                 <h3>交易历史：</h3>
                 <ul class="timelineContainer" id="transaction-timeline"></ul>
+                <!-- 在交易历史下方添加图表容器 -->
+                <div class="chart-container" id="chart-container">
+                    <h3></h3>
+                    <div id="transactionChart" style="width: 100%; height: 300px;"></div>
+                </div>
             </div>
 
             <div class="chat-container card-container">
@@ -361,337 +359,442 @@
         </div>
     </main>
 
-<script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 现有依赖 -->
+    <script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 添加 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<script>
-    const itemNameElement = document.getElementById('item-name');
-    const itemDescriptionElement = document.getElementById('item-description');
-    const itemPriceElement = document.getElementById('item-price');
-    const itemOwnerElement = document.getElementById('item-owner');
-    const itemNameContractElement = document.getElementById('item-name-contract');
-    const itemDescriptionContractElement = document.getElementById('item-description-contract');
-    const itemPriceContractElement = document.getElementById('item-price-contract');
-    const itemOwnerContractElement = document.getElementById('item-owner-contract');
-    const buyerNameElement = document.getElementById('buyer-name');
-    const itemImageElement = document.getElementById('item-image');
-    const transactionTimelineElement = document.getElementById('transaction-timeline');
-    const buyButton = document.getElementById('buy-button');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const contractModal = document.getElementById('contract-modal');
-    const confirmButton = document.getElementById('confirm-button');
-    const cancelButton = document.getElementById('cancel-button');
-    const chatHistory = document.getElementById('chat-history');
-    const chatInput = document.getElementById('chat-input');
-    const sendButton = document.getElementById('send-button');
+    <script>
+        const itemNameElement = document.getElementById('item-name');
+        const itemDescriptionElement = document.getElementById('item-description');
+        const itemPriceElement = document.getElementById('item-price');
+        const itemOwnerElement = document.getElementById('item-owner');
+        const itemNameContractElement = document.getElementById('item-name-contract');
+        const itemDescriptionContractElement = document.getElementById('item-description-contract');
+        const itemPriceContractElement = document.getElementById('item-price-contract');
+        const itemOwnerContractElement = document.getElementById('item-owner-contract');
+        const buyerNameElement = document.getElementById('buyer-name');
+        const itemImageElement = document.getElementById('item-image');
+        const transactionTimelineElement = document.getElementById('transaction-timeline');
+        const buyButton = document.getElementById('buy-button');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const contractModal = document.getElementById('contract-modal');
+        const confirmButton = document.getElementById('confirm-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const chatHistory = document.getElementById('chat-history');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
 
-    let websocketInstance;
-    let currentItem;
-    let waitingMessageElement = null;
-    let systemPrompt;
-    let messageBuffer = '';
-    let currentMessageElement = null;
+        let websocketInstance;
+        let currentItem;
+        let waitingMessageElement = null;
+        let systemPrompt;
+        let messageBuffer = '';
+        let currentMessageElement = null;
 
-    function addUserMessage(message) {
-        const messageElement = document.createElement('div');
-        messageElement.className = 'user-message';
-        messageElement.textContent = message;
-        chatHistory.appendChild(messageElement);
-        scrollToChatBottom();
-    }
-
-    function addBotMessage(message) {
-        if (!message || message.trim() === "") return;
-
-        if (message === "Full response stream handled.") {
-            finalizeBotMessage();
-            return;
+        function addUserMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'user-message';
+            messageElement.textContent = message;
+            chatHistory.appendChild(messageElement);
+            scrollToChatBottom();
         }
 
-        if (!currentMessageElement || !messageBuffer) {
-            currentMessageElement = document.createElement('div');
-            currentMessageElement.className = 'bot-message';
+        function addBotMessage(message) {
+            if (!message || message.trim() === "") return;
 
-            // 创建 markdown-body 容器
-            const markdownBody = document.createElement('div');
-            markdownBody.className = 'markdown-body';
-            currentMessageElement.appendChild(markdownBody);
-
-            chatHistory.appendChild(currentMessageElement);
-            messageBuffer = '';
-        }
-
-        // 替换换行符
-        message = message.replace(/\n/g, '<br>');
-
-        messageBuffer += message;
-        // 使用 marked.parse 渲染 Markdown 内容并设置到 markdown-body 容器中
-        currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
-        scrollToChatBottom();
-    }
-
-    function finalizeBotMessage() {
-        if (currentMessageElement) {
-            if (messageBuffer.trim()) {
-                // 最终消息也渲染 markdown
-                currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
+            if (message === "Full response stream handled.") {
+                finalizeBotMessage();
+                return;
             }
-            currentMessageElement = null;
-            messageBuffer = '';
+
+            if (!currentMessageElement || !messageBuffer) {
+                currentMessageElement = document.createElement('div');
+                currentMessageElement.className = 'bot-message';
+
+                const markdownBody = document.createElement('div');
+                markdownBody.className = 'markdown-body';
+                currentMessageElement.appendChild(markdownBody);
+
+                chatHistory.appendChild(currentMessageElement);
+                messageBuffer = '';
+            }
+
+            message = message.replace(/\n/g, '<br>');
+            messageBuffer += message;
+            currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
+            scrollToChatBottom();
         }
-    }
 
-    function addErrorMessage(message) {
-        const messageElement = document.createElement('div');
-        messageElement.className = 'error-message';
-        messageElement.textContent = message;
-        chatHistory.appendChild(messageElement);
-        scrollToChatBottom();
-    }
+        function finalizeBotMessage() {
+            if (currentMessageElement) {
+                if (messageBuffer.trim()) {
+                    currentMessageElement.querySelector('.markdown-body').innerHTML = marked.parse(messageBuffer);
+                }
+                currentMessageElement = null;
+                messageBuffer = '';
+            }
+        }
 
-    async function initializeWebSocket() {
-        return new Promise((resolve, reject) => {
-            websocketInstance = new WebSocket(`ws://123.60.41.116:8888/chat_ws`);
+        function addErrorMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'error-message';
+            messageElement.textContent = message;
+            chatHistory.appendChild(messageElement);
+            scrollToChatBottom();
+        }
 
-            websocketInstance.onopen = () => {
-                console.log("WebSocket connected");
-                resolve();
-            };
+        async function initializeWebSocket() {
+            return new Promise((resolve, reject) => {
+                websocketInstance = new WebSocket(`ws://123.60.41.116:8888/chat_ws`);
 
-            websocketInstance.onmessage = onWebSocketMessage;
-            websocketInstance.onerror = (error) => {
-                console.error("WebSocket error:", error);
-                reject(error);
-            };
-            websocketInstance.onclose = () => {
-                console.log("WebSocket closed");
-            };
-        });
-    }
+                websocketInstance.onopen = () => {
+                    console.log("WebSocket connected");
+                    resolve();
+                };
 
-    function onWebSocketMessage(event) {
-        hideWaitingMessage();
-        try {
-            const response = JSON.parse(event.data);
-            if (response.response && typeof response.response === 'string') {
-                const cleanMessage = response.response.trim();
-                if (cleanMessage) {
-                    if (cleanMessage === "Full response stream handled.") {
-                        finalizeBotMessage();
-                    } else {
-                        addBotMessage(cleanMessage);
+                websocketInstance.onmessage = onWebSocketMessage;
+                websocketInstance.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                    reject(error);
+                };
+                websocketInstance.onclose = () => {
+                    console.log("WebSocket closed");
+                };
+            });
+        }
+
+        function onWebSocketMessage(event) {
+            hideWaitingMessage();
+            try {
+                const response = JSON.parse(event.data);
+                if (response.response && typeof response.response === 'string') {
+                    const cleanMessage = response.response.trim();
+                    if (cleanMessage) {
+                        if (cleanMessage === "Full response stream handled.") {
+                            finalizeBotMessage();
+                        } else {
+                            addBotMessage(cleanMessage);
+                        }
                     }
                 }
+            } catch (error) {
+                console.error("Message parsing error:", error);
+                addErrorMessage("消息处理出错，请重试");
+                finalizeBotMessage();
             }
-        } catch (error) {
-            console.error("Message parsing error:", error);
-            addErrorMessage("消息处理出错，请重试");
-            finalizeBotMessage();
         }
-    }
 
-    window.onload = async function () {
-        currentItem = getItemDetailsFromSessionStorage();
-        if (currentItem) {
-            populateItemDetails(currentItem);
-            generateTransactionTimeline(currentItem.transactions);
-            initializeSystemPrompt(currentItem);
+        window.onload = async function () {
+            currentItem = getItemDetailsFromSessionStorage();
+            if (currentItem) {
+                populateItemDetails(currentItem);
+                generateTransactionTimeline(currentItem.transactions);
+                initializeSystemPrompt(currentItem);
+                // 初始化图表
+                initializeTransactionChart(currentItem.transactions);
+                try {
+                    await initializeWebSocket();
+                } catch (error) {
+                    addErrorMessage("Failed to connect to chat service.");
+                }
+                setupEventListeners();
+            } else {
+                handleItemLoadError();
+            }
+            enableBuyButtonIfLoggedIn();
+            scrollToChatBottom();
+        };
+
+        function getItemDetailsFromSessionStorage() {
+            const itemDetails = sessionStorage.getItem('itemDetails');
+            return itemDetails ? JSON.parse(itemDetails) : null;
+        }
+
+        function populateItemDetails(item) {
+            itemNameElement.textContent = `名称：${item.name}`;
+            itemDescriptionElement.textContent = item.description;
+            itemPriceElement.textContent = item.price;
+            itemOwnerElement.textContent = item.owner;
+            itemNameContractElement.textContent = item.name;
+            itemDescriptionContractElement.textContent = item.description;
+            itemPriceContractElement.textContent = item.price;
+            itemOwnerContractElement.textContent = item.owner;
+            buyerNameElement.textContent = localStorage.getItem("username");
+
+            itemImageElement.src = item.img && item.img.length >= 10 ? item.img : 'https://api.iconify.design/icon-park:fail-picture.svg';
+            itemImageElement.alt = '版权图片';
+        }
+
+        function generateTransactionTimeline(transactions) {
+            transactionTimelineElement.innerHTML = '';
+            if (transactions && transactions.length > 0) {
+                transactions.forEach((transaction, index) => {
+                    const timelineItem = createTimelineItem(transaction, index);
+                    transactionTimelineElement.appendChild(timelineItem);
+                });
+            } else {
+                transactionTimelineElement.innerHTML = '<p>暂无交易历史</p>';
+            }
+        }
+
+        function createTimelineItem(transaction, index) {
+            const timelineItem = document.createElement('li');
+            timelineItem.className = 'layui-timeline-item';
+            const uploadDate = transaction.Transtime.substring(0, 10);
+            timelineItem.innerHTML = `
+                <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
+                <div class="layui-timeline-content layui-text">
+                    <h3 class="layui-timeline-title">${index === 0 ? `上传时间：${uploadDate}` : `交易时间：${transaction.Transtime}`}</h3>
+                    <p>${index === 0 
+                        ? `<strong>拥有者:</strong> ${transaction.Purchaser}` 
+                        : `<strong>卖家:</strong> ${transaction.Seller}<br><strong>买家:</strong> ${transaction.Purchaser}<br><strong>价格:</strong> ${transaction.Price} 元`}
+                    </p>
+                </div>`;
+            return timelineItem;
+        }
+
+        // 初始化 ECharts 折线图
+        function initializeTransactionChart(transactions) {
+            if (!transactions || !transactions.length) {
+                return;
+            }
+            const chartDom = document.getElementById('transactionChart');
+            const myChart = echarts.init(chartDom);
+
+            const dates = [];
+            const prices = [];
+            const volumesMap = new Map();
+
+            transactions.forEach(tx => {
+                if (tx.Price) {
+                    const dateStr = tx.Transtime.substring(0, 10);
+                    dates.push(dateStr);
+                    prices.push(tx.Price);
+                    volumesMap.set(dateStr, (volumesMap.get(dateStr) || 0) + 1);
+                }
+            });
+
+            const volumes = dates.map(d => volumesMap.get(d));
+
+            const option = {
+                title: {
+                    text: ''
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {
+                    data: ['价格', '交易量']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLabel: {
+                        rotate: 45
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '价格',
+                        position: 'left'
+                    },
+                    {
+                        type: 'value',
+                        name: '交易量',
+                        position: 'right'
+                    }
+                ],
+                series: [
+                    {
+                        name: '价格',
+                        type: 'line',
+                        data: prices,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        lineStyle: {
+                            width: 3
+                        }
+                    },
+                    {
+                        name: '交易量',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: volumes,
+                        smooth: true,
+                        symbol: 'rect',
+                        symbolSize: 8,
+                        lineStyle: {
+                            width: 3,
+                            type: 'dashed'
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', () => myChart.resize());
+        }
+
+        function initializeSystemPrompt(item) {
+            systemPrompt = `你是一个专业的项目介绍和答疑助手。以下是关于 **${item.name}** 版权项目的信息：**项目名称:** ${item.name}**描述:** ${item.description}**价格:** ${item.price} 元**拥有者:** ${item.owner}**交易历史:**${
+                item.transactions && item.transactions.length > 0
+                    ? item.transactions.map((transaction, index) => {
+                        if (index === 0) {
+                            return ` - 上传时间: ${transaction.Transtime.substring(0, 10)}, 拥有者: ${transaction.Purchaser}`;
+                        } else {
+                            return ` - 交易时间: ${transaction.Transtime}, 卖家: ${transaction.Seller}, 买家: ${transaction.Purchaser}, 价格: ${transaction.Price} 元`;
+                        }
+                    }).join('')
+                    : '暂无交易历史'
+            }请基于以上项目信息，回答用户关于该项目的问题。`;
+        }
+
+        function handleItemLoadError() {
+            console.error('没有找到项目交易信息');
+            alert('项目信息加载失败，请稍后重试！');
+        }
+
+        function enableBuyButtonIfLoggedIn() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                buyButton.disabled = false;
+            }
+        }
+
+        function setupEventListeners() {
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keydown', handleEnter);
+            buyButton.addEventListener('click', handleBuyButtonClick);
+            confirmButton.onclick = handleConfirmButtonClick;
+            cancelButton.onclick = handleCancelButtonClick;
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function handleBuyButtonClick() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录后再购买！');
+                return;
+            }
+            modalOverlay.style.display = 'block';
+            contractModal.style.display = 'block';
+        }
+
+        async function handleConfirmButtonClick() {
+            modalOverlay.style.display = 'none';
+            contractModal.style.display = 'none';
+            try {
+                buyButton.disabled = true;
+                const token = localStorage.getItem('token');
+                const response = await fetch('/transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: currentItem.name })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert('购买成功！感谢您的支持！');
+                    window.location = '/display';
+                } else {
+                    alert(`购买失败：${result.message || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('购买失败', error);
+                alert('购买请求失败，请稍后重试。');
+            } finally {
+                buyButton.disabled = false;
+            }
+        }
+
+        function handleCancelButtonClick() {
+            modalOverlay.style.display = 'none';
+            contractModal.style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            if (message.length > 1000) {
+                addErrorMessage("消息过长，请缩短后重试");
+                return;
+            }
+
+            try {
+                finalizeBotMessage();
+                addUserMessage(message);
+                chatInput.value = '';
+                showWaitingMessage();
+
+                if (websocketInstance?.readyState !== WebSocket.OPEN) {
+                    throw new Error("WebSocket connection lost");
+                }
+
+                websocketInstance.send(JSON.stringify({
+                    message: message,
+                    prompt: systemPrompt
+                }));
+            } catch (error) {
+                console.error("Send message error:", error);
+                hideWaitingMessage();
+                addErrorMessage("发送失败，请刷新页面重试");
+                await reconnectWebSocket();
+            }
+        }
+
+        async function reconnectWebSocket() {
             try {
                 await initializeWebSocket();
             } catch (error) {
-                addErrorMessage("Failed to connect to chat service.");
+                console.error("Reconnection failed:", error);
+                addErrorMessage("重新连接失败，请刷新页面");
             }
-            setupEventListeners();
-        } else {
-            handleItemLoadError();
-        }
-        enableBuyButtonIfLoggedIn();
-        scrollToChatBottom();
-    };
-
-    function getItemDetailsFromSessionStorage() {
-        const itemDetails = sessionStorage.getItem('itemDetails');
-        return itemDetails ? JSON.parse(itemDetails) : null;
-    }
-
-    function populateItemDetails(item) {
-        itemNameElement.textContent = `名称：${item.name}`;
-        itemDescriptionElement.textContent = item.description;
-        itemPriceElement.textContent = item.price;
-        itemOwnerElement.textContent = item.owner;
-        itemNameContractElement.textContent = item.name;
-        itemDescriptionContractElement.textContent = item.description;
-        itemPriceContractElement.textContent = item.price;
-        itemOwnerContractElement.textContent = item.owner;
-        buyerNameElement.textContent = localStorage.getItem("username");
-
-        itemImageElement.src = item.img && item.img.length >= 10 ? item.img : 'https://api.iconify.design/icon-park:fail-picture.svg';
-        itemImageElement.alt = '版权图片';
-    }
-
-    function generateTransactionTimeline(transactions) {
-        transactionTimelineElement.innerHTML = '';
-        if (transactions && transactions.length > 0) {
-            transactions.forEach((transaction, index) => {
-                const timelineItem = createTimelineItem(transaction, index);
-                transactionTimelineElement.appendChild(timelineItem);
-            });
-        } else {
-            transactionTimelineElement.innerHTML = '<p>暂无交易历史</p>';
-        }
-    }
-
-    function createTimelineItem(transaction, index) {
-        const timelineItem = document.createElement('li');
-        timelineItem.className = 'layui-timeline-item';
-        const uploadDate = transaction.Transtime.substring(0, 10);
-        timelineItem.innerHTML = `
-            <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
-            <div class="layui-timeline-content layui-text">
-                <h3 class="layui-timeline-title">${index === 0 ? `上传时间：${uploadDate}` : `交易时间：${transaction.Transtime}`}</h3>
-                <p>${index === 0 ? `<strong>拥有者:</strong> ${transaction.Purchaser}` : `<strong>卖家:</strong> ${transaction.Seller}<br><strong>买家:</strong> ${transaction.Purchaser}<br><strong>价格:</strong> ${transaction.Price} 元`}</p>
-            </div>`;
-        return timelineItem;
-    }
-
-    function initializeSystemPrompt(item) {
-        systemPrompt = `你是一个专业的项目介绍和答疑助手。以下是关于 **${item.name}** 版权项目的信息：**项目名称:** ${item.name}**描述:** ${item.description}**价格:** ${item.price} 元**拥有者:** ${item.owner}**交易历史:**${item.transactions && item.transactions.length > 0 ? item.transactions.map((transaction, index) => { if (index === 0) { return ` - 上传时间: ${transaction.Transtime.substring(0, 10)}, 拥有者: ${transaction.Purchaser}`; } else { return ` - 交易时间: ${transaction.Transtime}, 卖家: ${transaction.Seller}, 买家: ${transaction.Purchaser}, 价格: ${transaction.Price} 元`; } }).join('') : '暂无交易历史'}请基于以上项目信息，回答用户关于该项目的问题。`;
-    }
-
-    function handleItemLoadError() {
-        console.error('没有找到项目交易信息');
-        alert('项目信息加载失败，请稍后重试！');
-    }
-
-    function enableBuyButtonIfLoggedIn() {
-        const token = localStorage.getItem('token');
-        if (token) {
-            buyButton.disabled = false;
-        }
-    }
-
-    function setupEventListeners() {
-        sendButton.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keydown', handleEnter);
-        buyButton.addEventListener('click', handleBuyButtonClick);
-        confirmButton.onclick = handleConfirmButtonClick;
-        cancelButton.onclick = handleCancelButtonClick;
-    }
-
-    function handleEnter(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
-    }
-
-    function handleBuyButtonClick() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('请先登录后再购买！');
-            return;
-        }
-        modalOverlay.style.display = 'block';
-        contractModal.style.display = 'block';
-    }
-
-    async function handleConfirmButtonClick() {
-        modalOverlay.style.display = 'none';
-        contractModal.style.display = 'none';
-        try {
-            buyButton.disabled = true;
-            const token = localStorage.getItem('token');
-            const response = await fetch('/transaction', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ name: currentItem.name })
-            });
-            const result = await response.json();
-            if (response.ok) {
-                alert('购买成功！感谢您的支持！');
-                window.location = '/display';
-            } else {
-                alert(`购买失败：${result.message || '未知错误'}`);
-            }
-        } catch (error) {
-            console.error('购买失败', error);
-            alert('购买请求失败，请稍后重试。');
-        } finally {
-            buyButton.disabled = false;
-        }
-    }
-
-    function handleCancelButtonClick() {
-        modalOverlay.style.display = 'none';
-        contractModal.style.display = 'none';
-    }
-
-    async function sendMessage() {
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        if (message.length > 1000) {
-            addErrorMessage("消息过长，请缩短后重试");
-            return;
         }
 
-        try {
-            finalizeBotMessage();
-            addUserMessage(message);
-            chatInput.value = '';
-            showWaitingMessage();
-
-            if (websocketInstance?.readyState !== WebSocket.OPEN) {
-                throw new Error("WebSocket connection lost");
-            }
-
-            websocketInstance.send(JSON.stringify({
-                message: message,
-                prompt: systemPrompt
-            }));
-        } catch (error) {
-            console.error("Send message error:", error);
+        function showWaitingMessage() {
             hideWaitingMessage();
-            addErrorMessage("发送失败，请刷新页面重试");
-            await reconnectWebSocket();
+            waitingMessageElement = document.createElement('div');
+            waitingMessageElement.className = 'waiting-message';
+            waitingMessageElement.textContent = '等待回复...';
+            chatHistory.appendChild(waitingMessageElement);
+            scrollToChatBottom();
         }
-    }
 
-    async function reconnectWebSocket() {
-        try {
-            await initializeWebSocket();
-        } catch (error) {
-            console.error("Reconnection failed:", error);
-            addErrorMessage("重新连接失败，请刷新页面");
+        function hideWaitingMessage() {
+            if (waitingMessageElement && waitingMessageElement.parentNode === chatHistory) {
+                chatHistory.removeChild(waitingMessageElement);
+                waitingMessageElement = null;
+            }
         }
-    }
 
-    function showWaitingMessage() {
-        hideWaitingMessage();
-        waitingMessageElement = document.createElement('div');
-        waitingMessageElement.className = 'waiting-message';
-        waitingMessageElement.textContent = '等待回复...';
-        chatHistory.appendChild(waitingMessageElement);
-        scrollToChatBottom();
-    }
-
-    function hideWaitingMessage() {
-        if (waitingMessageElement && waitingMessageElement.parentNode === chatHistory) {
-            chatHistory.removeChild(waitingMessageElement);
-            waitingMessageElement = null;
+        function scrollToChatBottom() {
+            chatHistory.scrollTo({
+                top: chatHistory.scrollHeight,
+                behavior: 'smooth'
+            });
         }
-    }
-
-    function scrollToChatBottom() {
-        chatHistory.scrollTo({
-            top: chatHistory.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
-</script>
+    </script>
 
 </body>
-
 </html>

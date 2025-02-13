@@ -1,5 +1,7 @@
 package conf
 
+import "github.com/dgrijalva/jwt-go"
+
 type Mysql struct {
 	DbUser     string `yaml:"dbUser"`
 	DbPassword string `yaml:"dbPassword"`
@@ -14,6 +16,7 @@ type User struct {
 type Config struct {
 	Mysql  Mysql  `yaml:"mysql"`
 	Jwtkey []byte `yaml:"jwtkey"`
+	APIKey string `yaml:"APIKey"`
 }
 
 type Upload struct {
@@ -47,4 +50,11 @@ type Createtrans struct {
 type Asset struct {
 	Owner   string
 	Balance float64
+}
+
+// UserClaims 用于 JWT 的声明
+
+type UserClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
 }
