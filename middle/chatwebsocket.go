@@ -60,7 +60,7 @@ func ChatWebsocket(_ context.Context, c *app.RequestContext) {
 					if writeErr := conn.WriteMessage(websocket.TextMessage, errorResponseJson); writeErr != nil {
 						log.Printf("write error to %s: %v, message: %s", conn.RemoteAddr(), writeErr, string(errorResponseJson)) // 错误响应写入日志
 					}
-					continue // 继续下一次循环，处理新的消息
+					continue
 				}
 				log.Printf("Received message from %s: %+v", conn.RemoteAddr(), chatRequest) // 记录接收到的消息
 
@@ -89,12 +89,12 @@ func ChatWebsocket(_ context.Context, c *app.RequestContext) {
 					if writeErr := conn.WriteMessage(websocket.TextMessage, errorResponseJson); writeErr != nil {
 						log.Printf("write error to %s: %v, message: %s", conn.RemoteAddr(), writeErr, string(errorResponseJson)) // 错误响应写入日志
 					}
-					continue // 继续下一次循环，处理新的消息
+					continue
 				}
 				defer stream.Close()
 				log.Println("API stream request successful, stream started for:", conn.RemoteAddr()) // 记录stream开始
 
-				completed := false // 初始化变量以检查响应流是否完成
+				completed := false
 
 				for {
 					recv, recvErr := stream.Recv()

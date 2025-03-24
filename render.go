@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"hyperledger-fabric-copyright/middle" // 添加这行导入middle包
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -51,4 +52,7 @@ func renderHTML(h *server.Hertz) {
 			"title": "upload",
 		})
 	})
+
+	// 添加对statistics页面的支持
+	h.GET("/statistics", middle.StatisticsPage)
 }

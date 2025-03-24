@@ -16,7 +16,7 @@
             /* 更浅的背景色 */
             color: #333;
             /* 通用文字颜色 */
-          }
+        }
 
         /* 页头样式 */
         .header {
@@ -199,7 +199,7 @@
             padding: 10px; /* 添加内边距 */
             background-color: #fff; /* 白色背景 */
             border-radius: 8px; /* 圆角 */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /*  হালকা ছায়া */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /*  হালকা ছায়া */
         }
 
         .pagination-container button {
@@ -316,10 +316,8 @@
     <div class="header">
         <h1>版权展示</h1>
         <div class="search-box">
-            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
-                onkeydown="handleSearchKey(event)">
-            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
-
+            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目">
+            <button class="layui-btn layui-btn-primary" id="search-btn">搜索</button>
         </div>
         <ul class="layui-nav">
             <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
@@ -334,6 +332,17 @@
                         </svg>
                     </a>
                     <span class="tooltip">个人中心</span>
+                </div>
+            </li>
+            <li class="layui-nav-item">
+                <div class="svg-container">
+                    <a href="statistics">
+                        <svg t="1735400000000" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2000" width="30" height="30">
+                            <path d="M888.2 849.9H135.8V174.1c0-10.5-8.5-19-19-19s-19 8.5-19 19v695.8c0 10.5 8.5 19 19 19h771.4c10.5 0 19-8.5 19-19s-8.5-19-19-19z" fill="white" p-id="2001"></path>
+                            <path d="M210.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V490.4c0-10.5-8.5-19-19-19s-19 8.5-19 19v221.3zM354.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V383.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v328zM498.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V277c0-10.5-8.5-19-19-19s-19 8.5-19 19v434.7zM642.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V426.6c0-10.5-8.5-19-19-19s-19 8.5-19 19v285.1zM786.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V319.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v392z" fill="white" p-id="2002"></path>
+                        </svg>
+                    </a>
+                    <span class="tooltip">统计分析</span>
                 </div>
             </li>
             <li class="layui-nav-item">
@@ -359,7 +368,6 @@
         let totalPages = 1;
         const pageSize = 10;
         let token;
-        let currentSearchQuery = ''; // 保存当前的搜索关键词
         const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 }); // Threshold adjusted
 
         // 页面加载时初始化
@@ -393,12 +401,9 @@
                 body: JSON.stringify(data)
             }).then(res => res.json()).catch(console.error);
 
-        // 请求项目数据 for specific page and search query
-        function fetchItemsForPage(page, searchQuery = '') {
+        // 请求项目数据 for specific page
+        function fetchItemsForPage(page) {
             const params = { page: page, pageSize: pageSize };
-            if (searchQuery) {
-                params.search = searchQuery; // 添加搜索关键词参数
-            }
 
             fetchData('/display', params)
                 .then(data => {
@@ -408,7 +413,7 @@
                         updatePagination();
                     } else {
                         console.error('未能获取到项目数据或分页信息');
-                        renderItems([]);
+                        renderItems();
                         totalPages = 1;
                         updatePagination();
                     }
@@ -420,18 +425,18 @@
             const container = document.querySelector('.container');
             container.innerHTML = items.length
                 ? items.map(item => `
-                        <div id="${item.name}" class="item">
-                            <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
-                                 src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
-                            <div class="item-content">
-                                <p>名称：${item.name}</p>
-                                <p>描述：${item.description}</p>
-                                <p>价格：${item.price}</p>
-                                <p>拥有者：${item.owner}</p>
-                                <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                            <div id="${item.name}" class="item">
+                                <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
+                                    src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
+                                <div class="item-content">
+                                    <p>名称：${item.name}</p>
+                                    <p>描述：${item.description}</p>
+                                    <p>价格：${item.price}</p>
+                                    <p>拥有者：${item.owner}</p>
+                                    <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                                </div>
                             </div>
-                        </div>
-                    `).join('') : '<p>没有数据可显示</p>';
+                        `).join('') : '<p>没有数据可显示</p>';
 
             // After rendering, observe new images for lazy loading
             observeImages();
@@ -517,31 +522,19 @@
             document.getElementById('page-number').value = currentPage; // 更新输入框的值
         }
 
-        // 搜索功能
-        function searchItems() {
-            currentSearchQuery = document.getElementById('search-input').value.trim(); // 更新搜索关键词
-            currentPage = 1; // 搜索时回到第一页
-            fetchItemsForPage(currentPage, currentSearchQuery);
-            document.querySelector('.pagination-container').style.display = 'flex'; // 搜索后显示分页
-        }
-
-        // 监听键盘事件
-        function handleSearchKey(event) {
-            if (event.key === 'Enter') searchItems();
-        }
 
         // 绑定分页按钮事件
         function bindPaginationEvents() {
             document.getElementById('prev-page').onclick = () => {
                 if (currentPage > 1) {
                     currentPage--;
-                    fetchItemsForPage(currentPage, currentSearchQuery); // 传递搜索关键词
+                    fetchItemsForPage(currentPage);
                 }
             };
             document.getElementById('next-page').onclick = () => {
                 if (currentPage < totalPages) {
                     currentPage++;
-                    fetchItemsForPage(currentPage, currentSearchQuery); // 传递搜索关键词
+                    fetchItemsForPage(currentPage);
                 }
             };
             document.getElementById('go-page').onclick = () => {
@@ -553,7 +546,7 @@
                     return;
                 }
                 currentPage = page;
-                fetchItemsForPage(currentPage, currentSearchQuery);
+                fetchItemsForPage(currentPage);
             };
             document.getElementById('page-number').addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {

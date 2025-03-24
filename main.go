@@ -3,6 +3,7 @@ package main
 import (
 	"hyperledger-fabric-copyright/conf"
 	"hyperledger-fabric-copyright/middle"
+	"hyperledger-fabric-copyright/router"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
 	_ "github.com/go-sql-driver/mysql"
@@ -14,6 +15,9 @@ func main() {
 	renderHTML(h)
 
 	conf.Init()
+
+	// 确保调用路由注册函数
+	router.RegisterRoutes(h)
 
 	h.POST("/register", middle.Register)
 

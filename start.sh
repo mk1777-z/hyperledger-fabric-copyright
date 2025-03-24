@@ -8,7 +8,6 @@ cd /home/hyperledger-fabric-copyright
 go build -o migrating migrate/main.go
 ./migrating
 
-
 if [ $0 == "1" ]; then
     bash startproject.sh
 fi
