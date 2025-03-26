@@ -49,8 +49,12 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 插入新用户
-	if _, err := db.Exec("INSERT INTO user (username, password) VALUES (?, ?)", user.Username, user.Password); err != nil {
+	// 获取当前时间作为注册时间
+	currentTime := time.Now()
+
+	// 插入新用户，同时记录注册时间
+	if _, err := db.Exec("INSERT INTO user (username, password, registration_time, last_active_time) VALUES (?, ?, ?, ?)",
+		user.Username, user.Password, currentTime, currentTime); err != nil {
 		log.Printf("Error inserting new user: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -103,6 +107,16 @@ func Login(_ context.Context, c *app.RequestContext) {
 		log.Printf("Incorrect password for username %s", user.Username)
 		c.Status(http.StatusUnauthorized) // 密码不正确
 		return
+	}
+
+	// 更新用户最后活跃时间
+	currentTime := time.Now()
+	_, updateErr := db.Exec("UPDATE user SET last_active_time = ? WHERE username = ?", currentTime, user.Username)
+	if updateErr != nil {
+		log.Printf("Error updating last_active_time for user %s: %v", user.Username, updateErr)
+		// 不要因为这个错误中断登录流程
+	} else {
+		log.Printf("Updated last_active_time for user %s to %v", user.Username, currentTime)
 	}
 
 	// 生成 JWT token

@@ -49,7 +49,11 @@ func main() {
 	h.POST("/account", middle.HandleAccount)
 
 	h.POST("/search", middle.Search)
+
 	h.GET("/chat_ws", middle.ChatWebsocket)
+
+	h.POST("/migrate", middle.Migrate)
+
 	h.NoHijackConnPool = true
 
 	if err := h.Run(); err != nil {

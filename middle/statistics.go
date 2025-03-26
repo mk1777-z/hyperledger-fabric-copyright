@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -86,32 +87,44 @@ func ExportData(ctx context.Context, c *app.RequestContext) {
 	}
 
 	if err := c.Bind(&req); err != nil {
+		log.Printf("导出请求绑定失败: %v", err)
 		c.JSON(http.StatusBadRequest, H{"message": "Invalid request"})
 		return
 	}
 
+	// 记录导出请求
+	log.Printf("收到导出请求: 类型=%s, 时间范围=%s, 分类=%s", req.Type, req.TimeRange, req.Category)
+
 	// 根据类型导出不同格式
 	if req.Type == "excel" {
 		// 导出Excel
+		log.Println("开始导出Excel...")
 		file, err := exportExcel(req.TimeRange, req.Category)
 		if err != nil {
+			log.Printf("导出Excel失败: %v", err)
 			c.JSON(http.StatusInternalServerError, H{"message": "Error exporting Excel: " + err.Error()})
 			return
 		}
 
 		c.Header("Content-Disposition", "attachment; filename=copyright_statistics.xlsx")
 		c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file)
+		log.Printf("Excel导出成功, 大小: %d 字节", len(file))
 	} else if req.Type == "pdf" {
 		// 导出PDF
+		log.Println("开始导出PDF...")
 		file, err := exportPDF(req.TimeRange, req.Category)
 		if err != nil {
+			log.Printf("导出PDF失败: %v", err)
 			c.JSON(http.StatusInternalServerError, H{"message": "Error exporting PDF: " + err.Error()})
 			return
 		}
 
 		c.Header("Content-Disposition", "attachment; filename=copyright_statistics.pdf")
+		c.Header("Content-Type", "application/pdf")
 		c.Data(http.StatusOK, "application/pdf", file)
+		log.Printf("PDF导出成功, 大小: %d 字节", len(file))
 	} else {
+		log.Printf("不支持的导出类型: %s", req.Type)
 		c.JSON(http.StatusBadRequest, H{"message": "Unsupported export type"})
 	}
 }
@@ -492,19 +505,64 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 		dates = append(dates, d.Format("01-02"))
 	}
 
-	// 简化处理，直接使用区块链交易数据
+	// 初始化结果数组
 	var newUsers = make([]int, len(dates))
 	var activeUsers = make([]int, len(dates))
 	var tradingUsers = make([]int, len(dates))
 
-	// 从区块链获取交易用户数据
+	// 依次处理每个日期
+	for i, date := range dates {
+		// 解析日期字符串以获取开始和结束时间
+		dateParts := strings.Split(date, "-")
+		if len(dateParts) != 2 {
+			continue
+		}
+
+		// 假设当前年份
+		year := time.Now().Year()
+		month, _ := strconv.Atoi(dateParts[0])
+		day, _ := strconv.Atoi(dateParts[1])
+
+		// 创建日期开始和结束时间
+		dayStart := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+		dayEnd := time.Date(year, time.Month(month), day, 23, 59, 59, 999999999, time.Local)
+
+		// 如果解析的月份大于当前月份，则假设它是去年的日期
+		currentMonth := time.Now().Month()
+		if time.Month(month) > currentMonth {
+			dayStart = time.Date(year-1, time.Month(month), day, 0, 0, 0, 0, time.Local)
+			dayEnd = time.Date(year-1, time.Month(month), day, 23, 59, 59, 999999999, time.Local)
+		}
+
+		// 统计新注册用户 - 当天注册的用户数量
+		queryNewUsers := `SELECT COUNT(*) FROM user WHERE registration_time BETWEEN ? AND ?`
+		var newUserCount int
+		err := db.QueryRow(queryNewUsers, dayStart, dayEnd).Scan(&newUserCount)
+		if err != nil {
+			log.Printf("获取新用户数据失败: %v", err)
+			// 继续执行，不要因为单个查询失败而中断整个流程
+		} else {
+			newUsers[i] = newUserCount
+		}
+
+		// 计算活跃用户数量 - 当天有登录记录的用户
+		queryActiveUsers := `SELECT COUNT(*) FROM user WHERE last_active_time BETWEEN ? AND ?`
+		var activeUserCount int
+		err = db.QueryRow(queryActiveUsers, dayStart, dayEnd).Scan(&activeUserCount)
+		if err != nil {
+			log.Printf("获取活跃用户数据失败: %v", err)
+			// 继续执行，不要因为单个查询失败而中断整个流程
+		} else {
+			activeUsers[i] = activeUserCount
+		}
+	}
+
+	// 继续获取交易用户数据 - 使用区块链交易数据
 	tradingUsersMap := make(map[string]map[string]bool) // 日期 -> 用户名 -> true
 
 	// 初始化日期映射
-	for i, date := range dates {
+	for _, date := range dates {
 		tradingUsersMap[date] = make(map[string]bool)
-		newUsers[i] = 0    // 初始化为0
-		activeUsers[i] = 0 // 初始化为0
 	}
 
 	// 从区块链获取交易数据
@@ -531,7 +589,7 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 			// 获取日期格式
 			dateKey := txTime.Format("01-02")
 
-			// 记录买家和卖家作为活跃用户
+			// 记录买家和卖家作为交易用户
 			if buyer, ok := tx["Purchaser"].(string); ok {
 				tradingUsersMap[dateKey][buyer] = true
 			}
@@ -545,33 +603,98 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 	// 计算每个日期的交易用户数
 	for i, date := range dates {
 		tradingUsers[i] = len(tradingUsersMap[date])
-		// 注意: user表中没有registration_time字段，所以不能统计新用户数
-		// 注意: 没有用户活动日志表，所以使用交易用户数作为活跃用户数
-		activeUsers[i] = len(tradingUsersMap[date])
 	}
 
 	return map[string]interface{}{
 		"dates":        dates,
-		"newUsers":     newUsers,
-		"activeUsers":  activeUsers,
-		"tradingUsers": tradingUsers,
+		"newUsers":     newUsers,     // 现在使用 registration_time 字段计算
+		"activeUsers":  activeUsers,  // 从last_active_time获取
+		"tradingUsers": tradingUsers, // 从交易数据获取
 	}, nil
 }
 
 // 导出Excel文件
 func exportExcel(timeRange, category string) ([]byte, error) {
-	// 导出Excel的实现
-	// 这是一个简化的实现，返回一个空的Excel文件
-	excelContent := []byte("This is a placeholder for Excel content")
-	return excelContent, nil
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("数据库连接失败: %v", err)
+	}
+	defer db.Close()
+
+	// 获取所有图表数据
+	categoryData, err := getCategoryData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取分类数据失败: %v", err)
+	}
+
+	priceData, err := getPriceData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取价格数据失败: %v", err)
+	}
+
+	trendData, err := getTrendData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取趋势数据失败: %v", err)
+	}
+
+	activityData, err := getActivityData(db, timeRange)
+	if err != nil {
+		return nil, fmt.Errorf("获取活跃度数据失败: %v", err)
+	}
+
+	// 调用导出函数
+	log.Println("调用Excel导出函数...")
+	data, err := ExportDataToExcel(timeRange, categoryData, priceData, trendData, activityData)
+	if err != nil {
+		log.Printf("Excel导出失败: %v", err)
+		return nil, err
+	}
+	log.Printf("Excel导出成功, 大小: %d 字节", len(data))
+	return data, nil
 }
 
 // 导出PDF文件
 func exportPDF(timeRange, category string) ([]byte, error) {
-	// 导出PDF的实现
-	// 这是一个简化的实现，返回一个空的PDF文件
-	pdfContent := []byte("This is a placeholder for PDF content")
-	return pdfContent, nil
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("数据库连接失败: %v", err)
+	}
+	defer db.Close()
+
+	// 获取所有图表数据
+	categoryData, err := getCategoryData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取分类数据失败: %v", err)
+	}
+
+	priceData, err := getPriceData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取价格数据失败: %v", err)
+	}
+
+	trendData, err := getTrendData(db, timeRange, category)
+	if err != nil {
+		return nil, fmt.Errorf("获取趋势数据失败: %v", err)
+	}
+
+	activityData, err := getActivityData(db, timeRange)
+	if err != nil {
+		return nil, fmt.Errorf("获取活跃度数据失败: %v", err)
+	}
+
+	// 调用导出函数
+	log.Println("调用PDF导出函数...")
+	data, err := ExportDataToPDF(timeRange, categoryData, priceData, trendData, activityData)
+	if err != nil {
+		log.Printf("PDF导出失败: %v", err)
+		return nil, err
+	}
+	log.Printf("PDF导出成功, 大小: %d 字节", len(data))
+	return data, nil
 }
 
 // GetDataSourceInfo 获取数据来源信息
@@ -579,44 +702,37 @@ func GetDataSourceInfo(ctx context.Context, c *app.RequestContext) {
 	// 连接数据库以测试连接是否可用
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
 	db, err := sql.Open("mysql", dsn)
-	dbAvailable := err == nil
-	if dbAvailable {
-		defer db.Close()
-		// 测试数据库连接是否正常
-		dbAvailable = db.Ping() == nil
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 测试数据库连接是否正常
+	if err := db.Ping(); err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "数据库Ping失败: " + err.Error()})
+		return
 	}
 
 	// 测试区块链连接
-	blockchainAvailable := false
 	_, err = readTransactionFromBlockchainForStats()
-	if err == nil {
-		blockchainAvailable = true
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "区块链连接失败: " + err.Error()})
+		return
 	}
 
-	// 准备数据源信息
+	// 准备数据源信息 - 所有数据来自实际数据源，不使用模拟数据
 	dataSources := make(map[string]string)
-	if dbAvailable {
-		dataSources["categoryData"] = "数据库"
-		dataSources["priceData"] = "数据库"
-		dataSources["activityData"] = "数据库"
-	} else {
-		dataSources["categoryData"] = "模拟数据"
-		dataSources["priceData"] = "模拟数据"
-		dataSources["activityData"] = "模拟数据"
-	}
-
-	if blockchainAvailable {
-		dataSources["trendData"] = "区块链"
-	} else {
-		dataSources["trendData"] = "模拟数据"
-	}
+	dataSources["categoryData"] = "数据库"
+	dataSources["priceData"] = "数据库"
+	dataSources["activityData"] = "数据库+区块链"
+	dataSources["trendData"] = "区块链"
 
 	c.JSON(http.StatusOK, H{
 		"dataStatus": H{
-			"db":         dbAvailable,
-			"blockchain": blockchainAvailable,
+			"db":         true,
+			"blockchain": true,
 		},
-		"dataSources":  dataSources,
-		"mockDataUsed": !dbAvailable || !blockchainAvailable,
+		"dataSources": dataSources,
 	})
 }
