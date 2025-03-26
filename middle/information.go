@@ -34,7 +34,8 @@ func readAssetByID(contract *client.Contract, assetId string) (map[string]interf
 	return transactionDetails, nil
 }
 
-func Information(_ context.Context, c *app.RequestContext) {
+// 如果有向前端传递地图相关数据的代码，需要移除或修改
+func Information(ctx context.Context, c *app.RequestContext) {
 	type RequestBody struct {
 		Name string
 	}

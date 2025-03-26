@@ -1,5 +1,6 @@
 // 页面加载时初始化
 window.onload = function() {
+    console.log("统计页面开始加载...");
     const username = localStorage.getItem('username');
     document.getElementById("username").textContent = username || "未登录";
     const token = localStorage.getItem('token');
@@ -8,35 +9,53 @@ window.onload = function() {
         return (window.location.href = '/');
     }
 
+    console.log("准备初始化组件...");
     // 初始化layui组件
     layui.use(['form', 'laydate', 'table', 'element'], function() {
-        const form = layui.form;
-        const laydate = layui.laydate;
+        console.log("Layui组件加载完成");
         const table = layui.table;
-        const element = layui.element;
-
-        // 初始化日期选择器
+        const laydate = layui.laydate;
+        
+        // 初始化日期选择器 - 确保其正确渲染
         laydate.render({
             elem: '#date-range',
-            range: true
+            type: 'date',
+            range: true,
+            value: getDefaultDateRange(),
+            // 添加触发方式，确保点击时显示
+            trigger: 'click',
+            // 添加回调确认选择有效
+            done: function(value){
+                console.log('日期选择完成:', value);
+                // 当选择日期后，可选择自动触发筛选
+                // setTimeout(() => document.getElementById('filter-btn').click(), 100);
+            }
         });
-
-        // 初始化表格
+        
+        // 初始化表格 - 不依赖于筛选按钮
         initTables(table);
-
-        // 渲染表单
-        form.render();
     });
 
-    // 初始化图表
+    // 初始化图表（这里也直接调用，不只依赖DOM事件中的调用）
+    console.log("准备初始化图表...");
     initCharts();
 
     // 初始化地图
+    console.log("准备初始化地图...");
     initMap();
 
     // 绑定筛选按钮事件
     document.getElementById('filter-btn').addEventListener('click', function() {
-        applyFilters();
+        console.log("筛选按钮被点击");
+        // 显示筛选中的状态
+        const loadingIndex = layui.layer.msg('数据加载中...', {
+            icon: 16,
+            time: 0,
+            shade: 0.1
+        });
+        
+        // 执行筛选
+        applyFilters(loadingIndex);
     });
 
     // 绑定导出按钮事件
@@ -48,6 +67,23 @@ window.onload = function() {
         exportData('pdf');
     });
 };
+
+// 获取默认日期范围（过去30天）
+function getDefaultDateRange() {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    // 格式化日期
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    return formatDate(startDate) + ' - ' + formatDate(endDate);
+}
 
 // 退出功能
 function logout() {
@@ -128,7 +164,12 @@ function initTables(table) {
 
 // 初始化图表
 function initCharts() {
+    console.log("开始初始化图表...");
     // 获取统计数据
+    const dateRange = document.getElementById('date-range').value || '';
+    const category = document.getElementById('category-filter').value || '';
+    
+    console.log("发送图表数据请求，参数:", {timeRange: dateRange, category: category});
     fetch('/statistics/chartData', {
         method: 'POST',
         headers: {
@@ -136,32 +177,59 @@ function initCharts() {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify({
-            timeRange: '',
-            category: ''
+            timeRange: dateRange,
+            category: category
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log("图表数据请求状态:", res.status);
+        if (!res.ok) {
+            throw new Error(`服务器返回错误: ${res.status}`);
+        }
+        return res.json();
+    })
     .then(data => {
-        // 渲染分类统计图表
-        renderCategoryChart(data.categoryData);
+        console.log("获取到图表数据:", data);
+        // 确保数据存在，如果后端没有返回数据则使用空数组/对象
+        const categoryData = data.categoryData || [];
+        const priceData = data.priceData || [];
+        const trendData = data.trendData || {months:[], counts:[], amounts:[]};
+        const activityData = data.activityData || {dates:[], newUsers:[], activeUsers:[], tradingUsers:[]};
         
-        // 渲染价格分布图表
-        renderPriceChart(data.priceData);
-        
-        // 渲染交易趋势图表
-        renderTrendChart(data.trendData);
-        
-        // 渲染用户活跃度图表
-        renderActivityChart(data.activityData);
+        // 渲染各种图表
+        renderCategoryChart(categoryData);
+        renderPriceChart(priceData);
+        renderTrendChart(trendData);
+        renderActivityChart(activityData);
     })
     .catch(error => {
         console.error('获取统计数据失败:', error);
+        // 显示友好的错误提示
+        layui.layer.msg('初始化图表失败: ' + error.message, {icon: 2});
+        
+        // 使用空数据渲染图表
+        renderCategoryChart([]);
+        renderPriceChart([]);
+        renderTrendChart({months:[], counts:[], amounts:[]});
+        renderActivityChart({dates:[], newUsers:[], activeUsers:[], tradingUsers:[]});
     });
 }
 
 // 渲染分类统计图表
 function renderCategoryChart(data) {
     const categoryChart = echarts.init(document.getElementById('category-chart'));
+    
+    // 处理空数据情况
+    if (!data || data.length === 0) {
+        categoryChart.setOption({
+            title: {
+                text: '暂无数据',
+                left: 'center',
+                top: 'center'
+            }
+        });
+        return;
+    }
     
     const option = {
         tooltip: {
@@ -214,6 +282,18 @@ function renderCategoryChart(data) {
 function renderPriceChart(data) {
     const priceChart = echarts.init(document.getElementById('price-chart'));
     
+    // 处理空数据情况
+    if (!data || data.length === 0) {
+        priceChart.setOption({
+            title: {
+                text: '暂无数据',
+                left: 'center',
+                top: 'center'
+            }
+        });
+        return;
+    }
+    
     const option = {
         tooltip: {
             trigger: 'axis',
@@ -247,13 +327,8 @@ function renderPriceChart(data) {
                 type: 'bar',
                 barWidth: '60%',
                 data: data.map(item => item.count),
-                itemStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#83bff6' },
-                        { offset: 0.5, color: '#188df0' },
-                        { offset: 1, color: '#006d77' }
-                    ])
-                }
+                left: 'center',
+                top: 'center'
             }
         ]
     };
@@ -264,9 +339,21 @@ function renderPriceChart(data) {
     });
 }
 
-// 渲染交易趋势图表
+// 渲染趋势图表
 function renderTrendChart(data) {
     const trendChart = echarts.init(document.getElementById('trend-chart'));
+    
+    // 处理空数据情况
+    if (!data || data.months.length === 0) {
+        trendChart.setOption({
+            title: {
+                text: '暂无数据',
+                left: 'center',
+                top: 'center'
+            }
+        });
+        return;
+    }
     
     const option = {
         tooltip: {
@@ -334,6 +421,18 @@ function renderTrendChart(data) {
 // 渲染用户活跃度图表
 function renderActivityChart(data) {
     const activityChart = echarts.init(document.getElementById('activity-chart'));
+    
+    // 处理空数据情况
+    if (!data || data.dates.length === 0) {
+        activityChart.setOption({
+            title: {
+                text: '暂无数据',
+                left: 'center',
+                top: 'center'
+            }
+        });
+        return;
+    }
     
     const option = {
         tooltip: {
@@ -408,14 +507,28 @@ function renderActivityChart(data) {
 
 // 初始化地图
 function initMap() {
-    // 检查百度地图API是否已加载
-    if (typeof BMap === 'undefined') {
-        console.error('百度地图API未正确加载，请检查API密钥');
-        document.getElementById('map-container').innerHTML = '<div class="map-error">地图加载失败，请检查API密钥</div>';
-        return;
-    }
+    console.log("初始化地图...");
+    // 显示地图加载中状态
+    document.getElementById('map-container').innerHTML = '<div style="text-align:center;line-height:400px;">地图加载中...</div>';
+    
+    // 加载Leaflet库
+    loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', function() {
+        if (typeof L === 'undefined') {
+            console.error("Leaflet库加载失败");
+            document.getElementById('map-container').innerHTML = '<div class="map-error">地图加载失败，请刷新页面重试</div>';
+            return;
+        }
+        
+        // 加载高德地图插件
+        loadScript('/static/js/leaflet-amap.js', function() {
+            // 获取交易地理位置数据
+            fetchLocationData();
+        });
+    });
+}
 
-    // 在适当的时机初始化百度地图
+// 获取地理位置数据
+function fetchLocationData() {
     fetch('/statistics/locationData', {
         method: 'POST',
         headers: {
@@ -423,42 +536,100 @@ function initMap() {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('服务器返回错误: ' + res.status);
+        }
+        return res.json();
+    })
     .then(data => {
-        // 创建百度地图实例
-        const map = new BMap.Map('map-container');
-        const point = new BMap.Point(104.195397, 35.86166);
-        map.centerAndZoom(point, 5);
-        map.enableScrollWheelZoom();
-        map.addControl(new BMap.NavigationControl());
-        map.addControl(new BMap.ScaleControl());
-        
-        // 添加标记点
-        data.forEach(item => {
-            const marker = new BMap.Marker(new BMap.Point(item.lng, item.lat));
-            map.addOverlay(marker);
-            
-            const content = `<div style="padding:10px;">
-                <h4 style="margin:0;font-size:14px;">用户: ${item.username}</h4>
-                <p style="margin:5px 0;">交易数: ${item.count}</p>
-                <p style="margin:5px 0;">最近交易: ${item.lastTransaction}</p>
-            </div>`;
-            
-            const infoWindow = new BMap.InfoWindow(content);
-            marker.addEventListener('click', function() {
-                this.openInfoWindow(infoWindow);
-            });
-        });
+        renderMap(data);
     })
     .catch(error => {
         console.error('获取地理位置数据失败:', error);
+        document.getElementById('map-container').innerHTML = 
+            `<div class="map-error">加载地图数据失败: ${error.message}</div>`;
     });
 }
 
+// 渲染地图
+function renderMap(data) {
+    try {
+        // 初始化地图
+        const map = L.map('map-container').setView([35.86166, 104.195397], 4);
+        
+        // 使用高德地图图层
+        L.tileLayer.amap('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+            subdomains: '1234',
+            attribution: 'Leaflet | © OpenStreetMap contributors © 高德地图'
+        }).addTo(map);
+        
+        // 添加标记点
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                // 创建一个标记
+                const marker = L.marker([item.lat, item.lng]).addTo(map);
+                
+                // 添加弹出信息
+                marker.bindPopup(`
+                    <div style="padding:5px;">
+                        <h4 style="margin:0;font-size:14px;">用户: ${item.username}</h4>
+                        <p style="margin:5px 0;">交易数: ${item.count}</p>
+                        <p style="margin:5px 0;">最近交易: ${item.lastTransaction}</p>
+                    </div>
+                `);
+            });
+            
+            // 如果数据点多于3个，尝试添加热力图
+            if (data.length > 3) {
+                // 加载热力图插件
+                loadScript('https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', function() {
+                    if (typeof L.heatLayer !== 'undefined') {
+                        // 准备热力图数据
+                        const heatData = data.map(item => [
+                            item.lat, 
+                            item.lng, 
+                            item.count / 2 // 强度比例
+                        ]);
+                        
+                        // 创建热力图层
+                        L.heatLayer(heatData, {
+                            radius: 25,
+                            blur: 15,
+                            maxZoom: 10,
+                            gradient: {0.4: 'blue', 0.6: 'lime', 0.8: 'yellow', 1: 'red'}
+                        }).addTo(map);
+                    }
+                });
+            }
+        } else {
+            // 没有数据时显示提示
+            const noDataMarker = L.marker([35.86166, 104.195397]).addTo(map);
+            noDataMarker.bindPopup('<b>暂无交易地理数据</b>').openPopup();
+        }
+        
+        // 确保地图正确调整大小
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    } catch (e) {
+        console.error("渲染地图时出错:", e);
+        document.getElementById('map-container').innerHTML = 
+            `<div class="map-error">地图渲染失败: ${e.message}</div>`;
+    }
+}
+
 // 应用筛选条件
-function applyFilters() {
+function applyFilters(loadingIndex) {
     const dateRange = document.getElementById('date-range').value;
     const category = document.getElementById('category-filter').value;
+    
+    console.log("应用筛选，参数:", {timeRange: dateRange, category: category});
+    
+    // 如果没有传入loadingIndex，则创建一个新的
+    if (!loadingIndex) {
+        loadingIndex = layui.layer.load(2);
+    }
     
     // 重新加载表格数据
     layui.table.reload('transaction-table', {
@@ -492,16 +663,34 @@ function applyFilters() {
             category: category
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('服务器返回错误: ' + res.status);
+        }
+        return res.json();
+    })
     .then(data => {
-        // 更新各图表
-        renderCategoryChart(data.categoryData);
-        renderPriceChart(data.priceData);
-        renderTrendChart(data.trendData);
-        renderActivityChart(data.activityData);
+        // 渲染各图表
+        renderCategoryChart(data.categoryData || []);
+        renderPriceChart(data.priceData || []);
+        renderTrendChart(data.trendData || {months:[], counts:[], amounts:[]});
+        renderActivityChart(data.activityData || {dates:[], newUsers:[], activeUsers:[], tradingUsers:[]});
+        
+        // 关闭加载层
+        layui.layer.close(loadingIndex);
+        layui.layer.msg('数据加载成功', {icon: 1, time: 1000});
     })
     .catch(error => {
+        // 关闭加载层
+        layui.layer.close(loadingIndex);
         console.error('获取统计数据失败:', error);
+        layui.layer.msg('获取数据失败，请稍后重试: ' + error.message, {icon: 2});
+        
+        // 使用默认空数据渲染图表，避免界面空白
+        renderCategoryChart([]);
+        renderPriceChart([]);
+        renderTrendChart({months:[], counts:[], amounts:[]});
+        renderActivityChart({dates:[], newUsers:[], activeUsers:[], tradingUsers:[]});
     });
 }
 

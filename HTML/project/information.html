@@ -359,7 +359,6 @@
                     <input type="text" id="district" placeholder="区/县" class="layui-input">
                     <input type="text" id="address" placeholder="详细地址" class="layui-input">
                 </div>
-                <div id="map-preview" style="width: 100%; height: 200px; margin-top: 10px;"></div>
             </p>
             <div class="modal-buttons">
                 <button id="confirm-button" class="layui-btn">确认</button>
@@ -373,8 +372,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 添加 ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <!-- 添加百度地图 -->
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=您的百度地图API密钥"></script>
 
     <script>
         const itemNameElement = document.getElementById('item-name');
@@ -707,9 +704,6 @@
             }
             modalOverlay.style.display = 'block';
             contractModal.style.display = 'block';
-            
-            // 初始化地图预览
-            setTimeout(initMapPreview, 500); // 延迟加载地图，确保DOM已渲染
         }
 
         async function handleConfirmButtonClick() {
@@ -825,41 +819,6 @@
                 top: chatHistory.scrollHeight,
                 behavior: 'smooth'
             });
-        }
-
-        // 初始化地图预览
-        function initMapPreview() {
-            const map = new BMap.Map("map-preview");
-            const point = new BMap.Point(116.404, 39.915); // 默认北京
-            map.centerAndZoom(point, 12);
-            map.enableScrollWheelZoom();
-            
-            // 添加地址输入监听
-            document.getElementById('province').addEventListener('change', updateMapLocation);
-            document.getElementById('city').addEventListener('change', updateMapLocation);
-            document.getElementById('district').addEventListener('change', updateMapLocation);
-            document.getElementById('address').addEventListener('change', updateMapLocation);
-        }
-        
-        // 更新地图位置
-        function updateMapLocation() {
-            const province = document.getElementById('province').value;
-            const city = document.getElementById('city').value;
-            const district = document.getElementById('district').value;
-            const address = document.getElementById('address').value;
-            
-            const fullAddress = province + city + district + address;
-            if (fullAddress.length > 3) {
-                const myGeo = new BMap.Geocoder();
-                myGeo.getPoint(fullAddress, function(point){
-                    if (point) {
-                        const map = new BMap.Map("map-preview");
-                        map.centerAndZoom(point, 16);
-                        const marker = new BMap.Marker(point);
-                        map.addOverlay(marker);
-                    }
-                });
-            }
         }
     </script>
 

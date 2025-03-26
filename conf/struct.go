@@ -58,3 +58,12 @@ type UserClaims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
+
+type CopyrightItem struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	SimpleDsc string `json:"simple_dsc"`
+	Owner     string `json:"owner"`
+	Price     string `json:"price"`
+	Img       string `json:"img"`
+}

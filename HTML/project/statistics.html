@@ -60,28 +60,10 @@
             margin-bottom: 20px;
         }
 
-        .map-container {
-            height: 400px;
-            margin-bottom: 20px;
-        }
-
-        .tab-container {
-            margin-top: 20px;
-        }
-
         .export-buttons {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-        }
-
-        .map-error {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            color: #ff5722;
-            font-size: 16px;
         }
 
         @media (max-width: 768px) {
@@ -90,6 +72,8 @@
             }
         }
     </style>
+    <!-- 添加 layui 脚本预加载 -->
+    <link rel="preload" href="https://unpkg.com/layui@2.9.16/dist/layui.js" as="script">
 </head>
 <body>
     <div class="header">
@@ -105,8 +89,8 @@
             <div class="filter-section">
                 <div class="layui-inline">
                     <label class="layui-form-label">时间范围</label>
-                    <div class="layui-input-inline" style="width: 200px;">
-                        <input type="text" class="layui-input" id="date-range" placeholder="开始日期 - 结束日期">
+                    <div class="layui-input-inline" style="width: 280px;">
+                        <input type="text" class="layui-input" id="date-range" placeholder="点击选择时间范围" readonly>
                     </div>
                 </div>
                 <div class="layui-inline">
@@ -160,38 +144,557 @@
                 </div>
             </div>
         </div>
-
-        <div class="card">
-            <h3>交易地理分布</h3>
-            <div class="map-container" id="map-container"></div>
-        </div>
-
-        <div class="card tab-container">
-            <div class="layui-tab layui-tab-brief">
-                <ul class="layui-tab-title">
-                    <li class="layui-this">交易记录</li>
-                    <li>用户统计</li>
-                    <li>收益分析</li>
-                </ul>
-                <div class="layui-tab-content">
-                    <div class="layui-tab-item layui-show">
-                        <table id="transaction-table" lay-filter="transaction-table"></table>
-                    </div>
-                    <div class="layui-tab-item">
-                        <table id="user-table" lay-filter="user-table"></table>
-                    </div>
-                    <div class="layui-tab-item">
-                        <table id="revenue-table" lay-filter="revenue-table"></table>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- 引入必要的JS -->
-    <script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=eBGajDG9gGOdYXl5jrtbPXGVCGG9tVeH"></script>
-    <script src="/static/js/statistics.js"></script>
+    <!-- 修改脚本加载部分 -->
+    <script>
+        // 监听脚本加载错误
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'SCRIPT') {
+                console.error('脚本加载失败:', e.target.src);
+                alert('加载UI库失败，请刷新页面重试');
+            }
+        }, true);
+    </script>
+    
+    <!-- 先加载Layui核心库 -->
+    <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    
+    <!-- 确保Layui加载后再加载其他库 -->
+    <script>
+        // 检查Layui是否加载成功
+        function checkLayui() {
+            if (typeof layui === 'undefined') {
+                console.error('Layui库加载失败，正在重试...');
+                setTimeout(checkLayui, 500);
+                return;
+            }
+            
+            console.log('Layui库已成功加载，正在加载其他依赖...');
+            
+            // Layui加载成功后，加载echarts库
+            loadScript('https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js', function() {
+                console.log('图表库加载成功');
+                // 初始化页面
+                initPage();
+            });
+        }
+        
+        // 加载脚本的辅助函数
+        function loadScript(src, callback) {
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            script.onerror = function() {
+                console.error('加载脚本失败:', src);
+            };
+            document.body.appendChild(script);
+        }
+        
+        // 开始检查Layui
+        checkLayui();
+        
+        // 在Layui加载完成后初始化页面
+        function initPage() {
+            console.log('开始初始化页面组件...');
+            
+            // 获取用户信息
+            const username = localStorage.getItem('username');
+            document.getElementById("username").textContent = username || "未登录";
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请登录');
+                return (window.location.href = '/');
+            }
+            
+            // 1. 初始化日期选择器
+            layui.use(['laydate', 'form'], function() {
+                var laydate = layui.laydate;
+                console.log("Layui组件已加载");
+                
+                // 初始化日期选择器
+                laydate.render({
+                    elem: '#date-range',
+                    type: 'date',
+                    range: true,
+                    trigger: 'click',
+                    value: getDefaultDate(),
+                    done: function(value) {
+                        console.log('日期选择完成:', value);
+                    }
+                });
+                
+                console.log("日期选择器初始化完成");
+            });
+            
+            // 2. 初始化图表 - 添加更好的错误处理
+            if (typeof echarts !== 'undefined') {
+                // 获取图表数据
+                console.log("开始加载图表数据");
+                fetch('/statistics/chartData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        timeRange: getDefaultDate(),
+                        category: ''
+                    })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        // 尝试解析错误消息
+                        return res.json().then(errData => {
+                            throw new Error(errData.message || '服务器错误');
+                        });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    // 如果服务器返回了错误消息而不是500状态码
+                    if (data && data.message && !data.categoryData) {
+                        console.error("服务器返回错误:", data.message);
+                        layui.layer.msg('数据加载失败: ' + data.message, {icon: 2});
+                        renderCharts({}); // 使用空数据渲染
+                        return;
+                    }
+                    
+                    console.log("获取到图表数据:", data);
+                    renderCharts(data);
+                })
+                .catch(error => {
+                    console.error('获取图表数据失败:', error);
+                    layui.layer.msg('数据加载失败: ' + error.message, {icon: 2});
+                    renderCharts({}); // 使用空数据渲染
+                });
+            } else {
+                console.error("ECharts库未加载，无法初始化图表");
+            }
+            
+            // 3. 绑定筛选按钮事件
+            document.getElementById('filter-btn').addEventListener('click', function() {
+                console.log("筛选按钮被点击");
+                applyFilters();
+            });
+            
+            // 4. 绑定导出按钮事件
+            document.getElementById('export-excel').addEventListener('click', function() {
+                exportData('excel');
+            });
+            
+            document.getElementById('export-pdf').addEventListener('click', function() {
+                exportData('pdf');
+            });
+            
+            // 将退出函数添加到全局作用域
+            window.logout = function() {
+                localStorage.clear();
+                window.location.href = '/';
+            };
+        }
+        
+        // 获取默认日期的函数 - 修改为从2023-01-01到今天
+        function getDefaultDate() {
+            var end = new Date();
+            var start = new Date('2023-01-01'); // 从2023年1月1日开始
+            
+            function formatDate(date) {
+                return date.getFullYear() + '-' + 
+                       ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+                       ('0' + date.getDate()).slice(-2);
+            }
+            
+            return formatDate(start) + ' - ' + formatDate(end);
+        }
+        
+        // 渲染所有图表
+        function renderCharts(data) {
+            // 确保数据存在
+            const categoryData = data.categoryData || [];
+            const priceData = data.priceData || [];
+            const trendData = data.trendData || {months:[], counts:[], amounts:[]};
+            const activityData = data.activityData || {dates:[], newUsers:[], activeUsers:[], tradingUsers:[]};
+            
+            // 渲染分类图
+            renderCategoryChart(categoryData);
+            // 渲染价格分布图
+            renderPriceChart(priceData);
+            // 渲染趋势图
+            renderTrendChart(trendData);
+            // 渲染活跃度图
+            renderActivityChart(activityData);
+        }
+        
+        // 渲染分类统计图表
+        function renderCategoryChart(data) {
+            if (!echarts) return;
+            const chart = echarts.init(document.getElementById('category-chart'));
+            
+            if (!data || data.length === 0) {
+                chart.setOption({
+                    title: {text: '暂无数据', left: 'center', top: 'center'}
+                });
+                return;
+            }
+            
+            chart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    data: data.map(item => item.name)
+                },
+                series: [{
+                    name: '版权分类',
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {show: false, position: 'center'},
+                    emphasis: {
+                        label: {show: true, fontSize: '16', fontWeight: 'bold'}
+                    },
+                    labelLine: {show: false},
+                    data: data
+                }]
+            });
+            
+            // 监听窗口大小变化，调整图表大小
+            window.addEventListener('resize', function() {
+                chart.resize();
+            });
+        }
+        
+        // 渲染价格分布图表
+        function renderPriceChart(data) {
+            if (!echarts) return;
+            const priceChart = echarts.init(document.getElementById('price-chart'));
+            
+            // 处理空数据情况
+            if (!data || data.length === 0) {
+                priceChart.setOption({
+                    title: {
+                        text: '暂无数据',
+                        left: 'center',
+                        top: 'center'
+                    }
+                });
+                return;
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: data.map(item => item.range),
+                        axisTick: {
+                            alignWithLabel: true
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: '版权数量',
+                        type: 'bar',
+                        barWidth: '60%',
+                        data: data.map(item => item.count),
+                        itemStyle: {
+                            color: function(params) {
+                                var colorList = ['#c23531','#2f4554','#61a0a8','#d48265','#91c7ae'];
+                                return colorList[params.dataIndex % colorList.length];
+                            }
+                        }
+                    }
+                ]
+            };
+            
+            priceChart.setOption(option);
+            window.addEventListener('resize', function() {
+                priceChart.resize();
+            });
+        }
+        
+        // 渲染趋势图表
+        function renderTrendChart(data) {
+            if (!echarts) return;
+            const trendChart = echarts.init(document.getElementById('trend-chart'));
+            
+            // 处理空数据情况
+            if (!data || data.months.length === 0) {
+                trendChart.setOption({
+                    title: {
+                        text: '暂无数据',
+                        left: 'center',
+                        top: 'center'
+                    }
+                });
+                return;
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['交易数量', '交易金额']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: data.months
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '交易数量',
+                        position: 'left'
+                    },
+                    {
+                        type: 'value',
+                        name: '交易金额',
+                        position: 'right'
+                    }
+                ],
+                series: [
+                    {
+                        name: '交易数量',
+                        type: 'line',
+                        data: data.counts,
+                        smooth: true
+                    },
+                    {
+                        name: '交易金额',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: data.amounts,
+                        smooth: true,
+                        lineStyle: {
+                            width: 0
+                        },
+                        areaStyle: {
+                            opacity: 0.5,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(0, 109, 119, 0.8)' },
+                                { offset: 1, color: 'rgba(0, 109, 119, 0.1)' }
+                            ])
+                        }
+                    }
+                ]
+            };
+            
+            trendChart.setOption(option);
+            window.addEventListener('resize', function() {
+                trendChart.resize();
+            });
+        }
+        
+        // 渲染用户活跃度图表
+        function renderActivityChart(data) {
+            if (!echarts) return;
+            const activityChart = echarts.init(document.getElementById('activity-chart'));
+            
+            // 处理空数据情况
+            if (!data || data.dates.length === 0) {
+                activityChart.setOption({
+                    title: {
+                        text: '暂无数据',
+                        left: 'center',
+                        top: 'center'
+                    }
+                });
+                return;
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                legend: {
+                    data: ['新用户', '活跃用户', '交易用户']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: data.dates
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: '新用户',
+                        type: 'line',
+                        stack: 'Total',
+                        areaStyle: {},
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: data.newUsers
+                    },
+                    {
+                        name: '活跃用户',
+                        type: 'line',
+                        stack: 'Total',
+                        areaStyle: {},
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: data.activeUsers
+                    },
+                    {
+                        name: '交易用户',
+                        type: 'line',
+                        stack: 'Total',
+                        areaStyle: {},
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: data.tradingUsers
+                    }
+                ]
+            };
+            
+            activityChart.setOption(option);
+            window.addEventListener('resize', function() {
+                activityChart.resize();
+            });
+        }
+        
+        // 应用筛选条件
+        function applyFilters() {
+            const dateRange = document.getElementById('date-range').value;
+            const category = document.getElementById('category-filter').value;
+            
+            // 显示加载状态
+            const loadingIndex = layui.layer.msg('数据加载中...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+            
+            // 重新获取图表数据
+            fetch('/statistics/chartData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    timeRange: dateRange,
+                    category: category
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                renderCharts(data);
+                layui.layer.close(loadingIndex);
+                layui.layer.msg('数据加载成功', {icon: 1, time: 1000});
+            })
+            .catch(error => {
+                console.error('获取统计数据失败:', error);
+                layui.layer.close(loadingIndex);
+                layui.layer.msg('获取数据失败：' + error.message, {icon: 2});
+            });
+        }
+        
+        // 导出数据
+        function exportData(type) {
+            const dateRange = document.getElementById('date-range').value;
+            const category = document.getElementById('category-filter').value;
+            
+            // 显示导出中提示
+            const loadingIndex = layui.layer.msg('正在导出' + (type === 'excel' ? 'Excel' : 'PDF') + '...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+            
+            fetch('/statistics/exportData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    type: type,
+                    timeRange: dateRange,
+                    category: category
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('服务器返回错误: ' + res.status);
+                }
+                return res.blob();
+            })
+            .then(blob => {
+                layui.layer.close(loadingIndex);
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `版权统计报表.${type === 'excel' ? 'xlsx' : 'pdf'}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                layui.layer.msg('导出成功', {icon: 1, time: 2000});
+            })
+            .catch(error => {
+                layui.layer.close(loadingIndex);
+                console.error('导出数据失败:', error);
+                layui.layer.msg('导出失败: ' + error.message, {icon: 2, time: 2000});
+            });
+        }
+    </script>
 </body>
 </html>

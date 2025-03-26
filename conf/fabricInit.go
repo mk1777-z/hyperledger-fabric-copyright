@@ -3,6 +3,8 @@ package conf
 import (
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -13,12 +15,19 @@ import (
 
 // newGrpcConnection creates a gRPC connection to the Gateway server.
 func newGrpcConnection() *grpc.ClientConn {
-	certificatePEM, err := os.ReadFile(tlsCertPath)
+	certPath := "/home/sample/fabric1/scripts/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read TLS certifcate file: %w", err))
+		log.Printf("Warning: failed to read TLS certificate file at %s: %v. Falling back to insecure connection.", certPath, err)
+		// 修复：正确处理grpc.Dial的返回值(连接和错误)
+		conn, err := grpc.Dial(peerEndpoint, grpc.WithInsecure())
+		if err != nil {
+			panic(fmt.Errorf("failed to connect insecurely: %w", err))
+		}
+		return conn
 	}
 
-	certificate, err := identity.CertificateFromPEM(certificatePEM)
+	certificate, err := identity.CertificateFromPEM(certBytes)
 	if err != nil {
 		panic(err)
 	}

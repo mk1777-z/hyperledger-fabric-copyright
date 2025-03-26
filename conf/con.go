@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	mspID        = "Org1MSP"
+	mspID        = "Org1MSP" //交易者的MSP
 	cryptoPath   = "/home/sample/fabric1/scripts/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com"
 	certPath     = cryptoPath + "/users/User1@org1.example.com/msp/signcerts"
 	keyPath      = cryptoPath + "/users/User1@org1.example.com/msp/keystore"
@@ -20,14 +20,16 @@ const (
 	peerEndpoint = "dns:///localhost:7051"
 	gatewayPeer  = "peer0.org1.example.com"
 
-	basicChaincodeName = "basic" // 资产交易链码
-	fundsChaincodeName = "funds" // 资金操作链码
-	channelName        = "mychannel"
+	basicChaincodeName     = "basic"     // 资产交易链码
+	fundsChaincodeName     = "funds"     // 资金操作链码
+	regulatorChaincodeName = "regulator" // 监管链码
+	channelName            = "mychannel"
 )
 
 var (
-	BasicContract *client.Contract // 资产交易合约
-	FundsContract *client.Contract // 资金操作合约
+	BasicContract     *client.Contract // 资产交易合约
+	FundsContract     *client.Contract // 资金操作合约
+	RegulatorContract *client.Contract // 监管合约
 )
 var Con Config
 
@@ -50,6 +52,19 @@ func Init() {
 		log.Fatal("解析 yaml 文件失败：", err)
 	}
 
+	// 初始化数据库连接
+	log.Println("开始初始化数据库连接...")
+	errDB := InitDB()
+	if errDB != nil {
+		log.Printf("数据库初始化失败: %v", errDB)
+		// 我们不应该在这里panic，而是记录错误并继续
+		// 这样即使数据库连接失败，其他功能仍可用
+		log.Println("警告: 数据库连接失败，统计功能将不可用")
+	} else {
+		log.Println("数据库初始化成功")
+	}
+
+	// 初始化区块链连接（现有代码）
 	clientConnection := newGrpcConnection()
 	id := newIdentity()
 	sign := newSign()
@@ -73,4 +88,6 @@ func Init() {
 	network := gw.GetNetwork(channelName)
 	BasicContract = network.GetContract(basicChaincodeName)
 	FundsContract = network.GetContract(fundsChaincodeName)
+	RegulatorContract = network.GetContract(regulatorChaincodeName) // 新增监管合约初始化
+
 }

@@ -152,12 +152,15 @@
             border-radius: 8px;
             object-fit: cover;
             margin-bottom: 10px;
-            opacity: 0; /* Initially invisible for fade-in effect */
-            transition: opacity 0.5s ease; /* Fade-in transition */
+            opacity: 0;
+            /* Initially invisible for fade-in effect */
+            transition: opacity 0.5s ease;
+            /* Fade-in transition */
         }
 
         .item img.loaded {
-            opacity: 1; /* Make visible when loaded */
+            opacity: 1;
+            /* Make visible when loaded */
         }
 
         /* 内容样式 */
@@ -194,54 +197,79 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px; /* 调整按钮和页码之间的间距 */
+            gap: 10px;
+            /* 调整按钮和页码之间的间距 */
             margin-top: 20px;
-            padding: 10px; /* 添加内边距 */
-            background-color: #fff; /* 白色背景 */
-            border-radius: 8px; /* 圆角 */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /*  হালকা ছায়া */
+            padding: 10px;
+            /* 添加内边距 */
+            background-color: #fff;
+            /* 白色背景 */
+            border-radius: 8px;
+            /* 圆角 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /*  হালকা ছায়া */
         }
 
         .pagination-container button {
-            height: 34px; /* 稍微减小高度 */
-            padding: 0 15px; /* 稍微调整内边距 */
-            border: 1px solid #ddd; /* 添加边框 */
-            background-color: #f9f9f9; /* 更浅的背景色 */
+            height: 34px;
+            /* 稍微减小高度 */
+            padding: 0 15px;
+            /* 稍微调整内边距 */
+            border: 1px solid #ddd;
+            /* 添加边框 */
+            background-color: #f9f9f9;
+            /* 更浅的背景色 */
             color: #333;
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* 添加过渡效果 */
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            /* 添加过渡效果 */
         }
 
         .pagination-container button:disabled {
-            background-color: #eee; /* 禁用时的背景色 */
-            color: #999; /* 禁用时的文字颜色 */
-            border-color: #eee; /* 禁用时的边框颜色 */
-            cursor: default; /* 禁用时默认光标 */
+            background-color: #eee;
+            /* 禁用时的背景色 */
+            color: #999;
+            /* 禁用时的文字颜色 */
+            border-color: #eee;
+            /* 禁用时的边框颜色 */
+            cursor: default;
+            /* 禁用时默认光标 */
         }
 
         .pagination-container button:hover:not(:disabled) {
-            background-color: #e1e1e1; /* 悬停时更浅的背景色 */
-            border-color: #ccc; /* 悬停时的边框颜色 */
-            color: #000; /* 悬停时的文字颜色 */
+            background-color: #e1e1e1;
+            /* 悬停时更浅的背景色 */
+            border-color: #ccc;
+            /* 悬停时的边框颜色 */
+            color: #000;
+            /* 悬停时的文字颜色 */
         }
 
         .pagination-container span {
             font-size: 14px;
             font-weight: bold;
             color: #333;
-            margin: 0 10px; /* 页码信息左右间距 */
+            margin: 0 10px;
+            /* 页码信息左右间距 */
         }
 
         .pagination-container .page-input {
-            width: 40px; /* 输入框宽度 */
-            height: 30px; /* 输入框高度 */
-            margin: 0 5px; /* 与按钮和文字的间距 */
-            text-align: center; /* 文本居中 */
-            border: 1px solid #ccc; /* 边框 */
-            border-radius: 4px; /* 圆角 */
-            outline: none; /* 去除 focus 时的外轮廓线 */
+            width: 40px;
+            /* 输入框宽度 */
+            height: 30px;
+            /* 输入框高度 */
+            margin: 0 5px;
+            /* 与按钮和文字的间距 */
+            text-align: center;
+            /* 文本居中 */
+            border: 1px solid #ccc;
+            /* 边框 */
+            border-radius: 4px;
+            /* 圆角 */
+            outline: none;
+            /* 去除 focus 时的外轮廓线 */
         }
 
         .pagination-container .go-button {
@@ -278,9 +306,12 @@
             }
 
             .pagination-container {
-                flex-direction: column; /* 在小屏幕上垂直排列分页元素 */
-                align-items: center; /* 居中对齐 */
-                gap: 10px; /* 垂直间距 */
+                flex-direction: column;
+                /* 在小屏幕上垂直排列分页元素 */
+                align-items: center;
+                /* 居中对齐 */
+                gap: 10px;
+                /* 垂直间距 */
             }
         }
 
@@ -316,8 +347,9 @@
     <div class="header">
         <h1>版权展示</h1>
         <div class="search-box">
-            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目">
-            <button class="layui-btn layui-btn-primary" id="search-btn">搜索</button>
+            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
+                onkeydown="handleSearchKey(event)">
+            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
         </div>
         <ul class="layui-nav">
             <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
@@ -337,9 +369,14 @@
             <li class="layui-nav-item">
                 <div class="svg-container">
                     <a href="statistics">
-                        <svg t="1735400000000" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2000" width="30" height="30">
-                            <path d="M888.2 849.9H135.8V174.1c0-10.5-8.5-19-19-19s-19 8.5-19 19v695.8c0 10.5 8.5 19 19 19h771.4c10.5 0 19-8.5 19-19s-8.5-19-19-19z" fill="white" p-id="2001"></path>
-                            <path d="M210.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V490.4c0-10.5-8.5-19-19-19s-19 8.5-19 19v221.3zM354.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V383.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v328zM498.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V277c0-10.5-8.5-19-19-19s-19 8.5-19 19v434.7zM642.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V426.6c0-10.5-8.5-19-19-19s-19 8.5-19 19v285.1zM786.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V319.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v392z" fill="white" p-id="2002"></path>
+                        <svg t="1735400000000" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="2000" width="30" height="30">
+                            <path
+                                d="M888.2 849.9H135.8V174.1c0-10.5-8.5-19-19-19s-19 8.5-19 19v695.8c0 10.5 8.5 19 19 19h771.4c10.5 0 19-8.5 19-19s-8.5-19-19-19z"
+                                fill="white" p-id="2001"></path>
+                            <path
+                                d="M210.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V490.4c0-10.5-8.5-19-19-19s-19 8.5-19 19v221.3zM354.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V383.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v328zM498.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V277c0-10.5-8.5-19-19-19s-19 8.5-19 19v434.7zM642.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V426.6c0-10.5-8.5-19-19-19s-19 8.5-19 19v285.1zM786.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V319.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v392z"
+                                fill="white" p-id="2002"></path>
                         </svg>
                     </a>
                     <span class="tooltip">统计分析</span>
@@ -368,7 +405,7 @@
         let totalPages = 1;
         const pageSize = 10;
         let token;
-        const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 }); // Threshold adjusted
+        const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 });
 
         // 页面加载时初始化
         window.onload = function () {
@@ -425,18 +462,18 @@
             const container = document.querySelector('.container');
             container.innerHTML = items.length
                 ? items.map(item => `
-                            <div id="${item.name}" class="item">
-                                <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
-                                    src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
-                                <div class="item-content">
-                                    <p>名称：${item.name}</p>
-                                    <p>描述：${item.description}</p>
-                                    <p>价格：${item.price}</p>
-                                    <p>拥有者：${item.owner}</p>
-                                    <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
-                                </div>
-                            </div>
-                        `).join('') : '<p>没有数据可显示</p>';
+                                    <div id="${item.name}" class="item">
+                                        <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
+                                            src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
+                                        <div class="item-content">
+                                            <p>名称：${item.name}</p>
+                                            <p>描述：${item.description}</p>
+                                            <p>价格：${item.price}</p>
+                                            <p>拥有者：${item.owner}</p>
+                                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p>没有数据可显示</p>';
 
             // After rendering, observe new images for lazy loading
             observeImages();
@@ -517,11 +554,25 @@
         // 更新分页信息
         function updatePagination() {
             document.getElementById('prev-page').disabled = currentPage === 1;
-            document.getElementById('next-page').disabled = currentPage >= totalPages; // Corrected condition
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
             document.getElementById('page-info').textContent = `第 ${currentPage} 页 / ${totalPages} 页`;
-            document.getElementById('page-number').value = currentPage; // 更新输入框的值
+            document.getElementById('page-number').value = currentPage;
         }
 
+        // 搜索功能：跳转到 search.html 页面
+        function    searchItems() {
+            const searchQuery = document.getElementById('search-input').value.trim();
+            if (searchQuery) {
+                window.location.href = `search?query=${encodeURIComponent(searchQuery)}`;
+            } else {
+                alert("请重试");
+            }
+        }
+
+        // 监听键盘事件
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') searchItems();
+        }
 
         // 绑定分页按钮事件
         function bindPaginationEvents() {

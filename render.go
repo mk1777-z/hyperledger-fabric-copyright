@@ -14,12 +14,19 @@ func renderHTML(h *server.Hertz) {
 	// 加载HTML模板文件
 	h.LoadHTMLGlob("HTML/project/*")
 
-	h.Static("/static", "./")
+	// 注释或删除这行静态文件注册代码，因为在main.go中已经注册了
+	// h.Static("/static", "./")
 
 	// 默认根路径返回一个 JSON 响应
 	h.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusOK, "homepage.html", utils.H{
 			"title": "Home",
+		})
+	})
+
+	h.GET("/search", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "search.html", utils.H{
+			"title": "Search",
 		})
 	})
 

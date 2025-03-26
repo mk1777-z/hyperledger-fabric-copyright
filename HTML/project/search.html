@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果</title>
+    <link href="//unpkg.s/layui.css" rel="stylesheet">
+    <style>
+        /* 这里可以复制版权展示页面的 CSS 样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #006d77, #004d5b);
+            color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 280px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .item img {
+            width: 100%;
+            max-width: 250px;
+            height: 140px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .item img.loaded {
+            opacity: 1;
+        }
+
+        .item-content {
+            text-align: left;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        .item-content p {
+            font-size: 14px;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .item-content a {
+            display: inline-block;
+            padding: 8px 15px;
+            margin-top: 10px;
+            background-color: #006d77;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination-container button {
+            height: 34px;
+            padding: 0 15px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            color: #333;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination-container button:disabled {
+            background-color: #eee;
+            color: #999;
+            border-color: #eee;
+            cursor: default;
+        }
+
+        .pagination-container button:hover:not(:disabled) {
+            background-color: #e1e1e1;
+            border-color: #ccc;
+            color: #000;
+        }
+
+        .pagination-container span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin: 0 10px;
+        }
+
+        .pagination-container .page-input {
+            width: 40px;
+            height: 30px;
+            margin: 0 5px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .pagination-container .go-button {
+            height: 34px;
+            padding: 0 10px;
+            border: none;
+            background-color: #006d77;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-container .go-button:hover {
+            background-color: #004d5b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>搜索结果</h1>
+        <div class="search-box">
+            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
+                onkeydown="handleSearchKey(event)">
+            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
+        </div>
+        <ul class="layui-nav">
+            <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
+            <li class="layui-nav-item"><a href="homepage">个人中心</a></li>
+            <li class="layui-nav-item"><a href="statistics">统计分析</a></li>
+            <li class="layui-nav-item"><a class="logout" onclick="logout()" style="cursor: pointer;">退出</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        </div>
+
+    <div class="pagination-container" style="text-align:center; margin-top:20px;">
+        <button class="layui-btn" id="prev-page" disabled>上一页</button>
+        <span id="page-info">第 1 页 / 1 页</span>
+        <button class="layui-btn" id="next-page">下一页</button>
+        <input type="number" class="page-input" id="page-number" min="1" value="1">
+        <button class="layui-btn go-button" id="go-page">跳转</button>
+    </div>
+
+    <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 10;
+        let token;
+        let currentSearchQuery = ''; // 保存当前的搜索关键词
+        const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 });
+
+        // 获取 URL 参数
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 页面加载时初始化
+        window.onload = function () {
+            const username = localStorage.getItem('username');
+            document.getElementById("username").textContent = username || "未登录";
+            token = localStorage.getItem('token');
+            if (!token) {
+                alert('请登录');
+                return (window.location.href = '/');
+            }
+
+            currentSearchQuery = getQueryParam('query') || '';
+            document.getElementById('search-input').value = currentSearchQuery; // 将搜索关键词填充到搜索框
+
+            fetchItemsForPage(currentPage, currentSearchQuery); // 加载搜索结果
+            bindPaginationEvents();
+        };
+
+        // 退出功能
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // 通用fetch请求函数
+        const fetchData = (url, data) =>
+            fetch(url, {    
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            }).then(res => res.json()).catch(console.error);
+
+        // 请求项目数据 for specific page and search query
+        function fetchItemsForPage(page, searchQuery) {
+            const params = { page: page, pageSize: pageSize };
+            if (searchQuery) {
+                params.search = searchQuery;
+            }
+
+            fetchData('/search', params)
+                .then(data => {
+                    if (data?.items && data?.totalPages) {
+                        renderItems(data.items);
+                        totalPages = data.totalPages;
+                        updatePagination();
+                    } else {
+                        console.error('未能获取到项目数据或分页信息');
+                        renderItems();
+                        totalPages = 1;
+                        updatePagination();
+                    }
+                });
+        }
+
+        // 渲染项目数据
+        function renderItems(items) {
+            const container = document.querySelector('.container');
+            container.innerHTML = items.length
+                ? items.map(item => `
+                                    <div id="${item.name}" class="item">
+                                        <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
+                                            src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
+                                        <div class="item-content">
+                                            <p>名称：${item.name}</p>
+                                            <p>描述：${item.description}</p>
+                                            <p>价格：${item.price}</p>
+                                            <p>拥有者：${item.owner}</p>
+                                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p>没有找到符合条件的项目</p>';
+
+            observeImages();
+        }
+
+        function observeImages() {
+            const images = document.querySelectorAll('.item-image');
+            images.forEach(img => {
+                if (!img.dataset.loaded) {
+                    lazyLoadObserver.observe(img);
+                }
+            });
+        }
+
+        function handleLazyLoad(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.dataset.src;
+                    img.src = src;
+                    img.classList.add('loaded');
+                    img.dataset.loaded = true;
+                    observer.unobserve(img);
+                }
+            });
+        }
+
+
+        function viewDetails(itemName) {
+            if (!token) {
+                alert('用户未登录，请先登录！');
+                return;
+            }
+
+            if (!itemName) {
+                alert('无效的项目名称！');
+                return;
+            }
+
+            fetch('/information', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: itemName })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(err => {
+                            console.error('查看详情请求失败:', err);
+                            alert('查看详情失败，请稍后重试！');
+                        });
+                    }
+                })
+                .then(data => {
+                    if (data && data.items && data.items.length > 0) {
+                        const item = data.items[0];
+                        const processedItem = {
+                            ...item,
+                            img: item.img === "NULL" ? "https://via.placeholder.com/200x120?text=暂无图片" : item.img
+                        };
+                        sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
+                        window.location.href = '/information';
+                    } else {
+                        console.error('未找到相关项');
+                        alert('未找到相关项');
+                    }
+                })
+                .catch(error => {
+                    console.error('网络错误:', error);
+                    alert('网络错误，请稍后重试！');
+                });
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
+            document.getElementById('page-info').textContent = `第 ${currentPage} 页 / ${totalPages} 页`;
+            document.getElementById('page-number').value = currentPage;
+        }
+
+        // 搜索功能：跳转到 search.html 页面
+        function searchItems() {
+            const searchQuery = document.getElementById('search-input').value.trim();
+            window.location.href = `search.html?query=${encodeURIComponent(searchQuery)}`;
+        }
+
+        // 监听键盘事件
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') searchItems();
+        }
+
+        // 绑定分页按钮事件
+        function bindPaginationEvents() {
+            document.getElementById('prev-page').onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchItemsForPage(currentPage, currentSearchQuery);
+                }
+            };
+            document.getElementById('next-page').onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    fetchItemsForPage(currentPage, currentSearchQuery);
+                }
+            };
+            document.getElementById('go-page').onclick = () => {
+                const pageInput = document.getElementById('page-number');
+                let page = parseInt(pageInput.value, 10);
+                if (isNaN(page) || page < 1 || page > totalPages) {
+                    alert('请输入有效的页码，范围在 1 到 ' + totalPages + '!');
+                    pageInput.value = currentPage; // Reset input to current page
+                    return;
+                }
+                currentPage = page;
+                fetchItemsForPage(currentPage, currentSearchQuery);
+            };
+            document.getElementById('page-number').addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    document.getElementById('go-page').click();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
