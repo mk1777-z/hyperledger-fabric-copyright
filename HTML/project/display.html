@@ -5,17 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>版权展示</title>
-    <link href="//unpkg.s/layui.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
+            --dark-bg: #0F172A;
+            --darker-bg: #080d18;
+            --card-bg: #1E293B; /* 调亮卡片背景色，增加对比度 */
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
+            --accent-hover: #5930d8;
+        }
+
         /* 页面整体样式 */
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f9fafb;
-            /* 更浅的背景色 */
-            color: #333;
-            /* 通用文字颜色 */
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
         }
 
         /* 页头样式 */
@@ -23,17 +36,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(90deg, #006d77, #004d5b);
-            /* 渐变背景 */
-            color: #fff;
+            background-color: var(--darker-bg);
+            color: var(--text-color);
             padding: 15px 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .header h1 {
             margin: 0;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* 搜索框样式 */
@@ -43,45 +59,42 @@
             justify-content: center;
             position: relative;
             max-width: 500px;
-            /* 搜索框和按钮宽度限制 */
         }
 
         .search-box input {
             width: 100%;
             height: 38px;
             padding: 0 50px 0 15px;
-            /* 搜索框内部间距 */
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 20px;
-            background-color: #f1f1f1;
-            color: #333;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
             outline: none;
             transition: all 0.3s ease;
         }
 
         .search-box input:focus {
-            border-color: #006d77;
-            box-shadow: 0 0 8px rgba(0, 109, 119, 0.3);
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px rgba(110, 64, 255, 0.3);
         }
 
         .search-box button {
             position: absolute;
-            right: 10px;
+            right: 5px;
             top: 50%;
             transform: translateY(-50%);
             height: 30px;
-            width: 70px;
-            background-color: #006d77;
+            width: 40px;
+            background: transparent;
             border: none;
-            color: #fff;
-            font-size: 14px;
-            border-radius: 15px;
+            color: var(--text-color);
+            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: color 0.3s ease;
         }
 
         .search-box button:hover {
-            background-color: #004d5b;
+            color: var(--accent-color);
         }
 
         /* 用户导航菜单 */
@@ -92,27 +105,35 @@
             padding: 0;
             gap: 20px;
             align-items: center;
+            background-color: transparent;
         }
 
         .layui-nav span {
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 500;
+            color: var(--secondary-text);
         }
 
         .layui-nav a {
             text-decoration: none;
+            color: var(--secondary-text);
             font-size: 14px;
             display: flex;
             align-items: center;
             gap: 5px;
             transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .layui-nav a:hover, .layui-nav a.active {
+            color: var(--accent-color);
         }
 
         .layui-nav img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            border: 2px solid #fff;
+            border: 2px solid var(--accent-color);
             object-fit: cover;
         }
 
@@ -122,26 +143,27 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
-            padding: 20px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        /* 卡片样式 */
         .item {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 280px;
             padding: 15px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* 增强阴影效果 */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 添加微妙边框 */
         }
 
         .item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
         }
 
         /* 图片样式 */
@@ -153,14 +175,11 @@
             object-fit: cover;
             margin-bottom: 10px;
             opacity: 0;
-            /* Initially invisible for fade-in effect */
             transition: opacity 0.5s ease;
-            /* Fade-in transition */
         }
 
         .item img.loaded {
             opacity: 1;
-            /* Make visible when loaded */
         }
 
         /* 内容样式 */
@@ -173,23 +192,24 @@
         .item-content p {
             font-size: 14px;
             margin: 5px 0;
-            color: #333;
+            color: var(--secondary-text);
         }
 
         .item-content a {
             display: inline-block;
             padding: 8px 15px;
             margin-top: 10px;
-            background-color: #006d77;
-            color: #fff;
+            background: var(--primary-gradient);
+            color: var(--text-color);
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 25px;
             text-align: center;
-            transition: background-color 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .item-content a:hover {
-            background-color: #004d5b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 64, 255, 0.4);
         }
 
         /* 分页容器样式 */
@@ -198,149 +218,139 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
-            /* 调整按钮和页码之间的间距 */
-            margin-top: 20px;
-            padding: 10px;
-            /* 添加内边距 */
-            background-color: #fff;
-            /* 白色背景 */
-            border-radius: 8px;
-            /* 圆角 */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            /*  হালকা ছায়া */
+            margin-top: 30px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .pagination-container button {
-            height: 34px;
-            /* 稍微减小高度 */
+            height: 36px;
             padding: 0 15px;
-            /* 稍微调整内边距 */
-            border: 1px solid #ddd;
-            /* 添加边框 */
-            background-color: #f9f9f9;
-            /* 更浅的背景色 */
-            color: #333;
-            border-radius: 4px;
+            border: none;
+            background: linear-gradient(90deg, rgba(110, 64, 255, 0.2), rgba(11, 220, 171, 0.2));
+            color: var(--text-color);
+            border-radius: 18px;
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-            /* 添加过渡效果 */
+            transition: all 0.3s ease;
         }
 
         .pagination-container button:disabled {
-            background-color: #eee;
-            /* 禁用时的背景色 */
-            color: #999;
-            /* 禁用时的文字颜色 */
-            border-color: #eee;
-            /* 禁用时的边框颜色 */
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--secondary-text);
             cursor: default;
-            /* 禁用时默认光标 */
         }
 
         .pagination-container button:hover:not(:disabled) {
-            background-color: #e1e1e1;
-            /* 悬停时更浅的背景色 */
-            border-color: #ccc;
-            /* 悬停时的边框颜色 */
-            color: #000;
-            /* 悬停时的文字颜色 */
+            background: linear-gradient(90deg, rgba(110, 64, 255, 0.3), rgba(11, 220, 171, 0.3));
+            transform: translateY(-2px);
         }
 
         .pagination-container span {
             font-size: 14px;
-            font-weight: bold;
-            color: #333;
+            font-weight: 500;
+            color: var(--text-color);
             margin: 0 10px;
-            /* 页码信息左右间距 */
         }
 
         .pagination-container .page-input {
             width: 40px;
-            /* 输入框宽度 */
-            height: 30px;
-            /* 输入框高度 */
+            height: 36px;
             margin: 0 5px;
-            /* 与按钮和文字的间距 */
             text-align: center;
-            /* 文本居中 */
-            border: 1px solid #ccc;
-            /* 边框 */
-            border-radius: 4px;
-            /* 圆角 */
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border-radius: 8px;
             outline: none;
-            /* 去除 focus 时的外轮廓线 */
         }
 
         .pagination-container .go-button {
-            height: 34px;
-            padding: 0 10px;
+            height: 36px;
+            padding: 0 15px;
             border: none;
-            background-color: #006d77;
-            color: #fff;
-            border-radius: 4px;
+            background: var(--primary-gradient);
+            color: var(--text-color);
+            border-radius: 18px;
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .pagination-container .go-button:hover {
-            background-color: #004d5b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 64, 255, 0.4);
         }
 
+        /* 导航图标样式 - 移除悬浮提示相关样式 */
+        .svg-container {
+            display: inline-block;
+        }
 
-        span.layui-nav-bar {
-            position: absolute;
+        /* 移除 tooltip 相关样式 */
+        .svg-container .tooltip {
+            display: none;
         }
 
         /* 响应式样式 */
         @media screen and (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-box {
+                width: 100%;
+                max-width: none;
+                margin: 10px 0;
+            }
+            
+            .layui-nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
             .container {
-                padding: 10px;
+                padding: 15px;
                 gap: 15px;
             }
-
+            
             .item {
                 width: 100%;
-                max-width: 400px;
+                max-width: none;
             }
-
+            
             .pagination-container {
                 flex-direction: column;
-                /* 在小屏幕上垂直排列分页元素 */
-                align-items: center;
-                /* 居中对齐 */
-                gap: 10px;
-                /* 垂直间距 */
+                gap: 15px;
             }
         }
 
-        /* 定义悬停时显示的提示文字 */
-        .svg-container {
-            position: relative;
-            display: inline-block;
+        /* 顶部导航条样式 */
+        .welcome-text {
+            color: var(--secondary-text);
+            font-weight: 500;
         }
 
-        .svg-container .tooltip {
-            visibility: hidden;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #f9f9f9;
-            /* 亮色背景 */
-            color: #000;
-            /* 黑色文字 */
-            padding: 5px 10px;
-            border-radius: 5px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-            white-space: nowrap;
-            font-size: 12px;
+        #username {
+            color: var(--accent-color);
+            font-weight: 600;
         }
 
-        .svg-container:hover .tooltip {
-            visibility: visible;
+        .icon {
+            fill: var(--text-color);
+            transition: fill 0.3s ease;
+        }
+
+        .layui-nav a:hover .icon {
+            fill: var(--accent-color);
         }
     </style>
+    <!-- 确保先加载 layui.js -->
+    <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
 </head>
 
 <body>
@@ -349,49 +359,35 @@
         <div class="search-box">
             <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
                 onkeydown="handleSearchKey(event)">
-            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
+            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
         <ul class="layui-nav">
             <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
             <li class="layui-nav-item">
-                <div class="svg-container">
-                    <a href="homepage">
-                        <svg t="1735399656533" class="icon" viewBox="0 0 1024 1024" version="1.1"
-                            xmlns="http://www.w3.org/2000/svg" p-id="1806" width="30" height="30">
-                            <path
-                                d="M510.45 70.554c-243.163 0-442.115 198.951-442.115 442.115 0 243.16 198.952 442.11 442.116 442.11 243.159 0 442.11-198.95 442.11-442.11 0-243.165-198.951-442.115-442.11-442.115z m11.051 132.633c168.556 0 168.556 127.11 168.556 198.95 0 71.847-66.318 204.48-168.556 207.24-99.475 0-168.556-132.632-168.556-207.24 0.001-71.841 0.001-198.95 168.556-198.95z m-11.05 726.723c-127.11 0-243.164-58.03-320.534-149.211 11.051-27.635 24.868-58.03 44.212-74.607 41.446-33.162 165.79-88.425 165.79-88.425l77.37 149.215 13.816-35.923L469 686.747l44.212-44.208 44.212 44.208-19.345 46.974 11.055 35.924 80.132-146.45s124.343 55.262 165.793 88.424c19.34 13.813 33.157 38.685 41.447 60.787C761.9 869.12 643.082 929.91 510.45 929.91z m0 0"
-                                fill="" p-id="1807"></path>
-                        </svg>
-                    </a>
-                    <span class="tooltip">个人中心</span>
-                </div>
+                <a href="homepage">
+                    <i class="fas fa-user"></i> 个人中心
+                </a>
             </li>
             <li class="layui-nav-item">
-                <div class="svg-container">
-                    <a href="statistics">
-                        <svg t="1735400000000" class="icon" viewBox="0 0 1024 1024" version="1.1"
-                            xmlns="http://www.w3.org/2000/svg" p-id="2000" width="30" height="30">
-                            <path
-                                d="M888.2 849.9H135.8V174.1c0-10.5-8.5-19-19-19s-19 8.5-19 19v695.8c0 10.5 8.5 19 19 19h771.4c10.5 0 19-8.5 19-19s-8.5-19-19-19z"
-                                fill="white" p-id="2001"></path>
-                            <path
-                                d="M210.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V490.4c0-10.5-8.5-19-19-19s-19 8.5-19 19v221.3zM354.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V383.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v328zM498.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V277c0-10.5-8.5-19-19-19s-19 8.5-19 19v434.7zM642.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V426.6c0-10.5-8.5-19-19-19s-19 8.5-19 19v285.1zM786.5 711.7c0 10.5 8.5 19 19 19s19-8.5 19-19V319.7c0-10.5-8.5-19-19-19s-19 8.5-19 19v392z"
-                                fill="white" p-id="2002"></path>
-                        </svg>
-                    </a>
-                    <span class="tooltip">统计分析</span>
-                </div>
+                <a href="statistics">
+                    <i class="fas fa-chart-bar"></i> 统计分析
+                </a>
             </li>
             <li class="layui-nav-item">
-                <a class="logout" onclick="logout()" style="cursor: pointer;">退出</a>
+                <a class="logout" onclick="logout()" style="cursor: pointer;">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </a>
             </li>
         </ul>
     </div>
 
     <div class="container">
+        <!-- 动态内容将通过 JavaScript 生成 -->
     </div>
 
-    <div class="pagination-container" style="text-align:center; margin-top:20px;">
+    <div class="pagination-container">
         <button class="layui-btn" id="prev-page" disabled>上一页</button>
         <span id="page-info">第 1 页 / 1 页</span>
         <button class="layui-btn" id="next-page">下一页</button>
@@ -399,7 +395,6 @@
         <button class="layui-btn go-button" id="go-page">跳转</button>
     </div>
 
-    <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
         let currentPage = 1;
         let totalPages = 1;
@@ -436,21 +431,42 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(data)
-            }).then(res => res.json()).catch(console.error);
+            })
+            .then(res => {
+                // 检查响应状态
+                if (!res.ok) {
+                    throw new Error(`请求失败: ${res.status} ${res.statusText}`);
+                }
+                return res.json();
+            })
+            .catch(error => {
+                console.error(`API请求错误 (${url}):`, error);
+                layui.layer.msg('数据加载失败，请稍后重试', {icon: 2});
+                // 返回空对象以避免后续处理错误
+                return { items: [], totalPages: 1 };
+            });
 
-        // 请求项目数据 for specific page
+        // 请求项目数据
         function fetchItemsForPage(page) {
-            const params = { page: page, pageSize: pageSize };
-
-            fetchData('/display', params)
+            // 显示加载状态
+            const loadingMsg = layui.layer.msg('数据加载中...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+            
+            // 修正API路径 - /items 可能应该是 /api/items 或其他正确的路径
+            fetchData('/api/items', { page: page, pageSize: pageSize })
                 .then(data => {
+                    layui.layer.close(loadingMsg);
+                    
                     if (data?.items && data?.totalPages) {
                         renderItems(data.items);
                         totalPages = data.totalPages;
                         updatePagination();
                     } else {
                         console.error('未能获取到项目数据或分页信息');
-                        renderItems();
+                        renderItems([]);
                         totalPages = 1;
                         updatePagination();
                     }
@@ -462,18 +478,18 @@
             const container = document.querySelector('.container');
             container.innerHTML = items.length
                 ? items.map(item => `
-                                    <div id="${item.name}" class="item">
-                                        <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
-                                            src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
-                                        <div class="item-content">
-                                            <p>名称：${item.name}</p>
-                                            <p>描述：${item.description}</p>
-                                            <p>价格：${item.price}</p>
-                                            <p>拥有者：${item.owner}</p>
-                                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
-                                        </div>
-                                    </div>
-                                `).join('') : '<p>没有数据可显示</p>';
+                    <div id="${item.name}" class="item">
+                        <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片'}"
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
+                        <div class="item-content">
+                            <p><strong>名称：</strong>${item.name}</p>
+                            <p><strong>描述：</strong>${item.description}</p>
+                            <p><strong>价格：</strong>${item.price}</p>
+                            <p><strong>拥有者：</strong>${item.owner}</p>
+                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
+                        </div>
+                    </div>
+                `).join('') : '<p style="color: var(--secondary-text); text-align: center; width: 100%;">没有数据可显示</p>';
 
             // After rendering, observe new images for lazy loading
             observeImages();
@@ -501,7 +517,6 @@
             });
         }
 
-
         function viewDetails(itemName) {
             if (!token) {
                 alert('用户未登录，请先登录！');
@@ -513,7 +528,15 @@
                 return;
             }
 
-            fetch('/information', {
+            // 显示加载状态
+            const loadingMsg = layui.layer.msg('加载详情...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+
+            // 修正API路径
+            fetch('/api/information', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -521,34 +544,33 @@
                 },
                 body: JSON.stringify({ name: itemName })
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        return response.json().then(err => {
-                            console.error('查看详情请求失败:', err);
-                            alert('查看详情失败，请稍后重试！');
-                        });
-                    }
-                })
-                .then(data => {
-                    if (data && data.items && data.items.length > 0) {
-                        const item = data.items[0];
-                        const processedItem = {
-                            ...item,
-                            img: item.img === "NULL" ? "https://via.placeholder.com/200x120?text=暂无图片" : item.img
-                        };
-                        sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
-                        window.location.href = '/information';
-                    } else {
-                        console.error('未找到相关项');
-                        alert('未找到相关项');
-                    }
-                })
-                .catch(error => {
-                    console.error('网络错误:', error);
-                    alert('网络错误，请稍后重试！');
-                });
+            .then(response => {
+                layui.layer.close(loadingMsg);
+                
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.items && data.items.length > 0) {
+                    const item = data.items[0];
+                    const processedItem = {
+                        ...item,
+                        img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
+                    };
+                    sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
+                    window.location.href = '/information';
+                } else {
+                    console.error('未找到相关项');
+                    layui.layer.msg('未找到项目详情', {icon: 2});
+                }
+            })
+            .catch(error => {
+                layui.layer.close(loadingMsg);
+                console.error('获取详情失败:', error);
+                layui.layer.msg('获取详情失败，请稍后重试', {icon: 2});
+            });
         }
 
         // 更新分页信息
@@ -560,12 +582,13 @@
         }
 
         // 搜索功能：跳转到 search.html 页面
-        function    searchItems() {
+        function searchItems() {
             const searchQuery = document.getElementById('search-input').value.trim();
             if (searchQuery) {
-                window.location.href = `search?query=${encodeURIComponent(searchQuery)}`;
+                // 确保使用正确的路径
+                window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
             } else {
-                alert("请重试");
+                layui.layer.msg('请输入搜索内容', {icon: 2});
             }
         }
 
@@ -592,8 +615,8 @@
                 const pageInput = document.getElementById('page-number');
                 let page = parseInt(pageInput.value, 10);
                 if (isNaN(page) || page < 1 || page > totalPages) {
-                    alert('请输入有效的页码，范围在 1 到 ' + totalPages + '!');
-                    pageInput.value = currentPage; // Reset input to current page
+                    layui.layer.msg('请输入有效的页码范围 1 - ' + totalPages, {icon: 2});
+                    pageInput.value = currentPage;
                     return;
                 }
                 currentPage = page;
@@ -607,5 +630,4 @@
         }
     </script>
 </body>
-
 </html>

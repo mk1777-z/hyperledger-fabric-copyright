@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜索结果</title>
-    <link href="//unpkg.s/layui.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
     <style>
         /* 这里可以复制版权展示页面的 CSS 样式 */
         body {
@@ -223,7 +223,7 @@
             window.location.href = '/';
         }
 
-        // 通用fetch请求函数
+        // 通用fetch请求函数 - 增强错误处理
         const fetchData = (url, data) =>
             fetch(url, {    
                 method: 'POST',
@@ -232,24 +232,47 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(data)
-            }).then(res => res.json()).catch(console.error);
+            })
+            .then(res => {
+                // 检查响应状态
+                if (!res.ok) {
+                    throw new Error(`请求失败: ${res.status} ${res.statusText}`);
+                }
+                return res.json();
+            })
+            .catch(error => {
+                console.error(`API请求错误 (${url}):`, error);
+                layui.layer.msg('数据加载失败，请稍后重试', {icon: 2});
+                // 返回空对象以避免后续处理错误
+                return { items: [], totalPages: 1 };
+            });
 
-        // 请求项目数据 for specific page and search query
+        // 请求项目数据 - 修正API路径
         function fetchItemsForPage(page, searchQuery) {
             const params = { page: page, pageSize: pageSize };
             if (searchQuery) {
                 params.search = searchQuery;
             }
 
-            fetchData('/search', params)
+            // 显示加载状态
+            const loadingMsg = layui.layer.msg('数据加载中...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+            
+            // 修正API路径
+            fetchData('/api/search', params)
                 .then(data => {
+                    layui.layer.close(loadingMsg);
+                    
                     if (data?.items && data?.totalPages) {
                         renderItems(data.items);
                         totalPages = data.totalPages;
                         updatePagination();
                     } else {
                         console.error('未能获取到项目数据或分页信息');
-                        renderItems();
+                        renderItems([]);
                         totalPages = 1;
                         updatePagination();
                     }

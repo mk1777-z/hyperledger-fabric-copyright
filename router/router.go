@@ -8,6 +8,19 @@ import (
 
 // RegisterRoutes 注册所有路由
 func RegisterRoutes(h *server.Hertz) {
+	// API路由前缀组
+	api := h.Group("/api")
+	{
+		// 项目列表API
+		api.POST("/items", middle.GetItems)
+
+		// 项目详情API
+		api.POST("/information", middle.GetItemInfo)
+
+		// 搜索API
+		api.POST("/search", middle.SearchItems)
+	}
+
 	// 统计分析相关路由
 	h.POST("/statistics/chartData", middle.GetChartData)
 	h.POST("/statistics/exportData", middle.ExportData)
