@@ -30,8 +30,15 @@ func renderHTML(h *server.Hertz) {
 		})
 	})
 
-	// 渲染 signin 页面
+	// 将根路径改为指向home.html
 	h.GET("/", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "home.html", utils.H{
+			"title": "区块链版权管理系统",
+		})
+	})
+
+	// 添加新路由指向登录页面
+	h.GET("/signin", func(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusOK, "signin.html", utils.H{
 			"title": "Sign In",
 		})
