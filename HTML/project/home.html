@@ -1,0 +1,742 @@
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区块链版权管理系统</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
+            --dark-bg: #0F172A;
+            --darker-bg: #080d18;
+            --card-bg: #182338;
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
+            --accent-hover: #5930d8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--darker-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .cta-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 1.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+        
+        /* 英雄部分 */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 5% 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(110, 64, 255, 0.2), transparent 40%),
+                        radial-gradient(circle at 70% 65%, rgba(11, 220, 171, 0.2), transparent 35%);
+            z-index: -1;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+        
+        .hero-image {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 特性部分 */
+        .features {
+            padding: 6rem 5%;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-text {
+            color: var(--secondary-text);
+        }
+        
+        /* 工作原理部分 */
+        .how-it-works {
+            padding: 6rem 5%;
+            background-color: var(--darker-bg);
+        }
+        
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+            max-width: 1000px;
+            margin: 4rem auto 0;
+        }
+        
+        .step {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-number {
+            font-size: 5rem;
+            font-weight: 700;
+            color: rgba(110, 64, 255, 0.2);
+            margin-bottom: 1rem;
+        }
+        
+        .step-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .step-text {
+            color: var(--secondary-text);
+        }
+        
+        .step-image {
+            flex: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .step-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 统计部分 */
+        .stats {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .stat-item {
+            position: relative;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--secondary-text);
+        }
+        
+        /* 常见问题 */
+        .faq {
+            padding: 6rem 5%;
+            background-color: var(--darker-bg);
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 4rem auto 0;
+        }
+        
+        .faq-item {
+            margin-bottom: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .faq-question:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .faq-question h3 {
+            font-size: 1.2rem;
+        }
+        
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--secondary-text);
+        }
+        
+        /* CTA 部分 */
+        .cta {
+            padding: 6rem 5%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at 70% 30%, rgba(110, 64, 255, 0.15), transparent 50%),
+                        radial-gradient(circle at 30% 70%, rgba(11, 220, 171, 0.15), transparent 50%);
+            z-index: -1;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta p {
+            color: var(--secondary-text);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 页脚 */
+        .footer {
+            padding: 5rem 5% 2rem;
+            background-color: var(--darker-bg);
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-links a {
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .step, .step:nth-child(even) {
+                flex-direction: column;
+                gap: 2rem;
+            }
+        }
+        
+        /* 导航栏汉堡菜单 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-color);
+            margin-bottom: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background-color: var(--darker-bg);
+                padding: 2rem;
+                gap: 1.5rem;
+                transform: translateY(-200%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+            
+            .nav-links.active {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">区块链版权</div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="#">主页</a>
+            <a href="#">产品</a>
+            <a href="#">文档</a>
+            <a href="#">关于我们</a>
+        </div>
+        <button class="cta-button" onclick="window.location.href='signin.html'">立即登录</button>
+    </nav>
+
+    <!-- 英雄部分 -->
+    <section class="hero">
+        <h1 data-aos="fade-up">基于区块链技术的版权管理系统</h1>
+        <p data-aos="fade-up" data-aos-delay="100">
+            利用区块链不可篡改的特性，保护您的创作，简化版权交易流程，
+            让每一份创意都得到充分尊重与保护。
+        </p>
+        <div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
+            <button class="cta-button" onclick="window.location.href='signup.html'">开始使用</button>
+            <button class="cta-button" style="background: transparent; border: 1px solid #6e40ff;" onclick="window.location.href='#how-it-works'">了解更多</button>
+        </div>
+        <img src="https://via.placeholder.com/1000x500/182338/cccccc?text=版权系统界面展示" alt="平台界面展示" class="hero-image" data-aos="fade-up" data-aos-delay="300">
+    </section>
+
+    <!-- 特性部分 -->
+    <section class="features">
+        <h2 class="section-title" data-aos="fade-up">系统特性</h2>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">安全可靠</h3>
+                <p class="feature-text">
+                    基于区块链技术，版权信息一经上链不可篡改，
+                    确保您的知识产权得到可靠保护。
+                </p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">高效交易</h3>
+                <p class="feature-text">
+                    简化版权交易流程，无需复杂的中介环节，
+                    直接连接创作者与使用者，提高交易效率。
+                </p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">数据分析</h3>
+                <p class="feature-text">
+                    提供全面的数据统计与分析功能，
+                    帮助您了解版权资产的市场表现和价值。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工作原理部分 -->
+    <section class="how-it-works" id="how-it-works">
+        <h2 class="section-title" data-aos="fade-up">工作原理</h2>
+        <div class="steps-container">
+            <div class="step" data-aos="fade-right">
+                <div class="step-content">
+                    <div class="step-number">01</div>
+                    <h3 class="step-title">版权上传</h3>
+                    <p class="step-text">
+                        创作者只需简单几步，即可将作品信息上传至平台，
+                        系统将自动生成唯一标识并上链存储，确保版权信息不可篡改。
+                    </p>
+                </div>
+                <div class="step-image">
+                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=上传界面" alt="版权上传界面">
+                </div>
+            </div>
+            <div class="step" data-aos="fade-left">
+                <div class="step-content">
+                    <div class="step-number">02</div>
+                    <h3 class="step-title">版权交易</h3>
+                    <p class="step-text">
+                        通过智能合约实现版权的安全交易，交易记录自动上链，
+                        确保交易过程透明可追溯，保障买卖双方权益。
+                    </p>
+                </div>
+                <div class="step-image">
+                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=交易界面" alt="版权交易界面">
+                </div>
+            </div>
+            <div class="step" data-aos="fade-right">
+                <div class="step-content">
+                    <div class="step-number">03</div>
+                    <h3 class="step-title">数据统计</h3>
+                    <p class="step-text">
+                        平台提供全面的统计分析功能，包括交易趋势、用户活跃度、
+                        价格分布等数据，帮助用户全面了解市场状况。
+                    </p>
+                </div>
+                <div class="step-image">
+                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=统计界面" alt="数据统计界面">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 统计部分 -->
+    <section class="stats">
+        <h2 class="section-title" data-aos="fade-up">平台数据</h2>
+        <div class="stats-grid">
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-number" id="user-count">5000+</div>
+                <div class="stat-label">注册用户</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-number" id="copyright-count">25000+</div>
+                <div class="stat-label">版权登记</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-number" id="transaction-count">8000+</div>
+                <div class="stat-label">成功交易</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-number" id="daily-active">1200+</div>
+                <div class="stat-label">日活跃用户</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常见问题 -->
+    <section class="faq">
+        <h2 class="section-title" data-aos="fade-up">常见问题</h2>
+        <div class="faq-container">
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="faq-question">
+                    <h3>什么是区块链版权管理系统？</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>区块链版权管理系统是一个基于区块链技术的平台，通过区块链的不可篡改特性，为创作者提供版权登记、确权、交易等服务，解决传统版权管理中的信任与效率问题。</p>
+                </div>
+            </div>
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="faq-question">
+                    <h3>如何上传我的作品？</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>注册并登录后，点击"上传"按钮，填写作品相关信息并上传作品文件，系统将自动为您的作品生成区块链上的唯一标识，完成版权登记。</p>
+                </div>
+            </div>
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="faq-question">
+                    <h3>版权交易如何进行？</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>可以通过平台直接发起版权转让或授权交易，系统将通过智能合约确保交易安全进行。交易完成后，所有权变更记录将自动上链，确保交易的有效性和可追溯性。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA 部分 -->
+    <section class="cta">
+        <h2 data-aos="fade-up">开始使用区块链版权管理系统</h2>
+        <p data-aos="fade-up" data-aos-delay="100">
+            为您的创意作品提供安全可靠的保护，让版权管理变得简单高效。
+            立即注册，体验区块链技术带来的创新版权管理方式。
+        </p>
+        <button class="cta-button" data-aos="fade-up" data-aos-delay="200" onclick="window.location.href='signup.html'">立即注册</button>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>区块链版权</h3>
+                <p style="color: var(--secondary-text); margin-top: 1rem;">
+                    基于区块链技术的创新版权管理解决方案，为创作者提供全方位的版权保护与交易服务。
+                </p>
+            </div>
+            <div class="footer-column">
+                <h3>产品</h3>
+                <ul class="footer-links">
+                    <li><a href="#">版权登记</a></li>
+                    <li><a href="#">版权交易</a></li>
+                    <li><a href="#">数据分析</a></li>
+                    <li><a href="#">企业解决方案</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>资源</h3>
+                <ul class="footer-links">
+                    <li><a href="#">帮助中心</a></li>
+                    <li><a href="#">API文档</a></li>
+                    <li><a href="#">白皮书</a></li>
+                    <li><a href="#">最新动态</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>关注我们</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 区块链版权管理系统. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- 引入 AOS 动画库 -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // 初始化 AOS 动画库
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 1000,
+                once: true
+            });
+            
+            // 汉堡菜单功能
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+            
+            hamburger.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+            
+            // FAQ 展开/收起功能
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    if (answer.style.maxHeight) {
+                        answer.style.maxHeight = null;
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    } else {
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

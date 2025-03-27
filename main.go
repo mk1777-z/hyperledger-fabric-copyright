@@ -52,8 +52,6 @@ func main() {
 
 	h.GET("/chat_ws", middle.ChatWebsocket)
 
-	h.POST("/migrate", middle.Migrate)
-
 	h.NoHijackConnPool = true
 
 	if err := h.Run(); err != nil {

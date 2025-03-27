@@ -62,4 +62,11 @@ func renderHTML(h *server.Hertz) {
 
 	// 添加对statistics页面的支持
 	h.GET("/statistics", middle.StatisticsPage)
+
+	//炫酷的主页
+	h.GET("/home", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "home.html", utils.H{
+			"title": "区块链版权管理系统",
+		})
+	})
 }
