@@ -38,14 +38,14 @@ func renderHTML(h *server.Hertz) {
 	})
 
 	// 添加新路由指向登录页面
-	h.GET("/signin", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/login", func(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusOK, "signin.html", utils.H{
 			"title": "Sign In",
 		})
 	})
 
 	// 渲染 signup 页面
-	h.GET("/signup", func(ctx context.Context, c *app.RequestContext) {
+	h.GET("/register", func(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusOK, "signup.html", utils.H{
 			"title": "Sign Up",
 		})

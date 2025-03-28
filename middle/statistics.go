@@ -613,7 +613,571 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 	}, nil
 }
 
-// 导出Excel文件
+// GetDataSourceInfo 获取数据来源信息
+func GetDataSourceInfo(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库以测试连接是否可用
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 测试数据库连接是否正常
+	if err := db.Ping(); err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "数据库Ping失败: " + err.Error()})
+		return
+	}
+
+	// 测试区块链连接
+	_, err = readTransactionFromBlockchainForStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "区块链连接失败: " + err.Error()})
+		return
+	}
+
+	// 准备数据源信息 - 所有数据来自实际数据源，不使用模拟数据
+	dataSources := make(map[string]string)
+	dataSources["categoryData"] = "数据库"
+	dataSources["priceData"] = "数据库"
+	dataSources["activityData"] = "数据库+区块链"
+	dataSources["trendData"] = "区块链"
+
+	c.JSON(http.StatusOK, H{
+		"dataStatus": H{
+			"db":         true,
+			"blockchain": true,
+		},
+		"dataSources": dataSources,
+	})
+}
+
+// 版权趋势数据API
+func GetCopyrightTrendAPI(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 解析请求参数
+	var req struct {
+		TimeRange string `json:"timeRange"`
+		Category  string `json:"category"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, H{"success": false, "message": "无效的请求参数"})
+		return
+	}
+
+	// 获取趋势数据
+	trendData, err := getTrendData(db, req.TimeRange, req.Category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "获取趋势数据失败: " + err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success": true,
+		"dates":   trendData["months"],
+		"counts":  trendData["counts"],
+	})
+}
+
+// 版权类型分布API
+func GetCopyrightTypesAPI(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 解析请求参数
+	var req struct {
+		TimeRange string `json:"timeRange"`
+		Category  string `json:"category"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, H{"success": false, "message": "无效的请求参数"})
+		return
+	}
+
+	// 获取类型分布数据
+	categoryData, err := getCategoryData(db, req.TimeRange, req.Category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "获取类型分布数据失败: " + err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success": true,
+		"types":   categoryData,
+	})
+}
+
+// 交易金额分析API
+func GetTransactionAmountAPI(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 解析请求参数
+	var req struct {
+		TimeRange string `json:"timeRange"`
+		Category  string `json:"category"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, H{"success": false, "message": "无效的请求参数"})
+		return
+	}
+
+	// 获取趋势数据（包含交易金额）
+	trendData, err := getTrendData(db, req.TimeRange, req.Category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "获取交易金额数据失败: " + err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success": true,
+		"dates":   trendData["months"],
+		"amounts": trendData["amounts"],
+	})
+}
+
+// 用户活跃度API - 修复内部服务器错误问题
+func GetUserActivityAPI(ctx context.Context, c *app.RequestContext) {
+	log.Println("处理用户活跃度API请求...")
+
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Printf("数据库连接失败: %v", err)
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 测试数据库连接
+	if err := db.Ping(); err != nil {
+		log.Printf("数据库Ping失败: %v", err)
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接测试失败: " + err.Error()})
+		return
+	}
+
+	// 解析请求参数
+	var req struct {
+		TimeRange string `json:"timeRange"`
+		Days      int    `json:"days"`
+	}
+	if err := c.Bind(&req); err != nil {
+		log.Printf("解析请求参数失败: %v", err)
+		c.JSON(http.StatusBadRequest, H{"success": false, "message": "无效的请求参数"})
+		return
+	}
+
+	log.Printf("用户活跃度API接收到参数: timeRange=%s, days=%d", req.TimeRange, req.Days)
+
+	// 首先检查user表中是否存在需要的字段
+	var tableExists int
+	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'user'",
+		conf.Con.Mysql.DbName).Scan(&tableExists)
+
+	if err != nil {
+		log.Printf("检查表是否存在时出错: %v", err)
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "检查数据库表结构失败"})
+		return
+	}
+
+	if tableExists == 0 {
+		log.Printf("user表不存在")
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "用户表不存在，无法获取活跃度数据"})
+		return
+	}
+
+	// 检查必要字段是否存在
+	var columnsExists struct {
+		registration_time int
+		last_active_time  int
+	}
+
+	// 检查registration_time字段
+	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = ? AND table_name = 'user' AND column_name = 'registration_time'",
+		conf.Con.Mysql.DbName).Scan(&columnsExists.registration_time)
+
+	if err != nil || columnsExists.registration_time == 0 {
+		log.Printf("registration_time字段不存在: %v", err)
+		// 提供默认日期数据，但使用简化的查询方式获取活跃用户
+		getSimplifiedActivityData(db, req.TimeRange, c)
+		return
+	}
+
+	// 检查last_active_time字段
+	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = ? AND table_name = 'user' AND column_name = 'last_active_time'",
+		conf.Con.Mysql.DbName).Scan(&columnsExists.last_active_time)
+
+	if err != nil || columnsExists.last_active_time == 0 {
+		log.Printf("last_active_time字段不存在: %v", err)
+		// 提供默认日期数据，但使用简化的查询方式获取活跃用户
+		getSimplifiedActivityData(db, req.TimeRange, c)
+		return
+	}
+
+	// 正常获取活跃度数据
+	activityData, err := getActivityData(db, req.TimeRange)
+	if err != nil {
+		log.Printf("获取用户活跃度数据失败: %v", err)
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "获取用户活跃度数据失败: " + err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success":          true,
+		"dates":            activityData["dates"],
+		"activeUsers":      activityData["activeUsers"],
+		"transactionUsers": activityData["tradingUsers"],
+		"newUsers":         activityData["newUsers"],
+	})
+}
+
+// 使用简化方式获取活跃度数据（当字段缺失时使用）
+func getSimplifiedActivityData(db *sql.DB, timeRange string, c *app.RequestContext) {
+	// 解析时间范围
+	startTime, endTime, err := parseTimeRange(timeRange)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "解析时间范围失败: " + err.Error()})
+		return
+	}
+
+	// 限制为过去7天的数据
+	sevenDaysAgo := time.Now().AddDate(0, 0, -6)
+	if startTime.Before(sevenDaysAgo) {
+		startTime = sevenDaysAgo
+	}
+
+	// 构建日期范围
+	var dates []string
+	for d := startTime; !d.After(endTime); d = d.AddDate(0, 0, 1) {
+		dates = append(dates, d.Format("01-02"))
+	}
+
+	// 初始化结果数组
+	var activeUsers = make([]int, len(dates))
+
+	// 使用创建时间作为备用
+	for i := range activeUsers {
+		// 使用固定值或查询总用户数
+		var userCount int
+		err := db.QueryRow("SELECT COUNT(*) FROM user").Scan(&userCount)
+		if err != nil {
+			log.Printf("查询用户总数失败: %v", err)
+			activeUsers[i] = 0
+		} else {
+			// 提供合理估计值
+			activeUsers[i] = userCount / 4 // 假设25%的用户活跃
+		}
+	}
+
+	// 获取交易用户数据
+	tradingUsersMap := make(map[string]map[string]bool)
+	for _, date := range dates {
+		tradingUsersMap[date] = make(map[string]bool)
+	}
+
+	// 从区块链获取交易数据
+	allTransactions, _ := readTransactionFromBlockchainForStats()
+	if allTransactions != nil {
+		for _, tx := range allTransactions {
+			transTime, ok := tx["Transtime"].(string)
+			if !ok {
+				continue
+			}
+
+			// 解析交易时间
+			txTime, err := time.Parse("2006-01-02 15:04:05", transTime)
+			if err != nil {
+				continue
+			}
+
+			// 检查时间是否在范围内
+			if txTime.Before(startTime) || txTime.After(endTime) {
+				continue
+			}
+
+			// 获取日期格式
+			dateKey := txTime.Format("01-02")
+
+			// 记录买家和卖家作为交易用户
+			if buyer, ok := tx["Purchaser"].(string); ok {
+				tradingUsersMap[dateKey][buyer] = true
+			}
+
+			if seller, ok := tx["Seller"].(string); ok {
+				tradingUsersMap[dateKey][seller] = true
+			}
+		}
+	}
+
+	// 计算每个日期的交易用户数
+	tradingUsers := make([]int, len(dates))
+	for i, date := range dates {
+		tradingUsers[i] = len(tradingUsersMap[date])
+	}
+
+	// 生成新用户数据（简化为从活跃用户中派生）
+	newUsers := make([]int, len(dates))
+	for i := range newUsers {
+		newUsers[i] = activeUsers[i] / 5 // 假设活跃用户中20%是新用户
+	}
+
+	c.JSON(http.StatusOK, H{
+		"success":          true,
+		"dates":            dates,
+		"activeUsers":      activeUsers,
+		"transactionUsers": tradingUsers,
+		"newUsers":         newUsers,
+		"note":             "部分数据是估算值，因为数据库缺少必要字段",
+	})
+}
+
+// 统计摘要API
+func GetStatisticsSummaryAPI(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 查询总版权数
+	var copyrightCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM item").Scan(&copyrightCount)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "查询版权数据失败: " + err.Error()})
+		return
+	}
+
+	// 查询活跃用户数 (过去30天有登录记录的用户)
+	var activeUsers int
+	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+	err = db.QueryRow("SELECT COUNT(DISTINCT username) FROM user WHERE last_active_time > ?", thirtyDaysAgo).Scan(&activeUsers)
+	if err != nil {
+		log.Printf("查询活跃用户失败: %v", err)
+		activeUsers = 0 // 如果查询失败，默认为0
+	}
+
+	// 获取交易数据
+	allTransactions, err := readTransactionFromBlockchainForStats()
+	var transactionCount int
+	var totalValue float64
+
+	if err == nil {
+		transactionCount = len(allTransactions)
+
+		// 计算总交易金额
+		for _, tx := range allTransactions {
+			var price float64
+			switch p := tx["Price"].(type) {
+			case float64:
+				price = p
+			case string:
+				fmt.Sscanf(p, "%f", &price)
+			}
+			totalValue += price
+		}
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success":          true,
+		"copyrightCount":   copyrightCount,
+		"activeUsers":      activeUsers,
+		"transactionCount": transactionCount,
+		"totalValue":       totalValue,
+	})
+}
+
+// 表格数据API
+func GetDetailTableDataAPI(ctx context.Context, c *app.RequestContext) {
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "数据库连接失败: " + err.Error()})
+		return
+	}
+	defer db.Close()
+
+	// 解析请求参数
+	var req struct {
+		DateRange string `json:"dateRange"`
+		Type      string `json:"type"`
+		Page      int    `json:"page"`
+		Limit     int    `json:"limit"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, H{"success": false, "message": "无效的请求参数"})
+		return
+	}
+
+	// 设置默认值
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.Limit < 1 {
+		req.Limit = 10
+	}
+
+	// 构建查询
+	query := "SELECT id, name, category, owner, start_time, price, on_sale FROM item WHERE 1=1"
+	countQuery := "SELECT COUNT(*) FROM item WHERE 1=1"
+	params := []interface{}{}
+
+	// 增加筛选条件
+	if req.DateRange != "" {
+		startTime, endTime, err := parseTimeRange(req.DateRange)
+		if err == nil {
+			query += " AND start_time BETWEEN ? AND ?"
+			countQuery += " AND start_time BETWEEN ? AND ?"
+			params = append(params, startTime, endTime)
+		}
+	}
+
+	if req.Type != "" {
+		query += " AND category = ?"
+		countQuery += " AND category = ?"
+		params = append(params, req.Type)
+	}
+
+	// 计算总数
+	var total int
+	err = db.QueryRow(countQuery, params...).Scan(&total)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "查询数据失败: " + err.Error()})
+		return
+	}
+
+	// 分页
+	query += " ORDER BY start_time DESC LIMIT ? OFFSET ?"
+	offset := (req.Page - 1) * req.Limit
+	params = append(params, req.Limit, offset)
+
+	// 执行查询
+	rows, err := db.Query(query, params...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"success": false, "message": "查询数据失败: " + err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	// 读取行并构造结果
+	var items []map[string]interface{}
+	for rows.Next() {
+		var id, name, category, owner string
+		var startTime time.Time
+		var price float64
+		var onSale bool
+
+		if err := rows.Scan(&id, &name, &category, &owner, &startTime, &price, &onSale); err != nil {
+			continue
+		}
+
+		// 获取交易次数 (这是一个简化版本，实际应该查询区块链)
+		transactions := 0
+		status := "未售"
+		if onSale {
+			status = "在售"
+		}
+
+		items = append(items, map[string]interface{}{
+			"id":               id,
+			"name":             name,
+			"type":             category,
+			"owner":            owner,
+			"registrationDate": startTime.Format("2006-01-02"),
+			"price":            price,
+			"transactions":     transactions,
+			"status":           status,
+		})
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, H{
+		"success": true,
+		"total":   total,
+		"items":   items,
+	})
+}
+
+// ExportExcelAPI 处理Excel导出请求
+func ExportExcelAPI(ctx context.Context, c *app.RequestContext) {
+	// 获取token
+	token := c.Query("token")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, H{"message": "未提供授权token"})
+		return
+	}
+
+	// 获取筛选参数
+	timeRange := c.Query("timeRange")
+	category := c.Query("category")
+
+	// 导出Excel
+	data, err := exportExcel(timeRange, category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "Excel导出失败: " + err.Error()})
+		return
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=copyright_statistics.xlsx")
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", data)
+}
+
+// ExportPDFAPI 处理PDF导出请求
+func ExportPDFAPI(ctx context.Context, c *app.RequestContext) {
+	// 获取token
+	token := c.Query("token")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, H{"message": "未提供授权token"})
+		return
+	}
+
+	// 获取筛选参数
+	timeRange := c.Query("timeRange")
+	category := c.Query("category")
+
+	// 导出PDF
+	data, err := exportPDF(timeRange, category)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, H{"message": "PDF导出失败: " + err.Error()})
+		return
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=copyright_statistics.pdf")
+	c.Header("Content-Type", "application/pdf")
+	c.Data(http.StatusOK, "application/pdf", data)
+}
+
+// 导出Excel文件 - 确保正确调用ExportDataToExcel函数
 func exportExcel(timeRange, category string) ([]byte, error) {
 	// 连接数据库
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
@@ -655,7 +1219,7 @@ func exportExcel(timeRange, category string) ([]byte, error) {
 	return data, nil
 }
 
-// 导出PDF文件
+// 导出PDF文件 - 确保正确调用ExportDataToPDF函数
 func exportPDF(timeRange, category string) ([]byte, error) {
 	// 连接数据库
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
@@ -695,44 +1259,4 @@ func exportPDF(timeRange, category string) ([]byte, error) {
 	}
 	log.Printf("PDF导出成功, 大小: %d 字节", len(data))
 	return data, nil
-}
-
-// GetDataSourceInfo 获取数据来源信息
-func GetDataSourceInfo(ctx context.Context, c *app.RequestContext) {
-	// 连接数据库以测试连接是否可用
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, H{"message": "数据库连接失败: " + err.Error()})
-		return
-	}
-	defer db.Close()
-
-	// 测试数据库连接是否正常
-	if err := db.Ping(); err != nil {
-		c.JSON(http.StatusInternalServerError, H{"message": "数据库Ping失败: " + err.Error()})
-		return
-	}
-
-	// 测试区块链连接
-	_, err = readTransactionFromBlockchainForStats()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, H{"message": "区块链连接失败: " + err.Error()})
-		return
-	}
-
-	// 准备数据源信息 - 所有数据来自实际数据源，不使用模拟数据
-	dataSources := make(map[string]string)
-	dataSources["categoryData"] = "数据库"
-	dataSources["priceData"] = "数据库"
-	dataSources["activityData"] = "数据库+区块链"
-	dataSources["trendData"] = "区块链"
-
-	c.JSON(http.StatusOK, H{
-		"dataStatus": H{
-			"db":         true,
-			"blockchain": true,
-		},
-		"dataSources": dataSources,
-	})
 }

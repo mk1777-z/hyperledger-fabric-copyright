@@ -30,6 +30,24 @@ func main() {
 	// 确保调用路由注册函数
 	router.RegisterRoutes(h)
 
+	// 直接在main函数中注册API路由，不使用setupRouter函数
+	// 统计分析API - 使用全局路由而非/api前缀
+	h.POST("/statistics/summary", middle.GetStatisticsSummaryAPI)
+	h.POST("/statistics/copyright-trend", middle.GetCopyrightTrendAPI)
+	h.POST("/statistics/copyright-types", middle.GetCopyrightTypesAPI)
+	h.POST("/statistics/transaction-amount", middle.GetTransactionAmountAPI)
+	h.POST("/statistics/user-activity", middle.GetUserActivityAPI)
+	h.POST("/statistics/detail-data", middle.GetDetailTableDataAPI)
+
+	// Excel和PDF导出API
+	h.GET("/statistics/export-excel", middle.ExportExcelAPI)
+	h.GET("/statistics/export-pdf", middle.ExportPDFAPI)
+
+	// 余额相关API
+	h.POST("/balance", middle.HandleAccount)
+	h.POST("/getbalance", middle.GetBalance)
+	h.POST("/account/balance", middle.GetBalance)
+
 	h.POST("/register", middle.Register)
 
 	h.POST("/login", middle.Login)
@@ -45,8 +63,6 @@ func main() {
 	h.POST("/updateItem", middle.UpdateItem)
 
 	h.POST("/transaction", middle.Transaction)
-
-	h.POST("/account", middle.HandleAccount)
 
 	h.POST("/search", middle.Search)
 

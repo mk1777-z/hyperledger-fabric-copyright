@@ -1,524 +1,1245 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人版权管理界面</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
-    <link rel="stylesheet" href="static/css/homepage.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': {
+                            '50': '#f0f9ff',
+                            '100': '#e0f2fe',
+                            '300': '#7dd3fc',
+                            '400': '#38bdf8',
+                            '500': '#0ea5e9',
+                            '600': '#0284c7',
+                            '700': '#0369a1',
+                            '800': '#075985',
+                            '900': '#0c4a6e',
+                        },
+                        'dark': {
+                            '400': '#1e293b',
+                            '500': '#0a101f',
+                            '600': '#070b16',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
     <style>
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
+            --dark-bg-left: #03020A;  /* 极暗的紫黑色 */
+            --dark-bg-right: #0A0818;  /* 极暗的蓝紫色 */
+            --card-bg: rgba(30, 40, 70, 0.9);
+            --card-border: rgba(80, 100, 240, 0.3);
+            --card-glow: rgba(110, 64, 255, 0.2);
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
         }
 
-        .pagination button {
-            margin: 0 5px;
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(90deg, var(--dark-bg-left), var(--dark-bg-right));
+            background-attachment: fixed;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 背景光晕效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(110, 64, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(11, 220, 171, 0.1) 0%, transparent 30%);
+            z-index: -1;
+        }
+
+        /* 额外背景效果 */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            z-index: -1;
+        }
+        
+        .bg-amber {
+            height: 600px;
+            width: 600px;
+            right: 0;
+            margin-top: -100px;
+            background-color: rgba(245, 158, 11, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+        
+        .bg-primary {
+            height: 600px;
+            width: 600px;
+            left: 0;
+            background-color: rgba(110, 64, 255, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(3, 2, 10, 0.6); 
+            color: var(--text-color);
+            padding: 15px 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        .nav-item {
             padding: 8px 16px;
-            /* 适当增大内边距，让按钮看起来更饱满美观 */
-            background-color: #d8daba;
-            /* 更改背景色为一种比较协调的中性色 */
-            border: 1px solid #495057;
-            /* 更改边框颜色与背景色搭配 */
-            border-radius: 5px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item.active {
+            color: white;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        /* 用户导航 */
+        .user-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .welcome-text {
+            color: var(--secondary-text);
+        }
+        
+        .username {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        
+        .logout-btn {
             cursor: pointer;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-            /* 为更多属性添加过渡效果 */
-            color: white;
-            /* 设置文字颜色为白色，与背景搭配更协调 */
         }
 
-        .pagination button:hover {
-            background-color: #5a6268;
-            /* 鼠标悬停时的背景色，稍作加深，体现交互效果 */
-            border-color: #343a40;
-            /* 悬停时边框颜色也稍作变化 */
+        /* 内容区域样式 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .header-section {
+            padding-top: 24px;
+            padding-bottom: 24px;
+            text-align: center;
+        }
+        
+        .header-section h2 {
+            font-size: 2.25rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
         }
 
-        .pagination button.active {
-            background-color: #007bff;
-            /* 当前选中页按钮的背景色，保持原来的蓝色，比较醒目 */
-            border-color: #007bff;
-            /* 当前选中页按钮的边框颜色与背景一致 */
-            color: white;
-            /* 当前选中页按钮的文字颜色保持白色 */
+        /* 项目网格布局 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px;
+            max-width: 1500px;
+            margin: 0 auto;
         }
 
-        /* 修改余额显示样式 */
-        .balance-box {
+        /* 卡片样式 */
+        .card {
+            position: relative;
+            height: 22rem;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 1px 3px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease-in-out;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 8px 15px rgba(0, 0, 0, 0.2), 
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 0.75rem 0.75rem 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        /* 卡片图标和图片 */
+        .item-icon {
+            background-color: rgba(241, 241, 241, 0.05);
             display: inline-block;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(241, 241, 241, 0.05);
+            overflow: hidden;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            height: 60%;
+        }
+
+        .item-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .item-img.loaded {
+            opacity: 1;
+        }
+
+        /* 卡片内容区域 */
+        .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(10, 15, 35, 0.8), rgba(10, 15, 35, 0.4), transparent);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        
+        .card-flex-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .card-col {
+            flex: 1;
+        }
+        
+        .card-col-left {
+            padding-right: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-col-right {
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-owner {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-desc {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .item-price {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* 按钮样式 */
+        .action-btn {
+            margin-top: auto;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            display: inline-block;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 功能按钮区 */
+        .function-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .function-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .function-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 余额显示 */
+        .balance-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .balance-label {
+            font-size: 1.1rem;
+            color: var(--secondary-text);
+            margin-right: 10px;
+        }
+
+        .balance-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        /* 分页样式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 40px auto;
+            padding: 20px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-number {
+            width: 40px;
+            height: 36px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .page-number:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn {
+            height: 36px;
             padding: 0 15px;
-            margin-right: 20px;
+            border: none;
+            color: white;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-btn:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            cursor: default;
+            box-shadow: none;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .go-btn {
+            height: 36px;
+            padding: 0 15px;
+            border: none;
+            color: white;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                0 1px 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        .go-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 2px 5px rgba(255, 255, 255, 0.1);
         }
 
-        .balance-text {
-            color: #fff;
-            margin-right: 8px;
+        /* 无数据提示样式 */
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-text);
             font-size: 18px;
-            /* 放大字体 */
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
-        .balance-number {
-            color: #ffd700;
-            font-weight: bold;
-            font-size: 20px;
-            /* 放大字体 */
-        }
-
-        /* 修改按钮样式 */
-        .button-container .layui-btn {
-            margin-right: 10px;
-            /* 按钮间距 */
-        }
-
-        /* 新增：统一所有按钮的字体粗细 */
-        .button-container .layui-btn {
-            margin-right: 10px;
-            font-weight: bold;
-            /* 强制加粗 */
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .main-nav {
+                margin: 10px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .user-nav {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .welcome-text {
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .pagination-container {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>版权资产</h1>
-        <div class="button-container">
-            <div class="balance-box">
-                <span class="balance-text">当前余额：</span>
-                <span id="balanceValue" class="balance-number">加载中...</span>
+    <!-- 背景色块 -->
+    <div class="bg-gradient bg-amber"></div>
+    <div class="bg-gradient bg-primary"></div>
+
+    <!-- 导航条 -->
+    <nav class="navbar">
+        <!-- 品牌标识 -->
+        <div class="navbar-brand">区块链版权</div>
+        
+        <!-- 主导航 -->
+        <div class="main-nav">
+            <a href="/display" class="nav-item">版权展示</a>
+            <a href="/homepage" class="nav-item active">个人中心</a>
+            <a href="/statistics" class="nav-item">统计分析</a>
+        </div>
+        
+        <!-- 用户导航 -->
+        <div class="user-nav">
+            <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
+            <a class="nav-link logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 退出
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h2>我的版权资产</h2>
+            <div class="balance-display">
+                <span class="balance-label">当前余额：</span>
+                <span id="balanceValue" class="balance-value">加载中...</span>
             </div>
-            <button class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius" onclick="showTopup()">充值</button>
-            <button class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius" onclick="showWithdraw()">提现</button>
-            <a href="/upload" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">上传</a>
-            <a href="/display" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">返回</a>
-            <a href="/statistics" class="layui-btn layui-btn-lg layui-bg-black layui-btn-radius">统计分析</a>
+            <div class="function-buttons">
+                <button class="function-btn" onclick="showTopup()">
+                    <i class="fas fa-plus-circle"></i> 充值
+                </button>
+                <button class="function-btn" onclick="showWithdraw()">
+                    <i class="fas fa-minus-circle"></i> 提现
+                </button>
+                <a href="/upload" class="function-btn">
+                    <i class="fas fa-upload"></i> 上传版权
+                </a>
+                <!-- <a href="/statistics" class="function-btn">
+                    <i class="fas fa-chart-bar"></i> 统计分析
+                </a> -->
+            </div>
+        </div>
+
+        <!-- 项目网格 -->
+        <div id="content" class="grid-container">
+            <!-- 动态内容将通过JavaScript生成 -->
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <button class="page-btn" id="prev-page" disabled>上一页</button>
+            <span id="page-info">第 1 页 / 1 页</span>
+            <button class="page-btn" id="next-page">下一页</button>
+            <input type="number" class="page-number" id="page-number" min="1" value="1">
+            <button class="go-btn" id="go-page">跳转</button>
         </div>
     </div>
 
-    <div class="content" id="content">
-        <!-- 动态生成的项目将放置在此处 -->
-    </div>
-
-    <div class="pagination">
-        <!-- 分页按钮等元素会动态生成在这里 -->
-    </div>
-
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
-        layui.use(['element', 'form', 'layer'], function () {
-            var element = layui.element;
-            var form = layui.form;
-            var layer = layui.layer;
+        // 初始化Lucide图标
+        lucide.createIcons();
+        
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 10;
+        const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 });
 
-            // 解析 JWT Token 获取用户名（假设 token 格式是标准的 JWT 格式）
-            function getUsernameFromToken(token) {
-                try {
-                    // 解码 base64 编码的 payload 部分
-                    const payloadBase64 = token.split('.')[1];
-
-                    // 使用 decodeURIComponent 和 escape 来正确解码
-                    const decodedPayload = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
-                    const decodedPayloadWithEncoding = decodeURIComponent(escape(decodedPayload));
-
-                    // 假设用户名保存在 payload 的 'username' 字段中
-                    const payload = JSON.parse(decodedPayloadWithEncoding);
-                    return payload.username;
-                } catch (error) {
-                    console.error('解析 Token 失败:', error);
-                    return null;
-                }
+        // 页面加载时初始化
+        window.onload = function () {
+            const username = localStorage.getItem('username');
+            document.getElementById("username").textContent = username || "未登录";
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请登录');
+                return (window.location.href = '/');
             }
 
-
-            // 充值弹窗
-            window.showTopup = function () {
-                const token = localStorage.getItem('token');
-                const username = getUsernameFromToken(token);
-                if (!username) {
-                    layer.msg('用户身份验证失败');
-                    return;
+            // 添加错误处理
+            window.addEventListener('error', function(e) {
+                if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+                    console.error('资源加载失败:', e.target.src || e.target.href);
                 }
-                layer.prompt({
-                    title: '请输入充值金额',
-                    formType: 0
-                }, function (value, index) {
-                    const amount = parseFloat(value);
-                    if (isNaN(amount) || amount <= 0) {
-                        layer.msg('请输入有效金额');
+            }, true);
+
+            // 检查Layui和Lucide是否加载成功
+            if (typeof layui === 'undefined') {
+                console.error('Layui库加载失败');
+                alert('UI组件加载失败，请刷新页面重试');
+                return;
+            }
+
+            try {
+                // 初始化Lucide图标
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+                
+                // 增加API检查
+                checkApiAvailability();
+                
+                loadMyProjects();
+                updateBalance();
+                bindPaginationEvents();
+            } catch (err) {
+                console.error('初始化失败:', err);
+                alert('页面初始化失败，请刷新重试');
+            }
+        };
+
+        // 退出功能
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // 通用fetch请求函数
+        const fetchData = (url, data) =>
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    // 根据状态码提供更详细的错误提示
+                    if (res.status === 404) {
+                        throw new Error(`接口不存在 (${url})`);
+                    } else if (res.status === 401) {
+                        // 如果是未授权，则重定向到登录页
+                        localStorage.clear();
+                        window.location.href = '/';
+                        throw new Error('登录已过期，请重新登录');
+                    } else {
+                        throw new Error(`请求失败: ${res.status} ${res.statusText}`);
+                    }
+                }
+                
+                // 检查内容类型
+                const contentType = res.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('服务器返回的不是JSON格式数据');
+                }
+                
+                return res.json();
+            })
+            .catch(error => {
+                console.error(`API请求错误 (${url}):`, error);
+                // 显示更友好的错误消息
+                if (error.message.includes('接口不存在')) {
+                    layui.layer.msg('系统接口未找到，请联系管理员', {icon: 2});
+                } else if (error.message.includes('登录已过期')) {
+                    layui.layer.msg('登录已过期，正在跳转到登录页面...', {icon: 0});
+                } else {
+                    layui.layer.msg('数据加载失败，请稍后重试', {icon: 2});
+                }
+                return { items: [], totalPages: 1 }; // 返回空数据以避免进一步错误
+            });
+
+        // 加载我的项目
+        function loadMyProjects() {
+            // 显示加载状态
+            const loadingMsg = layui.layer.msg('正在加载个人项目...', {
+                icon: 16,
+                time: 0,
+                shade: 0.1
+            });
+            
+            // 确保URL是正确的
+            const url = window.location.origin + '/myproject'; // 使用绝对路径
+            
+            fetchData(url, { 
+                page: currentPage, 
+                pageSize: pageSize 
+            })
+            .then(data => {
+                layui.layer.close(loadingMsg);
+                
+                if (data?.items) {
+                    renderProjects(data.items);
+                    totalPages = data.totalPages || Math.ceil(data.items.length / pageSize);
+                    updatePagination();
+                } else {
+                    console.error('未能获取到项目数据');
+                    renderProjects([]);
+                }
+            });
+        }
+
+        // 渲染项目列表
+        function renderProjects(items) {
+            const container = document.getElementById('content');
+            
+            if (items && items.length) {
+                container.innerHTML = items.map(item => `
+                    <div class="card" data-id="${item.id}">
+                        <div class="item-icon">
+                            <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/280x180/283250/a0aec0?text=暂无图片'}"
+                                alt="${item.name}" class="item-img">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-flex-container">
+                                <!-- 左列：名称和拥有者 -->
+                                <div class="card-col card-col-left">
+                                    <div class="item-title">${truncateText(item.name, 20)}</div>
+                                    <div class="item-owner">
+                                        <i class="fas fa-user"></i> ${truncateText(item.owner, 15)}
+                                    </div>
+                                </div>
+                                
+                                <!-- 右列：描述、价格和操作按钮 -->
+                                <div class="card-col card-col-right">
+                                    <div class="item-desc">${truncateText(item.description || "暂无描述", 40)}</div>
+                                    <div class="item-price">￥ ${item.price}</div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <a href="#" onclick="showDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="action-btn">详情</a>
+                                        <a href="#" onclick="modifyItem(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="action-btn">修改</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // 初始化图标
+                lucide.createIcons();
+            } else {
+                container.innerHTML = '<div class="no-data">您还没有上传版权，点击上方"上传版权"按钮开始创建</div>';
+            }
+
+            // 观察图片进行懒加载
+            observeImages();
+        }
+
+        // 更新余额 - 简化为直接使用/getbalance端点
+        function updateBalance() {
+            console.log('开始获取余额...');
+            
+            const username = localStorage.getItem('username');
+            console.log('当前用户:', username);
+            
+            // 直接使用/getbalance端点
+            fetch('/getbalance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(res => {
+                console.log('余额API响应状态:', res.status, res.statusText);
+                
+                if (!res.ok) {
+                    throw new Error(`服务器返回错误: ${res.status} ${res.statusText}`);
+                }
+                
+                // 检查内容类型确保是JSON
+                const contentType = res.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('返回的不是JSON数据');
+                }
+                
+                return res.json();
+            })
+            .then(data => {
+                console.log('余额数据:', data);
+                
+                if (data && data.balance !== undefined) {
+                    document.getElementById('balanceValue').textContent = data.balance + ' 积分';
+                } else {
+                    document.getElementById('balanceValue').textContent = '获取失败';
+                    layui.layer.msg('余额数据格式错误', {icon: 2});
+                }
+            })
+            .catch(error => {
+                console.error('获取余额失败:', error);
+                document.getElementById('balanceValue').textContent = '获取失败';
+                layui.layer.msg('获取余额失败，请刷新页面重试', {icon: 2});
+            });
+        }
+
+        // 通过Node.js检查API路由是否正确配置
+        function checkApiAvailability() {
+            console.log('检查API可用性...');
+            const endpoints = ['/balance', '/getbalance', '/account/balance'];
+            
+            endpoints.forEach(endpoint => {
+                fetch(endpoint, {
+                    method: 'HEAD',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                })
+                .then(res => {
+                    console.log(`API端点 ${endpoint} 响应状态: ${res.status}`);
+                })
+                .catch(err => {
+                    console.log(`API端点 ${endpoint} 检查失败:`, err);
+                });
+            });
+        }
+
+        // 充值弹窗 - 增强错误处理
+        function showTopup() {
+            layui.layer.open({
+                type: 1,
+                title: '充值',
+                content: `
+                <div style="padding: 20px;">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">充值金额</label>
+                            <div class="layui-input-block">
+                                <input type="number" id="topupAmount" required placeholder="请输入充值金额" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>`,
+                btn: ['确认', '取消'],
+                yes: function(index) {
+                    const amount = document.getElementById('topupAmount').value;
+                    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+                        layui.layer.msg('请输入有效金额', {icon: 2});
                         return;
                     }
-
-                    fetch('/account', {
+                    
+                    const username = localStorage.getItem('username');
+                    fetch('/balance', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
                         },
                         body: JSON.stringify({
                             action: 'topup',
                             owner: username,
-                            amount: amount
+                            amount: Number(amount)
                         })
-                    }).then(res => res.json()).then(data => {
-                        if (data.message.includes('success')) {
-                            layer.msg('充值成功');
+                    })
+                    .then(res => {
+                        // 添加响应检查，确保是JSON格式
+                        if (!res.ok) {
+                            return res.text().then(text => {
+                                console.error('充值失败，服务器返回:', text);
+                                throw new Error(`服务器错误: ${res.status} ${res.statusText}`);
+                            });
+                        }
+                        
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            return res.text().then(text => {
+                                console.error('服务器返回非JSON数据:', text.substring(0, 200));
+                                throw new Error('服务器返回格式错误，请联系管理员');
+                            });
+                        }
+                        
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data && data.message && data.message.includes('success')) {
+                            layui.layer.msg('充值成功', {icon: 1});
                             updateBalance();
                         } else {
-                            layer.msg('失败: ' + data.message);
+                            layui.layer.msg('失败: ' + (data ? data.message || '未知错误' : '服务器无响应'), {icon: 2});
                         }
-                    }).catch(() => layer.msg('网络错误'));
-                    layer.close(index);
-                });
-            };
+                    })
+                    .catch(error => {
+                        console.error('充值请求失败:', error);
+                        layui.layer.msg('充值失败: ' + error.message, {icon: 2});
+                    });
+                    layui.layer.close(index);
+                }
+            });
+        }
 
-            // 提现弹窗
-            window.showWithdraw = function () {
-                const token = localStorage.getItem('token');
-                const username = getUsernameFromToken(token);
-                layer.prompt({
-                    title: '请输入提现金额',
-                    formType: 0
-                }, function (value, index) {
-                    const amount = parseFloat(value);
-                    if (isNaN(amount) || amount <= 0) {
-                        layer.msg('请输入有效金额');
+        // 提现弹窗 - 同样增强错误处理
+        function showWithdraw() {
+            layui.layer.open({
+                type: 1,
+                title: '提现',
+                content: `
+                <div style="padding: 20px;">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">提现金额</label>
+                            <div class="layui-input-block">
+                                <input type="number" id="withdrawAmount" required placeholder="请输入提现金额" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>`,
+                btn: ['确认', '取消'],
+                yes: function(index) {
+                    const amount = document.getElementById('withdrawAmount').value;
+                    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+                        layui.layer.msg('请输入有效金额', {icon: 2});
                         return;
                     }
-
-                    fetch('/account', {
+                    
+                    const username = localStorage.getItem('username');
+                    fetch('/balance', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
                         },
                         body: JSON.stringify({
                             action: 'withdraw',
                             owner: username,
-                            amount: amount
+                            amount: Number(amount)
                         })
-                    }).then(res => res.json()).then(data => {
-                        if (data.message.includes('success')) {
-                            layer.msg('提现成功');
+                    })
+                    .then(res => {
+                        // 添加响应检查，确保是JSON格式
+                        if (!res.ok) {
+                            return res.text().then(text => {
+                                console.error('提现失败，服务器返回:', text);
+                                throw new Error(`服务器错误: ${res.status} ${res.statusText}`);
+                            });
+                        }
+                        
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            return res.text().then(text => {
+                                console.error('服务器返回非JSON数据:', text.substring(0, 200));
+                                throw new Error('服务器返回格式错误，请联系管理员');
+                            });
+                        }
+                        
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data && data.message && data.message.includes('success')) {
+                            layui.layer.msg('提现成功', {icon: 1});
                             updateBalance();
                         } else {
-                            layer.msg('失败: ' + data.message);
+                            layui.layer.msg('失败: ' + (data ? data.message || '未知错误' : '服务器无响应'), {icon: 2});
                         }
-                    }).catch(() => layer.msg('网络错误'));
-                    layer.close(index);
-                });
-            };
-
-            form.on('select(statusFilter)', function (data) {
-                if (data.value === 'not-selling') {
-                    alert('状态已切换为：非售卖');
-                } else if (data.value === 'selling') {
-                    alert('状态已切换为：在售');
-                }
-                form.render('select');
-            });
-
-            window.showDetails = function (item) {
-                layer.open({
-                    type: 1,
-                    title: '版权详情',
-                    content: `<div>
-                    <p><strong>ID：</strong>${item.id}</p>
-                    <p><strong>版权名称：</strong>${item.name}</p>
-                    <p><strong>简短描述：</strong>${item.description}</p>
-                    <p><strong>版权价格：</strong>${item.price}</p>
-                    <p><strong>详细描述：</strong>${item.dsc}</p>
-                    <p><strong>拥有者：</strong>${item.owner}</p>
-                    <p><strong>开始时间：</strong>${item.start_time}</p>
-                    <p><strong>是否售卖：</strong>${item.on_sale}</p>
-                  </div>`,
-                    area: ['400px', '400px']
-                });
-            };
-
-            window.modifyItem = function (item) {
-                layer.open({
-                    type: 1,
-                    title: '修改版权',
-                    content: `
-        <div>
-            <form class="layui-form" id="modifyForm" style="padding: 20px;">
-                <div class="layui-form-item">
-                    <label class="layui-form-label">简短描述</label>
-                    <div class="layui-input-block" style="width: calc(100% - 110px);">
-                        <input type="text" name="description" required value="${item.description}" placeholder="请输入简短描述" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">版权价格</label>
-                    <div class="layui-input-block" style="width: calc(100% - 110px);">
-                        <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">详细描述</label>
-                    <div class="layui-input-block" style="width: calc(100% - 110px);">
-                        <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc}</textarea>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">是否售卖</label>
-                    <div class="layui-input-block" style="width: calc(100% - 110px);">
-                        <select name="on_sale" id="on_sale" lay-filter="on_sale">
-                            <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
-                            <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
-                    <button type="submit" class="layui-btn layui-btn-normal" style ="text-align:center">保存修改</button>
-                </div>
-            </form>
-        </div>`,
-                    area: ['800px', '500px']
-                });
-
-
-                // 渲染表单
-                layui.use(['form'], function () {
-                    var form = layui.form;
-                    form.render('select'); // 渲染 select
-                });
-
-                // 表单提交事件
-                const form = document.getElementById('modifyForm');
-                form.onsubmit = function (event) {
-                    event.preventDefault(); // 阻止表单默认提交
-
-                    // 获取表单数据
-                    const formData = new FormData(form);
-                    const updatedItem = {
-                        id: item.id, // 保留原始ID，供后端识别
-                        name: item.name, // 用户输入的名称
-                        description: formData.get('description'), // 用户输入的简短描述
-                        price: parseFloat(formData.get('price')), // 用户输入的价格，转为浮点数
-                        dsc: formData.get('dsc'), // 用户输入的详细描述
-                        on_sale: formData.get('on_sale') === "1" ? true : false // 转换为布尔值
-                    };
-
-                    console.log('Sending updatedItem to server:', updatedItem);
-
-                    // 发送修改后的数据到后端
-                    fetch('/updateItem', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}` // 验证用户身份
-                        },
-                        body: JSON.stringify(updatedItem) // 转为 JSON 格式
                     })
+                    .catch(error => {
+                        console.error('提现请求失败:', error);
+                        layui.layer.msg('提现失败: ' + error.message, {icon: 2});
+                    });
+                    layui.layer.close(index);
+                }
+            });
+        }
+
+        // 显示项目详情
+        function showDetails(item) {
+            layui.layer.open({
+                type: 1,
+                title: '版权详情',
+                area: ['500px', 'auto'],
+                content: `
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}" 
+                             style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="margin-bottom: 10px; color: #0ea5e9; font-weight: 600;">${item.name}</h3>
+                        <p><strong>ID：</strong>${item.id}</p>
+                        <p><strong>简短描述：</strong>${item.description || "暂无"}</p>
+                        <p><strong>详细描述：</strong>${item.dsc || "暂无"}</p>
+                        <p><strong>价格：</strong>${item.price} 积分</p>
+                        <p><strong>拥有者：</strong>${item.owner}</p>
+                        <p><strong>创建时间：</strong>${item.start_time || "未知"}</p>
+                        <p><strong>是否在售：</strong>${item.on_sale ? "是" : "否"}</p>
+                    </div>
+                </div>`,
+                btn: ['关闭']
+            });
+        }
+
+        // 修改项目
+        function modifyItem(item) {
+            layui.layer.open({
+                type: 1,
+                title: '修改版权',
+                area: ['600px', 'auto'],
+                content: `
+                <div style="padding: 20px;">
+                    <form class="layui-form" id="modifyForm">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">简短描述</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="description" required value="${item.description || ''}" placeholder="请输入简短描述" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">版权价格</label>
+                            <div class="layui-input-block">
+                                <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">详细描述</label>
+                            <div class="layui-input-block">
+                                <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc || ''}</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">是否售卖</label>
+                            <div class="layui-input-block">
+                                <select name="on_sale" lay-filter="on_sale">
+                                    <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
+                                    <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
+                            <button type="submit" class="layui-btn">保存修改</button>
+                        </div>
+                    </form>
+                </div>`,
+                success: function() {
+                    layui.form.render();
+                    
+                    document.getElementById('modifyForm').onsubmit = function(event) {
+                        event.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        const updateData = {
+                            id: item.id,
+                            description: formData.get('description'),
+                            price: Number(formData.get('price')),
+                            dsc: formData.get('dsc'),
+                            on_sale: formData.get('on_sale') === '1'
+                        };
+                        
+                        // 显示加载状态
+                        const loadingIndex = layui.layer.msg('正在保存...', {
+                            icon: 16,
+                            time: 0,
+                            shade: 0.3
+                        });
+                        
+                        fetch('/update', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify(updateData)
+                        })
                         .then(response => response.json())
                         .then(data => {
-                            if (data.success) {
-                                // 更新页面中当前 `item` 的内容
-                                const itemElements = document.querySelectorAll('.item');
-                                itemElements.forEach((itemElement) => {
-                                    const itemId = parseInt(itemElement.getAttribute('data-id'));
-                                    if (itemId === updatedItem.id) {
-                                        // 修改页面中的内容为最新数据
-                                        itemElement.querySelector('.item-content p:nth-child(1)').innerHTML = `<i>版权名称：</i> ${updatedItem.name}`;
-                                        itemElement.querySelector('.item-content p:nth-child(2)').innerHTML = `<i>版权价格：</i> ${updatedItem.price}`;
-                                        itemElement.querySelector('.item-content p:nth-child(3)').innerHTML = `<i>描述：</i> ${updatedItem.description}`;
-                                    }
-                                });
-
-                                layer.closeAll(); // 关闭弹窗
-                                alert('修改成功！');
+                            layui.layer.close(loadingIndex);
+                            
+                            if (data && data.message === 'success') {
+                                layui.layer.msg('修改成功', {icon: 1});
+                                layui.layer.closeAll('page');
+                                loadMyProjects(); // 重新加载项目列表
                             } else {
-                                alert('修改失败：' + data.message); // 提示错误信息
+                                layui.layer.msg('修改失败: ' + (data.message || '未知错误'), {icon: 2});
                             }
                         })
                         .catch(error => {
+                            layui.layer.close(loadingIndex);
                             console.error('修改请求失败:', error);
-                            alert('修改请求失败，请稍后重试');
+                            layui.layer.msg('网络错误，请稍后重试', {icon: 2});
                         });
-                };
+                    };
+                }
+            });
+        }
 
+        // 绑定分页事件
+        function bindPaginationEvents() {
+            document.getElementById('prev-page').onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadMyProjects();
+                }
             };
-
-            // 更新余额
-            function updateBalance() {
-                document.getElementById('balanceValue').textContent = '加载中...';
-
-                fetch('/account', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    },
-                    body: JSON.stringify({
-                        action: 'query'
-                    })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.balance !== undefined) {
-                            const balance = data.balance.toFixed(2);
-                            document.getElementById('balanceValue').textContent = balance;
-                        } else {
-                            document.getElementById('balanceValue').textContent = '0.00';
-                            console.error('未获取到余额数据');
-                        }
-                    })
-                    .catch(error => {
-                        document.getElementById('balanceValue').textContent = '加载失败';
-                        console.error('获取余额失败:', error);
-                    });
-            }
-
-            window.onload = function () {
-                updateBalance();
-
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    console.error('未登录或未获取到有效的 token');
+            
+            document.getElementById('next-page').onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadMyProjects();
+                }
+            };
+            
+            document.getElementById('go-page').onclick = () => {
+                const pageInput = document.getElementById('page-number');
+                let page = parseInt(pageInput.value, 10);
+                if (isNaN(page) || page < 1 || page > totalPages) {
+                    layui.layer.msg('请输入有效的页码范围 1 - ' + totalPages, {icon: 2});
+                    pageInput.value = currentPage;
                     return;
                 }
-
-                const requestData = {
-                    page: 1,
-                    pageSize: 15 // 添加每页显示数量的参数
-                };
-
-                fetch('/myproject', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(requestData)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.items) {
-                            const items = data.items;
-                            const content = document.getElementById('content');
-                            const pagination = document.querySelector('.pagination');
-                            content.innerHTML = '';
-                            pagination.innerHTML = '';
-
-                            const itemsPerPage = 10;
-                            const totalPages = Math.ceil(items.length / itemsPerPage);
-                            let currentPage = 1;
-
-                            // 根据项目数量判断是否需要渲染分页按钮
-                            if (totalPages > 1) {
-                                // 渲染分页按钮
-                                function renderPagination() {
-                                    for (let i = 1; i <= totalPages; i++) {
-                                        const pageButton = document.createElement('button');
-                                        pageButton.textContent = i;
-                                        pageButton.addEventListener('click', function () {
-                                            currentPage = i;
-                                            // 移除所有按钮的active类
-                                            const allButtons = document.querySelectorAll('.pagination button');
-                                            allButtons.forEach((button) => {
-                                                button.classList.remove('active');
-                                            });
-                                            // 为当前点击的按钮添加active类
-                                            this.classList.add('active');
-                                            loadItems();
-                                        });
-                                        pagination.appendChild(pageButton);
-                                    }
-                                }
-                                renderPagination();
-                            }
-
-                            function loadItems() {
-                                const content = document.getElementById('content');
-                                // 清空之前的项目元素，避免重复显示
-                                content.innerHTML = '';
-                                const startIndex = (currentPage - 1) * itemsPerPage;
-                                const endIndex = startIndex + itemsPerPage;
-                                const currentItems = items.slice(startIndex, endIndex);
-                                currentItems.forEach((item, index) => {
-                                    // 以下创建项目元素并添加到页面的逻辑保持不变
-                                    const itemElement = document.createElement('div');
-                                    itemElement.classList.add('item');
-                                    itemElement.setAttribute('data-id', item.id); // 添加data-id属性
-
-                                    const img = document.createElement('img');
-                                    if (item.img.length >= 100) {
-                                        img.src = item.img;
-                                    } else {
-                                        img.src = 'https://api.iconify.design/icon-park:fail-picture.svg';
-                                    }
-                                    img.alt = '版权图片';
-
-                                    const contentDiv = document.createElement('div');
-                                    contentDiv.classList.add('item-content');
-
-                                    const nameElement = document.createElement('p');
-                                    nameElement.innerHTML = `<i>版权名称：</i> ${item.name}`;
-
-                                    const priceElement = document.createElement('p');
-                                    priceElement.innerHTML = `<i>版权价格：</i> ${item.price}`;
-
-                                    const descElement = document.createElement('p');
-                                    descElement.innerHTML = `<i>描述：</i> ${item.description}`;
-
-                                    const buttonSelectContainer = document.createElement('div');
-                                    buttonSelectContainer.classList.add('button-select-container');
-
-                                    const detailLink = document.createElement('a');
-                                    detailLink.innerHTML = '查看详情';
-                                    detailLink.onclick = function () {
-                                        window.showDetails(item);
-                                    };
-
-
-                                    const modifyButton = document.createElement('a');
-                                    modifyButton.classList.add('modify-button');
-                                    modifyButton.innerHTML = '修改';
-                                    modifyButton.onclick = function () {
-                                        window.modifyItem(item);
-                                    };
-
-                                    const formDiv = document.createElement('div');
-                                    formDiv.classList.add('layui-form');
-
-                                    const select = document.createElement('select');
-                                    select.id = 'statusSelect';
-                                    select.innerHTML = `
-                                        <option value="selling" ${item.status === 'selling' ? 'selected' : ''}>在售</option>
-                                        <option value="not-selling" ${item.status === 'not-selling' ? 'selected' : ''}>非售卖</option>
-                                    `;
-                                    formDiv.appendChild(select);
-
-                                    buttonSelectContainer.appendChild(detailLink);
-                                    buttonSelectContainer.appendChild(modifyButton);
-
-                                    contentDiv.appendChild(nameElement);
-                                    contentDiv.appendChild(priceElement);
-                                    contentDiv.appendChild(descElement);
-                                    contentDiv.appendChild(buttonSelectContainer);
-
-                                    itemElement.appendChild(img);
-                                    itemElement.appendChild(contentDiv);
-
-                                    content.appendChild(itemElement);
-                                });
-                            }
-
-                            loadItems();
-                        } else {
-                            console.error('未能获取到项目数据');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('请求失败:', error);
-                    });
+                currentPage = page;
+                loadMyProjects();
             };
-        });
+            
+            document.getElementById('page-number').addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    document.getElementById('go-page').click();
+                }
+            });
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            document.getElementById('page-info').textContent = `第 ${currentPage} 页 / ${totalPages} 页`;
+            document.getElementById('prev-page').disabled = currentPage <= 1;
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
+            document.getElementById('page-number').value = currentPage;
+            document.getElementById('page-number').max = totalPages;
+        }
+
+        // 文本截断函数
+        function truncateText(text, maxLength) {
+            if (!text) return "暂无信息";
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        // 图片懒加载
+        function handleLazyLoad(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.dataset.src;
+                    if (src) {
+                        img.src = src;
+                        img.classList.add('loaded');
+                        img.dataset.loaded = true;
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        }
+
+        // 观察图片元素
+        function observeImages() {
+            const images = document.querySelectorAll('.item-img');
+            images.forEach(img => {
+                if (!img.dataset.loaded) {
+                    lazyLoadObserver.observe(img);
+                }
+            });
+        }
     </script>
 </body>
 
