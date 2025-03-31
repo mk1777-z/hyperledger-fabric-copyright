@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// 服务器启动前先初始化配置
 	log.Println("正在初始化系统配置...")
 	conf.Init()
 	log.Println("系统配置初始化完成")
@@ -65,6 +64,8 @@ func main() {
 	h.POST("/transaction", middle.Transaction)
 
 	h.POST("/search", middle.Search)
+
+	h.POST("/audit-trade", middle.AuditTrade)
 
 	h.GET("/chat_ws", middle.ChatWebsocket)
 

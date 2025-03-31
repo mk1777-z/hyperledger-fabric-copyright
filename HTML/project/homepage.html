@@ -7,7 +7,7 @@
     <title>个人版权管理界面</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
+    <link href="//unpkg.com/layui@2.10.3/dist/css/layui.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -236,6 +236,8 @@
             transition: all 0.3s ease-in-out;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
         }
 
         .card:hover {
@@ -265,13 +267,15 @@
         /* 卡片图标和图片 */
         .item-icon {
             background-color: rgba(241, 241, 241, 0.05);
-            display: inline-block;
+            display: block;
             border-radius: 0.75rem;
             border: 1px solid rgba(241, 241, 241, 0.05);
             overflow: hidden;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             width: 100%;
-            height: 60%;
+            height: 180px; /* 固定图片高度 */
+            margin-bottom: 15px; /* 增加与内容的间距 */
+            position: relative; /* 让容器变成相对定位 */
         }
 
         .item-img {
@@ -289,14 +293,13 @@
 
         /* 卡片内容区域 */
         .card-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 1.5rem;
-            background: linear-gradient(to top, rgba(10, 15, 35, 0.8), rgba(10, 15, 35, 0.4), transparent);
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 100%;
+            z-index: 2; /* 确保内容在图片上层 */
+            background: transparent; /* 移除渐变背景 */
         }
         
         .card-flex-container {
@@ -304,6 +307,7 @@
             justify-content: space-between;
             gap: 10px;
             width: 100%;
+            margin-bottom: 10px;
         }
         
         .card-col {

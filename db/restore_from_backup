@@ -1,5 +1,0 @@
-# 解压缩备份文件
-gunzip /home/hyperledger-fabric-copyright/db/backups/your_database_backup_20231201_120000.sql.gz
-
-# 恢复数据库
-mysql -u your_user -pyour_password < /home/hyperledger-fabric-copyright/db/backups/your_database_backup_20231201_120000.sql

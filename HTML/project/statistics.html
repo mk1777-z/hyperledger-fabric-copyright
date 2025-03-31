@@ -893,7 +893,7 @@
         function loadRealChartData(trendChart, typeChart, transactionChart) {
             // 获取当前的日期范围和类型
             const dateRange = document.getElementById('date-range').value || sessionStorage.getItem('defaultDateRange');
-            const copyrightType = '';  // 已删除版权类型筛选
+            const copyrightType = '';  // 已删除版权类型筛选，使用空字符串
             
             // 获取版权交易趋势数据 - 修改API路径和参数
             fetch('/statistics/copyright-trend', {
@@ -1056,8 +1056,8 @@
                         // 日期改变时重新加载数据
                         if (value) {
                             // 重新获取图表和表格数据
-                            const copyrightType = document.getElementById('copyright-type').value || '';
-                            reloadAllData(value, copyrightType);
+                            // 由于已经移除了版权类型选择框，使用空字符串代替
+                            reloadAllData(value, '');
                         }
                     }
                 });
@@ -1072,7 +1072,7 @@
                     },
                     where: {
                         dateRange: sessionStorage.getItem('defaultDateRange'),
-                        type: document.getElementById('copyright-type').value || ''
+                        type: '' // 使用空字符串代替版权类型
                     },
                     page: true,
                     cols: [[
@@ -1102,7 +1102,8 @@
                 // 按钮事件绑定
                 document.getElementById('filter-btn').addEventListener('click', function() {
                     const dateRange = document.getElementById('date-range').value;
-                    const copyrightType = document.getElementById('copyright-type').value;
+                    // 由于已经移除了版权类型选择框，使用空字符串代替
+                    const copyrightType = '';
                     
                     // 重新加载所有数据
                     reloadAllData(dateRange, copyrightType);
@@ -1113,7 +1114,8 @@
                 // 导出功能
                 document.getElementById('export-excel').addEventListener('click', function() {
                     const dateRange = document.getElementById('date-range').value;
-                    const copyrightType = document.getElementById('copyright-type').value;
+                    // 由于已经移除了版权类型选择框，使用空字符串代替
+                    const copyrightType = '';
                     
                     const queryParams = new URLSearchParams({
                         token: localStorage.getItem('token'),
@@ -1126,7 +1128,8 @@
                 
                 document.getElementById('export-pdf').addEventListener('click', function() {
                     const dateRange = document.getElementById('date-range').value;
-                    const copyrightType = document.getElementById('copyright-type').value;
+                    // 由于已经移除了版权类型选择框，使用空字符串代替
+                    const copyrightType = '';
                     
                     const queryParams = new URLSearchParams({
                         token: localStorage.getItem('token'),
@@ -1256,13 +1259,15 @@
         
         // 重新加载所有数据
         function reloadAllData(dateRange, copyrightType) {
-            // 重新加载表格数据
-            layui.table.reload('data-table', {
-                where: {
-                    dateRange: dateRange,
-                    type: copyrightType
-                }
-            });
+            // 重新加载表格数据 - 这里需要检查data-table元素是否存在
+            if (document.getElementById('data-table')) {
+                layui.table.reload('data-table', {
+                    where: {
+                        dateRange: dateRange,
+                        type: copyrightType
+                    }
+                });
+            }
             
             // 重新获取所有图表
             const trendChart = echarts.init(document.getElementById('trend-chart'));
