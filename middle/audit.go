@@ -107,13 +107,31 @@ func getAuditHistory(contract *client.Contract, tradeID string) ([]conf.AuditRec
 		return nil, err
 	}
 
+	// 打印原始返回结果，帮助调试
+	log.Printf("审核历史原始返回: %s", string(result))
+
+	// 检查返回的数据是否为空
+	if len(result) == 0 || string(result) == "null" || string(result) == "[]" {
+		log.Printf("审核历史为空，返回空数组")
+		return []conf.AuditRecord{}, nil
+	}
+
 	var records []conf.AuditRecord
 	err = json.Unmarshal(result, &records)
 	if err != nil {
 		log.Printf("解析审核历史失败: %v", err)
+		// 尝试解析单个记录
+		var singleRecord conf.AuditRecord
+		errSingle := json.Unmarshal(result, &singleRecord)
+		if errSingle == nil {
+			log.Printf("成功解析单条审核记录")
+			return []conf.AuditRecord{singleRecord}, nil
+		}
+
 		return nil, err
 	}
 
+	log.Printf("成功解析审核历史，包含 %d 条记录", len(records))
 	return records, nil
 }
 
@@ -385,7 +403,7 @@ func GetAuditHistory(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 返回审核历史记录
+	// 返回审核历史记录，即使是空数组
 	c.JSON(http.StatusOK, utils.H{
 		"records": records,
 		"count":   len(records),

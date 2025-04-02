@@ -143,3 +143,92 @@ func Login(_ context.Context, c *app.RequestContext) {
 		"token":   tokenString,
 	})
 }
+
+// RegulatorLogin 处理监管者登录请求
+func RegulatorLogin(_ context.Context, c *app.RequestContext) {
+	var user conf.User
+	if err := c.Bind(&user); err != nil {
+		log.Printf("绑定监管者登录数据错误: %v", err)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	// 验证用户名是否为监管者
+	if user.Username != "监管者" {
+		log.Printf("非法访问监管者登录API: %s", user.Username)
+		c.JSON(http.StatusForbidden, utils.H{
+			"message": "只有监管者可以使用此登录接口",
+		})
+		return
+	}
+
+	// 连接数据库
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Printf("Error opening database connection: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Error closing database connection: %v", err)
+		}
+	}()
+
+	// 查询监管者密码
+	var storedPassword string
+	err = db.QueryRow("SELECT password FROM user WHERE username = ?", user.Username).Scan(&storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("监管者账户未找到，请先创建监管者账户")
+			c.JSON(http.StatusUnauthorized, utils.H{
+				"message": "监管者账户未找到，请先创建监管者账户",
+			})
+		} else {
+			log.Printf("查询监管者密码错误: %v", err)
+			c.Status(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// 验证密码
+	if user.Password != storedPassword {
+		log.Printf("监管者密码验证失败")
+		c.JSON(http.StatusUnauthorized, utils.H{
+			"message": "密码错误",
+		})
+		return
+	}
+
+	// 更新最后活跃时间
+	currentTime := time.Now()
+	_, updateErr := db.Exec("UPDATE user SET last_active_time = ? WHERE username = ?", currentTime, user.Username)
+	if updateErr != nil {
+		log.Printf("更新监管者最后活跃时间失败: %v", updateErr)
+		// 不因为这个错误中断登录流程
+	}
+
+	// 生成JWT令牌
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := conf.UserClaims{
+		Username: user.Username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(conf.Con.Jwtkey)
+	if err != nil {
+		log.Printf("生成监管者令牌失败: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, utils.H{
+		"message": "监管者登录成功",
+		"token":   tokenString,
+	})
+}

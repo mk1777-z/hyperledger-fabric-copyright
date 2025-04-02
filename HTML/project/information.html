@@ -9,66 +9,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
     <style>
+        /* CSS 变量定义 */
         :root {
+            --primary-color: #00796b;
+            --box-shadow-card: 0 8px 16px rgba(0, 0, 0, 0.1);
+            --border-radius-card: 15px;
+            --border-radius-button: 20px;
+
             --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
             --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
             --dark-bg-left: #03020A;
+            /* 极暗的紫黑色 */
             --dark-bg-right: #0A0818;
+            /* 极暗的蓝紫色 */
             --card-bg: rgba(30, 40, 70, 0.9);
+            /* 更不透明，移除毛玻璃效果 */
             --card-border: rgba(80, 100, 240, 0.3);
+            --card-glow: rgba(110, 64, 255, 0.2);
             --text-color: #f1f1f1;
             --secondary-text: #a0aec0;
             --accent-color: #6e40ff;
-            --border-radius-card: 15px;
-            --box-shadow-card: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
+        /* 背景颜色 */
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(90deg, var(--dark-bg-left), var(--dark-bg-right));
+            background-attachment: fixed;
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
             margin: 0;
             padding: 0;
+        }
+
+        /* 背景光晕效果 - 移除点状图案 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(110, 64, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(11, 220, 171, 0.1) 0%, transparent 30%);
+            z-index: -1;
+        }
+
+        /* 额外背景效果 */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            z-index: -1;
+        }
+
+        .bg-amber {
+            height: 600px;
+            width: 600px;
+            right: 0;
+            margin-top: -100px;
+            background-color: rgba(245, 158, 11, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+
+        .bg-primary {
+            height: 600px;
+            width: 600px;
+            left: 0;
+            background-color: rgba(110, 64, 255, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+
+        main {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 1200px;
-            width: 90%;
             display: flex;
             justify-content: space-between;
-            gap: 20px;
+            align-items: flex-start;
+            width: 90%;
+            max-width: 1200px;
             margin-top: 50px;
+            gap: 30px;
         }
 
+        /* 公共卡片样式 */
         .card-container {
-            background: var(--card-bg);
-            border-radius: var(--border-radius-card);
-            border: 1px solid var(--card-border);
-            padding: 20px;
+            background: var(--card-background);
+            padding: 30px;
             box-shadow: var(--box-shadow-card);
-            color: var(--text-color);
-            flex: 1;
-            min-width: 300px;
-            height: 500px;
+            border-radius: var(--border-radius-card);
+        }
+
+        .item-info {
+            width: 48%;
             display: flex;
             flex-direction: column;
-        }
-
-        .item-info h2,
-        .transaction-history h3,
-        .chat-container h3 {
-            color: var(--text-color);
-            margin-bottom: 15px;
+            align-items: center;
             text-align: center;
         }
 
-        .item-info p {
-            text-align: center;
+        .transaction-history {
+            width: 48%;
+        }
+
+        .chat-container {
+            width: 48%;
+            background: var(--card-background);
+            padding: 20px;
+            box-shadow: var(--box-shadow-card);
+            border-radius: var(--border-radius-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 500px;
+        }
+
+        .item-info h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
         }
 
         .item-info img {
@@ -76,6 +146,7 @@
             margin: 20px auto;
             max-width: 200px;
             max-height: 200px;
+            border: 1px solid #ddd;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -83,113 +154,111 @@
         .purchase-button {
             margin-top: 20px;
             display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .layui-btn {
-            padding: 10px 20px;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
 
-        .layui-btn:hover {
-            background: linear-gradient(135deg, rgba(110, 64, 255, 1), rgba(11, 220, 171, 1));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        #buy-button {
+            position: relative;
         }
 
-        .chat-history {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
+        .back-button {
+            margin-left: 20px;
         }
 
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-            margin-top: auto;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            outline: none;
-        }
-
-        .chat-input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px rgba(110, 64, 255, 0.2);
-        }
-
-        .send-button {
-            padding: 10px 20px;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .send-button:hover {
-            background: linear-gradient(135deg, rgba(110, 64, 255, 1), rgba(11, 220, 171, 1));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .chart-container {
+        .timelineContainer {
+            padding-left: 30px;
             margin-top: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
-        #transactionChart {
-            width: 100%;
-            height: 300px;
-        }
-
+         /* 合同协议的框 */
         #contract-modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 400px;
-            padding: 20px;
+            max-width:400px;
+            max-height: 80vh;     /* 变矮：限制高度 */
+            padding: 15px;
             background: var(--card-bg);
-            border-radius: var(--border-radius-card);
-            box-shadow: var(--box-shadow-card);
+
+            overflow-y: auto;     /* 允许内容滚动 */
+            scrollbar-width: 12px; /* 加粗 */
+            scrollbar-color: rgba(30, 40, 70, 0.8) transparent;
+
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
             display: none;
             z-index: 1000;
+            transition: opacity 0.3s, transform 0.3s;
+
+            border: 1px solid transparent; /* 预留边框位置 */
+            transition: all 0.3s ease; /* 添加过渡动画 */
         }
+
+        /* 鼠标悬停效果 */
+        #contract-modal:hover {
+            transform: translate(-50%, -51%); /* 上浮效果 */
+            box-shadow: 
+                0 12px 20px rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 顶部光带效果 */
+        #contract-modal::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 3px;
+            background: var(--primary-gradient); /* 使用您定义的渐变 */
+            border-radius: 10px 10px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        #contract-modal:hover::before {
+            opacity: 1;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+
+        /* 合同协议滚动条的设置 */
+        #contract-modal::-webkit-scrollbar {
+            width: 12px;
+            height: 8px;
+        }
+
+        #contract-modal::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 2px 0;
+        }
+
+        #contract-modal::-webkit-scrollbar-thumb {
+            background: rgba(30, 40, 70, 0.8);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        #contract-modal::-webkit-scrollbar-thumb:hover {
+            background:rgba(30, 40, 70, 1);
+        }   
+
 
         #contract-modal.active {
             display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
         #modal-overlay {
@@ -201,20 +270,228 @@
             background: rgba(0, 0, 0, 0.6);
             display: none;
             z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         #modal-overlay.active {
             display: block;
+            opacity: 1;
         }
 
         .modal-buttons {
             text-align: center;
+            margin-top: 20px;
+            display: flex;          /* 启用弹性布局 */
+            justify-content: center; /* 水平居中 */
+            gap: 20px;              /* 按钮间距 */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .item-info,
+            .transaction-history,
+            .chat-container {
+                width: 90%;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+
+        /* 大圆角按钮*/
+        .layui-btn {     
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .layui-btn:hover {
+            transform: translateY(-2px);
+        }
+
+         /* 方圆角按钮*/
+        .send-button {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+
+        /* 聊天框样式 */
+        .chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #6c6b6b;
+            display: flex;
+            flex-direction: column;
+
+            /* 新增与合同协议相同的滚动条样式 */
+            scrollbar-width: 12px; /* Firefox */
+            scrollbar-color: rgba(30, 40, 70, 0.8) transparent;
+        }
+
+        /* AI助手框的滚动条 */
+        .chat-history::-webkit-scrollbar {
+            width: 12px;
+            height: 8px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 2px 0;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: rgba(30, 40, 70, 0.8);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: rgba(30, 40, 70, 1);
+        }
+
+        .chat-input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        /* AI助手的输入框 */
+        .chat-input {
+            flex-grow: 1;
+            border-radius: var(--border-radius-button);
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+
+            background: rgba(255,255,255,0.1); /* 半透明白底 */
+            border: 1px solid rgba(255,255,255,0.2); /* 浅色边框 */
+            color: var(--text-color); /* 显式定义文字颜色 */
+
+            transition: all 0.3s ease; /* 添加过渡效果 */
+        }
+
+        /* 修改后的悬停效果 */
+        .chat-input:hover {
+            border-color: rgba(110, 64, 255, 0.3); /* 保留细边框 */
+            box-shadow: 
+                0 0 0 1px rgba(110, 64, 255, 0.2), /* 更细的发光边缘（1px） */
+                0 0 8px rgba(110, 64, 255, 0.1);    /* 更柔和的扩散光 */
+            
+            /* 移除动画或使用更微妙的动画 */
+            animation: subtle-glow 2s infinite alternate;
+        }
+
+        /* 更微妙的动画 */
+        @keyframes subtle-glow {
+            from {
+                box-shadow: 
+                    0 0 0 1px rgba(110, 64, 255, 0.2),
+                    0 0 8px rgba(110, 64, 255, 0.1);
+            }
+            to {
+                box-shadow: 
+                    0 0 0 1px rgba(110, 64, 255, 0.3),
+                    0 0 12px rgba(110, 64, 255, 0.15);
+            }
+        }
+
+        .send-button {
+            border-radius: var(--border-radius-button);
+        }
+
+        .user-message {
+            text-align: right;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            background-color: #e6f7ff;
+            padding: 8px 15px;
+            border-radius: var(--border-radius-button);
+            align-self: flex-end;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .bot-message {
+            text-align: left;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            background-color: var(--background-light);
+            padding: 8px 15px;
+            border-radius: var(--border-radius-button);
+            align-self: flex-start;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 0.6rem; /* 比默认稍大 */
+        }
+
+        .bot-message .markdown-body {
+            padding: 0;
+            background-color: transparent;
+            color: var(--text-color);
+        }
+
+        .waiting-message {
+            text-align: left;
+            margin-bottom: 5px;
+            color: grey;
+            font-style: italic;
+            align-self: flex-start;
+        }
+
+        /* 新增图表容器样式（若需要可调整） */
+        .chart-container {
             margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
+    <!-- 背景色块 -->
+    <div class="bg-gradient bg-amber"></div>
+    <div class="bg-gradient bg-primary"></div>
+
     <main>
         <div class="container">
             <div class="item-info card-container">
@@ -234,9 +511,10 @@
             <div class="transaction-history card-container">
                 <h3>交易历史：</h3>
                 <ul class="timelineContainer" id="transaction-timeline"></ul>
+                <!-- 在交易历史下方添加图表容器 -->
                 <div class="chart-container" id="chart-container">
                     <h3></h3>
-                    <div id="transactionChart"></div>
+                    <div id="transactionChart" style="width: 100%; height: 300px;"></div>
                 </div>
             </div>
 
@@ -247,7 +525,7 @@
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" class="chat-input" placeholder="请输入您的问题..."
                         onkeydown="handleEnter(event)">
-                    <button class="layui-btn send-button" id="send-button">发送</button>
+                    <button class="send-button" id="send-button">发送</button>
                 </div>
             </div>
         </div>
@@ -308,13 +586,15 @@
             </p>
             <div class="modal-buttons">
                 <button id="confirm-button" class="layui-btn">确认</button>
-                <button id="cancel-button" class="layui-btn layui-btn-danger">取消</button>
+                <button id="cancel-button" class="layui-btn">取消</button>
             </div>
         </div>
     </main>
 
+    <!-- 现有依赖 -->
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.all.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 添加 ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
     <script>
@@ -444,6 +724,7 @@
                 populateItemDetails(currentItem);
                 generateTransactionTimeline(currentItem.transactions);
                 initializeSystemPrompt(currentItem);
+                // 初始化图表
                 initializeTransactionChart(currentItem.transactions);
                 try {
                     await initializeWebSocket();
@@ -506,31 +787,53 @@
             return timelineItem;
         }
 
+        // 初始化 ECharts 折线图
         function initializeTransactionChart(transactions) {
-            if (!transactions || !transactions.length) {
-                return;
-            }
+            if (!transactions || !transactions.length) return;
+
             const chartDom = document.getElementById('transactionChart');
             const myChart = echarts.init(chartDom);
 
-            const dates = [];
-            const prices = [];
-            const volumesMap = new Map();
+            // 找出首次交易日期
+            const firstTransactionDate = transactions[0]?.Transtime?.substring(0, 10);
 
+            // 按日期分组交易
+            const dateMap = new Map();
             transactions.forEach(tx => {
                 if (tx.Price) {
                     const dateStr = tx.Transtime.substring(0, 10);
-                    dates.push(dateStr);
-                    prices.push(tx.Price);
-                    volumesMap.set(dateStr, (volumesMap.get(dateStr) || 0) + 1);
+                    if (!dateMap.has(dateStr)) {
+                        dateMap.set(dateStr, {
+                            price: tx.Price,
+                            volume: (dateStr === firstTransactionDate) ? null : 1 // 首次交易日volume设为null
+                        });
+                    } else {
+                        // 同一天多次交易的处理
+                        const existing = dateMap.get(dateStr);
+                        existing.price = tx.Price;
+                        if (dateStr !== firstTransactionDate) {
+                            existing.volume = (existing.volume || 0) + 1;
+                        }
+                    }
                 }
             });
 
-            const volumes = dates.map(d => volumesMap.get(d));
+            // 排序日期
+            const sortedDates = Array.from(dateMap.keys()).sort();
+            const prices = [];
+            const volumes = [];
+            sortedDates.forEach(date => {
+                prices.push(dateMap.get(date).price);
+                volumes.push(dateMap.get(date).volume); // 首次交易日的volume会是null
+            });
 
             const option = {
+                backgroundColor: 'transparent',
                 title: {
-                    text: ''
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: 14
+                    }
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -539,18 +842,30 @@
                     }
                 },
                 legend: {
-                    data: ['价格', '交易量']
+                    data: ['价格', '交易量'],
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    },
+                    padding: [0, 20, 0, 10],  // 调整上下间距（[top, right, bottom, left]）
+                    itemGap: 16,              // 增加图例项之间的间距
                 },
                 grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
+                    left: '5%',
+                    right: '7%',
+                    top: '12%',
+                    bottom: '12%',
                     containLabel: true
                 },
                 xAxis: {
                     type: 'category',
-                    data: dates,
+                    data: sortedDates,
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        }
+                    },
                     axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.7)',
                         rotate: 45
                     }
                 },
@@ -558,12 +873,42 @@
                     {
                         type: 'value',
                         name: '价格',
-                        position: 'left'
+                        position: 'left',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#ff6b6b' // 与新注册用户折线颜色一致
+                            }
+                        },
+                        axisLabel: {
+                            color: '#ff6b6b'
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
                     },
                     {
                         type: 'value',
                         name: '交易量',
-                        position: 'right'
+                        position: 'right',
+                        axisLabel: {
+                            show: true,
+                            showMinLabel: true,  // 强制显示最小值标签
+                            showMaxLabel: true,  // 强制显示最大值标签
+                            color: '#0bdcab'     // 保持颜色一致
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#0bdcab' // 与交易金额分析柱状图颜色一致
+                            }
+                        },
+                        axisLabel: {
+                            color: '#0bdcab'
+                        },
+                        splitLine: {
+                            show: false
+                        }
                     }
                 ],
                 series: [
@@ -574,21 +919,39 @@
                         smooth: true,
                         symbol: 'circle',
                         symbolSize: 8,
+                        itemStyle: {
+                            color: '#ffd700', // 黄色数据点
+                        },
                         lineStyle: {
-                            width: 3
+                            width: 3,
+                            color: '#ff6b6b'
+                        },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
+                                { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
+                            ])
                         }
                     },
                     {
                         name: '交易量',
-                        type: 'line',
+                        type: 'bar',
                         yAxisIndex: 1,
                         data: volumes,
-                        smooth: true,
-                        symbol: 'rect',
-                        symbolSize: 8,
-                        lineStyle: {
-                            width: 3,
-                            type: 'dashed'
+                        barWidth: '50%',
+                        itemStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: '#6e40ff' },
+                                    { offset: 1, color: '#0bdcab' }
+                                ]
+                            },
+                            borderRadius: [4, 4, 0, 0] // 与交易金额分析图表一致
                         }
                     }
                 ]
@@ -597,6 +960,7 @@
             myChart.setOption(option);
             window.addEventListener('resize', () => myChart.resize());
         }
+
 
         function initializeSystemPrompt(item) {
             systemPrompt = `你是一个专业的项目介绍和答疑助手。以下是关于 **${item.name}** 版权项目的信息：**项目名称:** ${item.name}**描述:** ${item.description}**价格:** ${item.price} 元**拥有者:** ${item.owner}**交易历史:**${

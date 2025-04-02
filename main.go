@@ -31,6 +31,7 @@ func setupRouter(h *server.Hertz) {
 	h.POST("/register", middle.Register)
 
 	h.POST("/login", middle.Login)
+	h.POST("/api/login", middle.RegulatorLogin)
 
 	h.POST("/myproject", middle.Myproject)
 
