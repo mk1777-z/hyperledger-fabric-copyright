@@ -39,9 +39,12 @@
         :root {
             --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
             --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
-            --dark-bg-left: #03020A;  /* 极暗的紫黑色 */
-            --dark-bg-right: #0A0818;  /* 极暗的蓝紫色 */
-            --card-bg: rgba(30, 40, 70, 0.9); /* 更不透明，移除毛玻璃效果 */
+            --dark-bg-left: #03020A;
+            /* 极暗的紫黑色 */
+            --dark-bg-right: #0A0818;
+            /* 极暗的蓝紫色 */
+            --card-bg: rgba(30, 40, 70, 0.9);
+            /* 更不透明，移除毛玻璃效果 */
             --card-border: rgba(80, 100, 240, 0.3);
             --card-glow: rgba(110, 64, 255, 0.2);
             --text-color: #f1f1f1;
@@ -61,7 +64,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         /* 背景光晕效果 - 移除点状图案 */
         body::before {
             content: '';
@@ -70,7 +73,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(110, 64, 255, 0.1) 0%, transparent 30%),
                 radial-gradient(circle at 90% 80%, rgba(11, 220, 171, 0.1) 0%, transparent 30%);
             z-index: -1;
@@ -82,7 +85,7 @@
             top: 0;
             z-index: -1;
         }
-        
+
         .bg-amber {
             height: 600px;
             width: 600px;
@@ -92,7 +95,7 @@
             border-radius: 1rem;
             filter: blur(200px);
         }
-        
+
         .bg-primary {
             height: 600px;
             width: 600px;
@@ -104,7 +107,8 @@
 
         /* 导航栏样式 - 使用透明背景 */
         .navbar {
-            background: rgba(3, 2, 10, 0.6); /* 更暗更透明的导航栏背景 */
+            background: rgba(3, 2, 10, 0.6);
+            /* 更暗更透明的导航栏背景 */
             color: var(--text-color);
             padding: 15px 30px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -116,14 +120,15 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         /* 品牌标识区 */
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
-            color: white; /* 纯白色替代渐变效果 */
+            color: white;
+            /* 纯白色替代渐变效果 */
         }
-        
+
         /* 主导航 */
         .main-nav {
             display: flex;
@@ -132,7 +137,7 @@
             justify-content: center;
             flex: 1;
         }
-        
+
         .nav-item {
             padding: 8px 16px;
             color: rgba(255, 255, 255, 0.7);
@@ -142,16 +147,16 @@
             transition: all 0.3s ease;
             position: relative;
         }
-        
+
         .nav-item:hover {
             color: white;
             background: rgba(255, 255, 255, 0.05);
         }
-        
+
         .nav-item.active {
             color: white;
         }
-        
+
         .nav-item.active::after {
             content: '';
             position: absolute;
@@ -162,23 +167,23 @@
             background: white;
             border-radius: 4px;
         }
-        
+
         /* 用户导航 */
         .user-nav {
             display: flex;
             gap: 15px;
             align-items: center;
         }
-        
+
         .welcome-text {
             color: var(--secondary-text);
         }
-        
+
         .username {
             color: var(--accent-color);
             font-weight: 600;
         }
-        
+
         .nav-link {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
@@ -188,7 +193,7 @@
             gap: 5px;
             white-space: nowrap;
         }
-        
+
         .logout-btn {
             cursor: pointer;
         }
@@ -201,7 +206,7 @@
             display: flex;
             align-items: center;
         }
-        
+
         .search-input {
             width: 100%;
             padding: 0.75rem 3.5rem 0.75rem 3.5rem;
@@ -214,7 +219,7 @@
             border: 1px solid rgba(241, 241, 241, 0.1);
             transition: all 0.3s;
         }
-        
+
         .search-icon {
             position: absolute;
             left: 1.25rem;
@@ -238,25 +243,30 @@
         .card {
             position: relative;
             border-radius: 0.75rem;
-            background: rgba(255, 255, 255, 0.1); /* 减少白色比例 */
+            background: rgba(255, 255, 255, 0.1);
+            /* 减少白色比例 */
             padding: 1.5rem;
             height: 22rem;
             width: 100%;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 
-                0 4px 6px rgba(0, 0, 0, 0.1), 
-                0 1px 3px rgba(255, 255, 255, 0.05); /* 添加轻微的阴影 */
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 1px 3px rgba(255, 255, 255, 0.05);
+            /* 添加轻微的阴影 */
             transition: all 0.3s ease-in-out;
-            backdrop-filter: blur(10px); /* 调整模糊程度 */
+            backdrop-filter: blur(10px);
+            /* 调整模糊程度 */
             -webkit-backdrop-filter: blur(10px);
         }
 
         .card:hover {
-            transform: translateY(-5px); /* 鼠标悬停时上浮 */
-            box-shadow: 
-                0 8px 15px rgba(0, 0, 0, 0.2), 
-                0 2px 5px rgba(255, 255, 255, 0.1); /* 增强悬停时的阴影效果 */
+            transform: translateY(-5px);
+            /* 鼠标悬停时上浮 */
+            box-shadow:
+                0 8px 15px rgba(0, 0, 0, 0.2),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+            /* 增强悬停时的阴影效果 */
         }
 
         .card::before {
@@ -283,8 +293,10 @@
             left: 0;
             right: 0;
             padding: 1.5rem;
-            background: linear-gradient(to top, rgba(10, 15, 35, 0.8), rgba(10, 15, 35, 0.4), transparent); /* 更深的渐变 */
-            backdrop-filter: none; /* 内容区域不使用模糊效果 */
+            background: linear-gradient(to top, rgba(10, 15, 35, 0.8), rgba(10, 15, 35, 0.4), transparent);
+            /* 更深的渐变 */
+            backdrop-filter: none;
+            /* 内容区域不使用模糊效果 */
             -webkit-backdrop-filter: none;
         }
 
@@ -295,14 +307,17 @@
             border-radius: 0.75rem;
             border: 1px solid rgba(241, 241, 241, 0.05);
             overflow: hidden;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* 图片阴影 */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            /* 图片阴影 */
             width: 100%;
-            height: 60%; /* 调整图片高度 */
+            height: 60%;
+            /* 调整图片高度 */
         }
 
         .item-img {
             width: 100%;
-            height: 100%; /* 确保图片填满容器 */
+            height: 100%;
+            /* 确保图片填满容器 */
             border-radius: 8px;
             object-fit: cover;
             opacity: 0;
@@ -368,7 +383,7 @@
             display: inline-block;
             text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 
+            box-shadow:
                 0 2px 10px rgba(0, 0, 0, 0.1),
                 0 1px 2px rgba(255, 255, 255, 0.05);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -378,7 +393,7 @@
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-3px);
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(0, 0, 0, 0.15),
                 0 2px 5px rgba(255, 255, 255, 0.1);
         }
@@ -397,11 +412,11 @@
             -webkit-backdrop-filter: blur(20px);
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
+            box-shadow:
                 0 10px 30px rgba(0, 0, 0, 0.1),
                 0 1px 2px rgba(255, 255, 255, 0.05);
         }
-        
+
         /* 卡片图标和图片 - 修改为更大尺寸 */
         .item-icon {
             background-color: rgba(241, 241, 241, 0.05);
@@ -410,23 +425,25 @@
             border: 1px solid rgba(241, 241, 241, 0.05);
             overflow: hidden;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            width: 100%; /* 让容器宽度100% */
+            width: 100%;
+            /* 让容器宽度100% */
         }
-        
+
         .item-img {
             width: 100%;
-            height: 180px; /* 增加图片高度 */
+            height: 180px;
+            /* 增加图片高度 */
             border-radius: 8px;
             object-fit: cover;
             opacity: 0;
             transition: all 0.5s ease;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .item-img.loaded {
             opacity: 1;
         }
-        
+
         /* 左右布局的卡片内容 */
         .card-content {
             position: absolute;
@@ -435,32 +452,33 @@
             right: 0;
             padding: 1.5rem;
             background: linear-gradient(to top, rgba(10, 15, 35, 0.8), rgba(10, 15, 35, 0.4), transparent);
-            backdrop-filter: none; /* 内容区域不使用模糊效果 */
+            backdrop-filter: none;
+            /* 内容区域不使用模糊效果 */
             -webkit-backdrop-filter: none;
         }
-        
+
         .card-flex-container {
             display: flex;
             justify-content: space-between;
             gap: 10px;
             width: 100%;
         }
-        
+
         .card-col {
             flex: 1;
         }
-        
+
         .card-col-left {
             padding-right: 10px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .card-col-right {
             padding-left: 10px;
             display: flex;
             flex-direction: column;
         }
-        
+
         .item-title {
             font-size: 1.1rem;
             font-weight: 500;
@@ -470,7 +488,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .item-owner {
             font-size: 0.85rem;
             color: var(--secondary-text);
@@ -481,7 +499,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .item-desc {
             font-size: 0.85rem;
             color: var(--secondary-text);
@@ -491,14 +509,14 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .item-price {
             font-size: 0.9rem;
             font-weight: 500;
             color: white;
             margin-bottom: 0.75rem;
         }
-        
+
         .action-btn {
             margin-top: auto;
             padding: 8px 16px;
@@ -514,17 +532,17 @@
             display: inline-block;
             text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 
+            box-shadow:
                 0 2px 10px rgba(0, 0, 0, 0.1),
                 0 1px 2px rgba(255, 255, 255, 0.05);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         .action-btn:hover {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-3px);
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(0, 0, 0, 0.15),
                 0 2px 5px rgba(255, 255, 255, 0.1);
         }
@@ -540,22 +558,24 @@
             backdrop-filter: blur(3px);
             -webkit-backdrop-filter: blur(3px);
         }
-        
+
         .card-meta {
             display: flex;
             flex-direction: column;
             font-size: 0.75rem;
-            margin-top: 1rem; /* 减少上边距 */
+            margin-top: 1rem;
+            /* 减少上边距 */
         }
-        
+
         .meta-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             overflow: hidden;
-            margin-bottom: 2px; /* 减少行间距 */
+            margin-bottom: 2px;
+            /* 减少行间距 */
         }
-        
+
         .meta-label {
             display: flex;
             align-items: center;
@@ -564,7 +584,7 @@
             text-transform: uppercase;
             min-width: 60px;
         }
-        
+
         .meta-value {
             max-width: 180px;
             white-space: nowrap;
@@ -572,11 +592,12 @@
             text-overflow: ellipsis;
             text-align: right;
         }
-        
+
         .divider {
             height: 1px;
             background-color: rgba(241, 241, 241, 0.1);
-            margin: 4px 0; /* 减少分隔线上下空间 */
+            margin: 4px 0;
+            /* 减少分隔线上下空间 */
         }
 
         /* 用户样式 */
@@ -587,7 +608,7 @@
             padding-top: 0.375rem;
             font-size: 0.875rem;
         }
-        
+
         .user-avatar {
             height: 1rem;
             width: 1rem;
@@ -620,7 +641,7 @@
             outline: none;
             transition: all 0.3s ease;
         }
-        
+
         .page-number:focus {
             border-color: rgba(255, 255, 255, 0.5);
             background-color: rgba(255, 255, 255, 0.15);
@@ -642,7 +663,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         .page-btn:disabled {
             background: rgba(255, 255, 255, 0.05);
             color: rgba(255, 255, 255, 0.3);
@@ -650,14 +671,14 @@
             cursor: default;
             box-shadow: none;
         }
-        
+
         .page-btn:hover:not(:disabled) {
             background: rgba(255, 255, 255, 0.2);
             border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         }
-        
+
         .go-btn {
             height: 36px;
             padding: 0 15px;
@@ -670,34 +691,34 @@
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
+            box-shadow:
                 0 4px 12px rgba(0, 0, 0, 0.1),
                 0 1px 3px rgba(255, 255, 255, 0.1);
         }
-        
+
         .go-btn:hover {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(0, 0, 0, 0.15),
                 0 2px 5px rgba(255, 255, 255, 0.1);
         }
-        
+
         /* 页面通用容器 */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
+
         /* 头部标题区 */
         .header-section {
             padding-top: 24px;
             padding-bottom: 24px;
             text-align: center;
         }
-        
+
         .header-section h2 {
             font-size: 2.25rem;
             font-weight: 500;
@@ -706,7 +727,8 @@
 
         /* 增大搜索组件与周围元素的间距 */
         .search-form {
-            margin: 45px auto 60px auto; /* 增大上下间距 */
+            margin: 45px auto 60px auto;
+            /* 增大上下间距 */
             text-align: center;
         }
 
@@ -715,35 +737,35 @@
             .grid-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .search-container {
                 width: 100%;
             }
-            
+
             .navbar {
                 flex-direction: column;
                 padding: 10px;
             }
-            
+
             .main-nav {
                 margin: 10px 0;
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+
             .user-nav {
                 margin-top: 10px;
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 10px;
             }
-            
+
             .welcome-text {
                 display: block;
                 width: 100%;
                 text-align: center;
             }
-            
+
             .pagination-container {
                 flex-direction: column;
                 gap: 10px;
@@ -751,7 +773,7 @@
         }
     </style>
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script> -->
 </head>
 
 <body>
@@ -763,14 +785,14 @@
     <nav class="navbar">
         <!-- 品牌标识 -->
         <div class="navbar-brand">区块链版权</div>
-        
+
         <!-- 主导航 - 居中 -->
         <div class="main-nav">
             <a href="/display" class="nav-item active">版权展示</a>
             <a href="/homepage" class="nav-item">个人中心</a>
             <a href="/statistics" class="nav-item">统计分析</a>
         </div>
-        
+
         <!-- 用户导航 - 右侧 -->
         <div class="user-nav">
             <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
@@ -787,7 +809,8 @@
                 <h2>探索版权作品</h2>
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-input" placeholder="搜索版权项目" class="search-input" onkeydown="handleSearchKey(event)">
+                    <input type="text" id="search-input" placeholder="搜索版权项目" class="search-input"
+                        onkeydown="handleSearchKey(event)">
                 </div>
             </div>
         </div>
@@ -809,8 +832,8 @@
 
     <script>
         // 初始化Lucide图标
-        lucide.createIcons();
-        
+        // lucide.createIcons();
+
         let currentPage = 1;
         let totalPages = 1;
         const pageSize = 10;
@@ -847,19 +870,19 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(res => {
-                // 检查响应状态
-                if (!res.ok) {
-                    throw new Error(`请求失败: ${res.status} ${res.statusText}`);
-                }
-                return res.json();
-            })
-            .catch(error => {
-                console.error(`API请求错误 (${url}):`, error);
-                layui.layer.msg('数据加载失败，请稍后重试', {icon: 2});
-                // 返回空对象以避免后续处理错误
-                return { items: [], totalPages: 1 };
-            });
+                .then(res => {
+                    // 检查响应状态
+                    if (!res.ok) {
+                        throw new Error(`请求失败: ${res.status} ${res.statusText}`);
+                    }
+                    return res.json();
+                })
+                .catch(error => {
+                    console.error(`API请求错误 (${url}):`, error);
+                    layui.layer.msg('数据加载失败，请稍后重试', { icon: 2 });
+                    // 返回空对象以避免后续处理错误
+                    return { items: [], totalPages: 1 };
+                });
 
         // 请求项目数据
         function fetchItemsForPage(page) {
@@ -869,11 +892,11 @@
                 time: 0,
                 shade: 0.1
             });
-            
+
             fetchData('/api/items', { page: page, pageSize: pageSize })
                 .then(data => {
                     layui.layer.close(loadingMsg);
-                    
+
                     if (data?.items && data?.totalPages) {
                         renderItems(data.items);
                         totalPages = data.totalPages;
@@ -890,7 +913,7 @@
         // 渲染项目数据 - 重新设计卡片布局为左右两栏
         function renderItems(items) {
             const container = document.getElementById('projects-grid');
-            
+
             if (items.length) {
                 container.innerHTML = items.map(item => `
                     <div class="card shadow-xl relative">
@@ -920,9 +943,9 @@
                         </div>
                     </div>
                 `).join('');
-                
+
                 // 初始化图标
-                lucide.createIcons();
+                // lucide.createIcons();
             } else {
                 container.innerHTML = '<div class="no-data">没有数据可显示</div>';
             }
@@ -930,7 +953,7 @@
             // 观察图片进行懒加载
             observeImages();
         }
-        
+
         // 添加文本截断函数防止内容溢出
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text;
@@ -985,33 +1008,33 @@
                 },
                 body: JSON.stringify({ name: itemName })
             })
-            .then(response => {
-                layui.layer.close(loadingMsg);
-                
-                if (!response.ok) {
-                    throw new Error(`请求失败: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.items && data.items.length > 0) {
-                    const item = data.items[0];
-                    const processedItem = {
-                        ...item,
-                        img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
-                    };
-                    sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
-                    window.location.href = '/information';
-                } else {
-                    console.error('未找到相关项');
-                    layui.layer.msg('未找到项目详情', {icon: 2});
-                }
-            })
-            .catch(error => {
-                layui.layer.close(loadingMsg);
-                console.error('获取详情失败:', error);
-                layui.layer.msg('获取详情失败，请稍后重试', {icon: 2});
-            });
+                .then(response => {
+                    layui.layer.close(loadingMsg);
+
+                    if (!response.ok) {
+                        throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.items && data.items.length > 0) {
+                        const item = data.items[0];
+                        const processedItem = {
+                            ...item,
+                            img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
+                        };
+                        sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
+                        window.location.href = '/information';
+                    } else {
+                        console.error('未找到相关项');
+                        layui.layer.msg('未找到项目详情', { icon: 2 });
+                    }
+                })
+                .catch(error => {
+                    layui.layer.close(loadingMsg);
+                    console.error('获取详情失败:', error);
+                    layui.layer.msg('获取详情失败，请稍后重试', { icon: 2 });
+                });
         }
 
         // 更新分页信息
@@ -1028,7 +1051,7 @@
             if (searchQuery) {
                 window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
             } else {
-                layui.layer.msg('请输入搜索内容', {icon: 2});
+                layui.layer.msg('请输入搜索内容', { icon: 2 });
             }
         }
 
@@ -1055,7 +1078,7 @@
                 const pageInput = document.getElementById('page-number');
                 let page = parseInt(pageInput.value, 10);
                 if (isNaN(page) || page < 1 || page > totalPages) {
-                    layui.layer.msg('请输入有效的页码范围 1 - ' + totalPages, {icon: 2});
+                    layui.layer.msg('请输入有效的页码范围 1 - ' + totalPages, { icon: 2 });
                     pageInput.value = currentPage;
                     return;
                 }
@@ -1067,7 +1090,7 @@
                     document.getElementById('go-page').click();
                 }
             });
-            
+
             // 搜索按钮
             document.getElementById('search-input').addEventListener('keyup', (event) => {
                 if (event.key === 'Enter') {
@@ -1077,4 +1100,5 @@
         }
     </script>
 </body>
+
 </html>
