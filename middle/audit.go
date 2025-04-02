@@ -17,15 +17,6 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
-// AuditRecord 审核记录结构，与智能合约保持一致
-type AuditRecord struct {
-	TradeID   string `json:"tradeId"`
-	Decision  string `json:"decision"` // APPROVE/REJECT
-	Comment   string `json:"comment"`
-	Regulator string `json:"regulator"`
-	Timestamp int64  `json:"timestamp"`
-}
-
 // 验证和解析交易ID
 func validateAndParseTradeID(tradeID string) (string, error) {
 	// 如果传入的是多个交易ID（空格分隔），取最后一个作为默认值
@@ -43,114 +34,83 @@ func validateAndParseTradeID(tradeID string) (string, error) {
 	return validID, nil
 }
 
-// 验证交易是否存在
-func verifyTradeExists(contract *client.Contract, tradeID string) (bool, error) {
-	fmt.Printf("\n--> Evaluate Transaction: Verify Trade Exists for ID: %s <-- \n", tradeID)
+// 检查交易是否存在
+func checkTradeExists(contract *client.Contract, tradeID string) bool {
+	log.Printf("检查交易是否存在: %s", tradeID)
 
-	// 使用与information.go中相同的方法读取交易信息
-	result, err := contract.EvaluateTransaction("ReadCreatetrans", tradeID)
+	result, err := contract.EvaluateTransaction("TradeExists", tradeID)
 	if err != nil {
-		log.Printf("*** 交易验证失败: ID=%s, 错误=%v ***", tradeID, err)
-		// 如果交易不存在，通常会返回特定错误
-		if strings.Contains(err.Error(), "交易不存在") || strings.Contains(err.Error(), "does not exist") {
-			return false, fmt.Errorf("交易 ID %s 不存在", tradeID)
-		}
-		return false, err
+		log.Printf("检查交易失败: %v", err)
+		return false
 	}
 
-	// 如果结果为空，表示交易不存在
-	if len(result) == 0 {
-		log.Printf("*** 交易 %s 返回空结果 ***", tradeID)
-		return false, fmt.Errorf("交易 ID %s 返回空结果", tradeID)
-	}
-
-	fmt.Printf("*** 获取到交易数据: %s ***\n", string(result))
-
-	// 验证结果是否为有效的JSON
-	var transactionDetails map[string]interface{}
-	if err := json.Unmarshal(result, &transactionDetails); err != nil {
-		log.Printf("*** 交易数据解析失败: ID=%s, 错误=%v ***", tradeID, err)
-		return false, fmt.Errorf("交易数据格式无效: %v", err)
-	}
-
-	// 检查必要字段是否存在
-	if _, ok := transactionDetails["ID"]; !ok {
-		log.Printf("*** 交易数据缺少必要字段: ID=%s ***", tradeID)
-		return false, fmt.Errorf("交易数据缺少必要字段")
-	}
-
-	fmt.Printf("*** 交易 %s 验证成功存在 ***\n", tradeID)
-	return true, nil
+	return string(result) == "true"
 }
 
-// 创建审核记录
-func createAuditRecord(contract *client.Contract, tradeID string, decision string, comment string) error {
-	fmt.Printf("\n--> Submit Transaction: AuditTrade <-- \n")
-	fmt.Printf("参数: tradeID=%s, decision=%s, comment=%s\n", tradeID, decision, comment)
-
-	// 添加详细调试信息
-	fmt.Printf("*** 合约对象信息: %#v ***\n", contract)
-	fmt.Printf("*** 合约ID: %v ***\n", contract.ChaincodeName())
-
-	// 检查合约是否为nil
-	if contract == nil {
-		return fmt.Errorf("监管合约对象为空，请检查初始化")
-	}
-
-	// 尝试先调用无害查询操作测试合约连接
-	try := func() error {
-		fmt.Println("测试合约连接...")
-		_, err := contract.EvaluateTransaction("GetAuditHistory", tradeID)
-		if err != nil {
-			fmt.Printf("测试查询失败: %v\n", err)
-			return err
-		}
-		fmt.Println("测试查询成功")
+// 创建交易记录 - 内部使用，不作为API暴露
+func createTradeIfNeeded(contract *client.Contract, tradeID string) error {
+	// 检查交易是否已存在
+	if exists := checkTradeExists(contract, tradeID); exists {
+		log.Printf("交易已存在，无需创建: %s", tradeID)
 		return nil
 	}
 
-	if err := try(); err != nil {
-		fmt.Printf("警告: 合约连接测试失败，但仍将尝试提交审核\n")
+	log.Printf("交易不存在，开始创建: %s", tradeID)
+
+	// 创建交易对象
+	trade := map[string]interface{}{
+		"id":          tradeID,
+		"description": fmt.Sprintf("自动创建的交易 %s", tradeID),
+		"status":      "PENDING",
+		"createdAt":   time.Now().Unix(),
 	}
 
-	// 直接提交审核交易，添加更详细的错误处理
-	result, err := contract.SubmitTransaction("AuditTrade", tradeID, decision, comment)
+	// 转换为JSON
+	tradeJSON, err := json.Marshal(trade)
 	if err != nil {
-		log.Printf("*** 审核交易提交失败: %v ***", err)
+		return fmt.Errorf("创建交易JSON失败: %v", err)
+	}
 
-		// 错误分类处理
-		errMsg := err.Error()
-		if strings.Contains(errMsg, "regulator") {
-			return fmt.Errorf("跨链码调用失败: 未找到 regulator 链码，请确认链码已正确部署")
-		} else if strings.Contains(errMsg, "trade") && strings.Contains(errMsg, "not found") {
-			return fmt.Errorf("交易ID %s 在监管合约中未找到", tradeID)
-		} else if strings.Contains(errMsg, "access denied") || strings.Contains(errMsg, "permission") {
-			return fmt.Errorf("权限错误: 调用者可能没有执行此操作的权限")
-		} else if strings.Contains(errMsg, "endorsement") {
-			return fmt.Errorf("背书失败: 可能是跨链码配置问题或通道配置错误")
-		}
+	// 调用智能合约的CreateTrade函数
+	_, err = contract.SubmitTransaction("CreateTrade", tradeID, string(tradeJSON))
+	if err != nil {
+		log.Printf("创建交易失败: %v", err)
+		return fmt.Errorf("创建交易失败: %v", err)
+	}
 
+	log.Printf("交易 %s 创建成功", tradeID)
+	return nil
+}
+
+// 创建审核记录
+func submitAuditTransaction(contract *client.Contract, tradeID string, decision string, comment string) error {
+	log.Printf("--> 提交审核交易: ID=%s, Decision=%s", tradeID, decision)
+
+	// 直接调用智能合约的审核功能
+	_, err := contract.SubmitTransaction("AuditTrade", tradeID, decision, comment)
+	if err != nil {
+		log.Printf("审核交易提交失败: %v", err)
 		return fmt.Errorf("审核交易失败: %v", err)
 	}
 
-	fmt.Printf("*** 审核记录提交成功，结果: %s ***\n", string(result))
+	log.Printf("审核记录提交成功")
 	return nil
 }
 
 // 获取审核历史记录
-func getAuditHistory(contract *client.Contract, tradeID string) ([]AuditRecord, error) {
-	fmt.Printf("\n--> Evaluate Transaction: GetAuditHistory <-- \n")
+func getAuditHistory(contract *client.Contract, tradeID string) ([]conf.AuditRecord, error) {
+	log.Printf("--> 获取审核历史: ID=%s", tradeID)
 
 	result, err := contract.EvaluateTransaction("GetAuditHistory", tradeID)
 	if err != nil {
-		log.Printf("failed to evaluate transaction: %v", err)
+		log.Printf("获取审核历史失败: %v", err)
 		return nil, err
 	}
 
-	var records []AuditRecord
+	var records []conf.AuditRecord
 	err = json.Unmarshal(result, &records)
 	if err != nil {
-		log.Printf("failed to unmarshal audit history: %v", err)
+		log.Printf("解析审核历史失败: %v", err)
 		return nil, err
 	}
 
@@ -193,8 +153,41 @@ func isRegulator(username, password string) bool {
 	return true
 }
 
+// 从basic链上查询交易信息
+func getTradeInfoFromBasic(tradeID string) (map[string]interface{}, error) {
+	log.Printf("从基础链查询交易信息: %s", tradeID)
+
+	// 确保BasicContract已初始化
+	if conf.BasicContract == nil {
+		return nil, fmt.Errorf("基础合约未初始化")
+	}
+
+	// 调用basic链上的查询函数 - 使用ReadCreatetrans而非GetTrade
+	log.Printf("--> 执行交易: ReadCreatetrans, 返回资产属性")
+	evaluateResult, err := conf.BasicContract.EvaluateTransaction("ReadCreatetrans", tradeID)
+	if err != nil {
+		log.Printf("执行交易失败: %v", err)
+		return nil, fmt.Errorf("从基础链查询交易失败: %v", err)
+	}
+
+	if len(evaluateResult) == 0 {
+		return nil, fmt.Errorf("未在基础链上找到交易信息")
+	}
+
+	// 解析JSON结果
+	var tradeInfo map[string]interface{}
+	if err := json.Unmarshal(evaluateResult, &tradeInfo); err != nil {
+		log.Printf("解析交易信息失败: %v", err)
+		return nil, fmt.Errorf("解析交易信息失败: %v", err)
+	}
+
+	log.Printf("成功获取交易信息: %s", tradeID)
+	return tradeInfo, nil
+}
+
+// AuditTrade - 主要API接口，提交审核
 func AuditTrade(_ context.Context, c *app.RequestContext) {
-	log.Println("AuditTrade API called.")
+	log.Println("AuditTrade API 被调用")
 
 	// 定义请求结构
 	type AuditRequest struct {
@@ -207,7 +200,7 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 	// 解析请求
 	var req AuditRequest
 	if err := c.Bind(&req); err != nil {
-		log.Printf("Failed to bind request: %v", err)
+		log.Printf("解析请求失败: %v", err)
 		c.Status(http.StatusBadRequest)
 		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的请求参数"})
 		return
@@ -232,35 +225,6 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 
 	// 更新请求中的交易ID为验证后的ID
 	req.TradeID = validTradeID
-
-	// 先验证交易是否存在
-	exists, err := verifyTradeExists(conf.BasicContract, req.TradeID)
-	if err != nil || !exists {
-		statusMsg := "交易不存在或无效"
-		if err != nil {
-			statusMsg = err.Error()
-		}
-		log.Printf("*** 交易验证失败: %s ***", statusMsg)
-		c.Status(http.StatusBadRequest)
-		c.JSON(http.StatusBadRequest, utils.H{
-			"message": "审核失败",
-			"error":   statusMsg,
-		})
-		return
-	}
-
-	// 检查RegulatorContract是否已正确初始化
-	if conf.RegulatorContract == nil {
-		log.Printf("*** 严重错误: RegulatorContract 未初始化 ***")
-		c.Status(http.StatusInternalServerError)
-		c.JSON(http.StatusInternalServerError, utils.H{
-			"message": "系统配置错误",
-			"error":   "监管合约未正确初始化",
-		})
-		return
-	}
-
-	log.Printf("*** 交易验证通过，继续执行审核 ***")
 
 	// 验证决定值是否有效
 	if req.Decision != "APPROVE" && req.Decision != "REJECT" {
@@ -305,22 +269,39 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 调用链码函数
-	err = createAuditRecord(conf.RegulatorContract, req.TradeID, req.Decision, req.Comment)
+	// 检查RegulatorContract是否已正确初始化
+	if conf.RegulatorContract == nil {
+		log.Printf("严重错误: RegulatorContract 未初始化")
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "系统配置错误",
+			"error":   "监管合约未正确初始化",
+		})
+		return
+	}
+
+	// 检查交易是否存在，如果不存在则创建
+	err = createTradeIfNeeded(conf.RegulatorContract, req.TradeID)
 	if err != nil {
-		log.Printf("*** 审核失败: %v ***", err)
-		// 区分不同类型的错误，返回更具体的错误信息
-		statusCode := http.StatusInternalServerError
-		errorMsg := err.Error()
+		log.Printf("创建交易失败: %v", err)
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "交易准备失败",
+			"error":   err.Error(),
+		})
+		return
+	}
 
-		if strings.Contains(errorMsg, "交易ID无效") {
-			statusCode = http.StatusBadRequest
-		}
+	log.Printf("交易准备完成，开始审核...")
 
-		c.Status(statusCode)
-		c.JSON(statusCode, utils.H{
+	// 提交审核
+	err = submitAuditTransaction(conf.RegulatorContract, req.TradeID, req.Decision, req.Comment)
+	if err != nil {
+		log.Printf("审核失败: %v", err)
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
 			"message": "审核交易失败",
-			"error":   errorMsg,
+			"error":   err.Error(),
 		})
 		return
 	}
@@ -333,9 +314,9 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 	})
 }
 
-// GetAuditHistory 获取交易的审核历史
+// GetAuditHistory - 获取交易的审核历史
 func GetAuditHistory(_ context.Context, c *app.RequestContext) {
-	log.Println("GetAuditHistory API called.")
+	log.Println("GetAuditHistory API 被调用")
 
 	// 获取交易ID参数
 	tradeID := c.Query("tradeId")
@@ -384,6 +365,15 @@ func GetAuditHistory(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// 检查交易是否存在
+	if exists := checkTradeExists(conf.RegulatorContract, tradeID); !exists {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{
+			"message": "交易不存在",
+		})
+		return
+	}
+
 	// 调用链码获取审核历史
 	records, err := getAuditHistory(conf.RegulatorContract, tradeID)
 	if err != nil {
@@ -399,5 +389,165 @@ func GetAuditHistory(_ context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, utils.H{
 		"records": records,
 		"count":   len(records),
+	})
+}
+
+// GetTradeInfoForAudit - 获取交易信息供审核使用
+func GetTradeInfoForAudit(_ context.Context, c *app.RequestContext) {
+	log.Println("GetTradeInfoForAudit API 被调用")
+
+	// 获取交易ID参数
+	tradeID := c.Query("tradeId")
+	if tradeID == "" {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "缺少交易ID参数"})
+		return
+	}
+
+	// 验证并解析交易ID
+	validTradeID, err := validateAndParseTradeID(tradeID)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": err.Error()})
+		return
+	}
+
+	// 使用验证后的交易ID
+	tradeID = validTradeID
+
+	// 验证用户权限
+	tokenString := c.GetHeader("Authorization")
+	if string(tokenString) == "" {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "缺少授权令牌"})
+		return
+	}
+
+	// 提取 Bearer token
+	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
+
+	// 解析 token
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return conf.Con.Jwtkey, nil
+	})
+	if err != nil {
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌"})
+		return
+	}
+
+	// 验证 token 是否有效
+	claims, ok := token.Claims.(*conf.UserClaims)
+	if !ok || !token.Valid {
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌声明"})
+		return
+	}
+
+	// 检查用户是否为监管者
+	if claims.Username != "监管者" {
+		c.Status(http.StatusForbidden)
+		c.JSON(http.StatusForbidden, utils.H{"message": "只有监管者可以查看待审核交易信息"})
+		return
+	}
+
+	// 从基础链上获取交易信息
+	tradeInfo, err := getTradeInfoFromBasic(tradeID)
+	if err != nil {
+		log.Printf("获取交易信息失败: %v", err)
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "获取交易信息失败",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// 检查监管链上是否已存在该交易
+	tradeExists := false
+	if conf.RegulatorContract != nil {
+		tradeExists = checkTradeExists(conf.RegulatorContract, tradeID)
+	}
+
+	// 从交易信息中获取项目名称
+	itemName, ok := tradeInfo["Name"].(string)
+	if !ok || itemName == "" {
+		log.Printf("交易信息中未找到有效的项目名称")
+		c.JSON(http.StatusOK, utils.H{
+			"message":     "获取交易信息成功，但未找到相关项目信息",
+			"tradeInfo":   tradeInfo,
+			"tradeExists": tradeExists,
+		})
+		return
+	}
+
+	// 连接数据库获取项目详细信息
+	var itemDetails map[string]interface{}
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s",
+		conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Printf("数据库连接失败: %v", err)
+		c.JSON(http.StatusOK, utils.H{
+			"message":     "获取交易信息成功，但数据库连接失败",
+			"tradeInfo":   tradeInfo,
+			"tradeExists": tradeExists,
+		})
+		return
+	}
+	defer db.Close()
+
+	// 查询项目详情
+	var id int
+	var name, simple_des, dsc, owner, img, start_time string
+	var price float32
+	var transID sql.NullString // 使用NullString处理可能为NULL的值
+
+	err = db.QueryRow("SELECT id, name, simple_dsc, price, dsc, owner, img, start_time, transID FROM item WHERE name = ?",
+		itemName).Scan(&id, &name, &simple_des, &price, &dsc, &owner, &img, &start_time, &transID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("未找到名称为 %s 的项目", itemName)
+			c.JSON(http.StatusOK, utils.H{
+				"message":     "获取交易信息成功，但未找到相关项目记录",
+				"tradeInfo":   tradeInfo,
+				"tradeExists": tradeExists,
+			})
+			return
+		}
+		log.Printf("查询项目信息失败: %v", err)
+		c.JSON(http.StatusOK, utils.H{
+			"message":     "获取交易信息成功，但查询项目信息失败",
+			"tradeInfo":   tradeInfo,
+			"tradeExists": tradeExists,
+			"queryError":  err.Error(),
+		})
+		return
+	}
+
+	// 构建项目详情
+	itemDetails = map[string]interface{}{
+		"id":         id,
+		"name":       name,
+		"simple_dsc": simple_des,
+		"price":      price,
+		"dsc":        dsc,
+		"owner":      owner,
+		"img":        img,
+		"start_time": start_time,
+	}
+
+	// 如果transID有值，添加到详情中
+	if transID.Valid && transID.String != "" {
+		itemDetails["transID"] = transID.String
+	}
+
+	// 返回交易信息和项目信息
+	c.JSON(http.StatusOK, utils.H{
+		"message":     "获取交易和项目信息成功",
+		"tradeInfo":   tradeInfo,
+		"itemDetails": itemDetails,
+		"tradeExists": tradeExists,
 	})
 }

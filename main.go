@@ -10,26 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func main() {
-	log.Println("正在初始化系统配置...")
-	conf.Init()
-	log.Println("系统配置初始化完成")
-
-	h := server.Default()
-
-	// 修改静态文件服务根目录，避免路径重复
-	h.Static("/static", "/home/hyperledger-fabric-copyright")
-
-	// 只加载project目录下的模板，特别是statistics.html
-	h.LoadHTMLGlob("/home/hyperledger-fabric-copyright/HTML/project/*.html")
-
-	// renderHTML函数中不应再注册静态文件
-	renderHTML(h)
-
-	// 确保调用路由注册函数
-	router.RegisterRoutes(h)
-
-	// 直接在main函数中注册API路由，不使用setupRouter函数
+func setupRouter(h *server.Hertz) {
 	// 统计分析API - 使用全局路由而非/api前缀
 	h.POST("/statistics/summary", middle.GetStatisticsSummaryAPI)
 	h.POST("/statistics/copyright-trend", middle.GetCopyrightTrendAPI)
@@ -65,9 +46,35 @@ func main() {
 
 	h.POST("/search", middle.Search)
 
-	h.POST("/audit-trade", middle.AuditTrade)
+	// 审核相关路由
+	h.POST("/api/audit/trade", middle.AuditTrade)              // 提交审核决定
+	h.GET("/api/audit/history", middle.GetAuditHistory)        // 获取审核历史
+	h.GET("/api/audit/tradeinfo", middle.GetTradeInfoForAudit) // 新增：获取交易信息用于审核
 
 	h.GET("/chat_ws", middle.ChatWebsocket)
+}
+
+func main() {
+	log.Println("正在初始化系统配置...")
+	conf.Init()
+	log.Println("系统配置初始化完成")
+
+	h := server.Default()
+
+	// 修改静态文件服务根目录，避免路径重复
+	h.Static("/static", "/home/hyperledger-fabric-copyright")
+
+	// 只加载project目录下的模板，特别是statistics.html
+	h.LoadHTMLGlob("/home/hyperledger-fabric-copyright/HTML/project/*.html")
+
+	// renderHTML函数中不应再注册静态文件
+	renderHTML(h)
+
+	// 确保调用路由注册函数
+	router.RegisterRoutes(h)
+
+	// 使用setupRouter函数注册API路由
+	setupRouter(h)
 
 	h.NoHijackConnPool = true
 

@@ -67,3 +67,11 @@ type CopyrightItem struct {
 	Price     string `json:"price"`
 	Img       string `json:"img"`
 }
+
+type AuditRecord struct {
+	TradeID   string `json:"tradeId"`
+	Decision  string `json:"decision"` // APPROVE/REJECT
+	Comment   string `json:"comment"`
+	Regulator string `json:"regulator"`
+	Timestamp int64  `json:"timestamp"`
+}
