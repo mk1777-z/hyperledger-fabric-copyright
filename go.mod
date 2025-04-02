@@ -8,7 +8,9 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/hertz-contrib/websocket v0.2.0
 	github.com/hyperledger/fabric-gateway v1.7.1
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/sashabaranov/go-openai v1.37.0
+	github.com/xuri/excelize/v2 v2.9.0
 	google.golang.org/grpc v1.69.2
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -27,7 +29,6 @@ require (
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.4 // indirect
-	github.com/jung-kurt/gofpdf v1.16.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect
@@ -41,7 +42,6 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/xuri/efp v0.0.0-20240408161823-9ad904a10d6d // indirect
-	github.com/xuri/excelize/v2 v2.9.0 // indirect
 	github.com/xuri/nfp v0.0.0-20240318013403-ab9948c2c4a7 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.31.0 // indirect

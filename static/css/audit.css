@@ -18,6 +18,13 @@
     border-top-right-radius: 10px;
 }
 
+/* 表格样式 */
+.table {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
 /* 状态标签样式 */
 .status-badge {
     position: absolute;
@@ -42,6 +49,12 @@
 .status-rejected {
     background-color: #dc3545;
     color: #fff;
+}
+
+.badge {
+    font-size: 12px;
+    padding: 5px 8px;
+    border-radius: 4px;
 }
 
 /* 审核页面样式 */
@@ -93,4 +106,22 @@
     max-height: 250px;
     width: 100%;
     object-fit: contain;
+}
+
+/* 表格行样式 */
+.table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* 防止文本溢出 */
+td {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

@@ -66,20 +66,28 @@ document.addEventListener('DOMContentLoaded', function () {
 function loadAllItems() {
     showLoading();
 
-    fetch('/api/items', {
+    fetch('/api/audit/categorized-items', {  // 使用新的分类API
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
     })
-        .then(response => response.json())
+        .then(response => {
+            console.log('获取项目列表响应状态:', response.status);
+            return response.json();
+        })
         .then(data => {
-            if (data.items && Array.isArray(data.items)) {
-                processItems(data.items);
-            } else {
-                console.error('获取项目列表失败：', data);
-                alert('获取版权项目失败！');
-            }
+            console.log('获取到分类项目数据:', data);
+
+            // 直接从响应中获取已分类的项目数据
+            renderItems('pendingItems', data.pendingItems || [], 'pending');
+            renderItems('approvedItems', data.approvedItems || [], 'approved');
+            renderItems('rejectedItems', data.rejectedItems || [], 'rejected');
+
+            // 检查是否有内容
+            toggleEmptyState('pendingEmpty', !data.pendingItems || data.pendingItems.length === 0);
+            toggleEmptyState('approvedEmpty', !data.approvedItems || data.approvedItems.length === 0);
+            toggleEmptyState('rejectedEmpty', !data.rejectedItems || data.rejectedItems.length === 0);
         })
         .catch(error => {
             console.error('获取项目列表错误：', error);
@@ -179,39 +187,63 @@ async function checkAuditStatus(tradeID) {
     }
 }
 
-// 渲染项目列表
+// 渲染项目列表 - 使用列表形式而非卡片
 function renderItems(containerId, items, type) {
     const container = document.getElementById(containerId);
 
+    // 如果没有项目，显示空状态
+    if (!items || items.length === 0) {
+        return;
+    }
+
+    // 创建表格视图
+    const table = document.createElement('table');
+    table.className = 'table table-hover table-striped';
+
+    // 创建表头
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th scope="col">状态</th>
+            <th scope="col">名称</th>
+            <th scope="col">所有者</th>
+            <th scope="col">上传时间</th>
+            <th scope="col">交易ID</th>
+            <th scope="col">操作</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    // 创建表格主体
+    const tbody = document.createElement('tbody');
+
     items.forEach(item => {
-        const col = document.createElement('div');
-        col.className = 'col-md-4 col-sm-6 mb-4';
+        const tr = document.createElement('tr');
 
         // 获取状态标签
         const statusBadge = getStatusBadge(type);
 
-        // 设置卡片内容
-        col.innerHTML = `
-            <div class="card item-card">
-                ${statusBadge}
-                <img src="${item.img || '/static/images/placeholder.jpg'}" class="card-img-top" alt="${item.name}">
-                <div class="card-body">
-                    <h5 class="card-title">${item.name}</h5>
-                    <p class="card-text item-description">${item.simple_dsc || '暂无描述'}</p>
-                    <p class="card-text"><small class="text-muted">所有者: ${item.owner}</small></p>
-                    <p class="card-text"><small class="text-muted">交易ID: ${item.firstTransID}</small></p>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-info btn-sm view-details" data-id="${item.id}">查看详情</button>
-                        ${type === 'pending' ? `<button class="btn btn-primary btn-sm audit-item" data-id="${item.id}" data-trans-id="${item.firstTransID}">审核</button>` : ''}
-                    </div>
-                </div>
-            </div>
+        // 设置行内容
+        tr.innerHTML = `
+            <td>${statusBadge}</td>
+            <td><div class="fw-bold">${item.name}</div>
+                <small class="text-muted">${item.simple_dsc || '暂无描述'}</small></td>
+            <td>${item.owner || '未知'}</td>
+            <td>${formatTime(item.start_time) || '未知'}</td>
+            <td><small class="text-truncate d-inline-block" style="max-width:150px;" 
+                title="${item.firstTransID}">${item.firstTransID}</small></td>
+            <td>
+                <button class="btn btn-info btn-sm view-details" data-id="${item.id}">查看详情</button>
+                ${type === 'pending' ? `<button class="btn btn-primary btn-sm ms-1 audit-item" 
+                data-id="${item.id}" data-trans-id="${item.firstTransID}">审核</button>` : ''}
+            </td>
         `;
 
-        container.appendChild(col);
+        tbody.appendChild(tr);
     });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
 
     // 添加事件监听
     container.querySelectorAll('.view-details').forEach(btn => {
@@ -230,15 +262,15 @@ function renderItems(containerId, items, type) {
     });
 }
 
-// 获取状态标签
+// 获取状态标签 - 改为文本标签
 function getStatusBadge(type) {
     switch (type) {
         case 'pending':
-            return '<span class="badge status-badge status-pending">待审核</span>';
+            return '<span class="badge bg-warning">待审核</span>';
         case 'approved':
-            return '<span class="badge status-badge status-approved">已通过</span>';
+            return '<span class="badge bg-success">已通过</span>';
         case 'rejected':
-            return '<span class="badge status-badge status-rejected">未通过</span>';
+            return '<span class="badge bg-danger">未通过</span>';
         default:
             return '';
     }

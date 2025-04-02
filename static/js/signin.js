@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (token && username === '监管者' &&
         (window.location.pathname.includes('/signin.html') || window.location.pathname === '/')) {
-        window.location.href = '/HTML/project/audit.html';
+        window.location.href = '/audit.html';
         return;
     }
 
@@ -56,16 +56,14 @@ function handleLogin() {
 function handleRegulatorLogin(username, password) {
     // 添加调试日志
     console.log('开始监管者登录请求');
+    const encryptedPassword = hashPassword(password);
 
     fetch('/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
+        body: JSON.stringify({ username, password: encryptedPassword })
     })
         .then(response => {
             console.log('监管者登录响应状态:', response.status);
@@ -84,7 +82,7 @@ function handleRegulatorLogin(username, password) {
                 // 使用准确的HTML完整路径
                 console.log('即将跳转到审核页面...');
                 setTimeout(() => {
-                    // 尝试使用完整的相对路径
+                    // 修改为正确的路径
                     window.location.href = '/audit';
                 }, 1000);
 

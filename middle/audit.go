@@ -2,7 +2,9 @@ package middle
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"hyperledger-fabric-copyright/conf"
@@ -161,8 +163,13 @@ func isRegulator(username, password string) bool {
 		return false
 	}
 
-	// 验证密码是否匹配
-	if password != dbPassword {
+	// 对传入的明文密码进行SHA256加密
+	hasher := sha256.New()
+	hasher.Write([]byte(password))
+	encryptedPassword := hex.EncodeToString(hasher.Sum(nil))
+
+	// 验证加密后的密码是否匹配数据库中的密码
+	if encryptedPassword != dbPassword {
 		log.Printf("监管者密码验证失败")
 		return false
 	}

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"hyperledger-fabric-copyright/conf"
 	"hyperledger-fabric-copyright/middle"
 	"hyperledger-fabric-copyright/router"
 	"log"
+	"net/http"
 
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -48,9 +51,15 @@ func setupRouter(h *server.Hertz) {
 	h.POST("/search", middle.Search)
 
 	// 审核相关路由
-	h.POST("/api/audit/trade", middle.AuditTrade)              // 提交审核决定
-	h.GET("/api/audit/history", middle.GetAuditHistory)        // 获取审核历史
-	h.GET("/api/audit/tradeinfo", middle.GetTradeInfoForAudit) // 新增：获取交易信息用于审核
+	h.POST("/api/audit", middle.AuditTrade)               // 提交审核决定
+	h.GET("/api/audit/history", middle.GetAuditHistory)   // 获取审核历史
+	h.GET("/api/audit/info", middle.GetTradeInfoForAudit) // 新增：获取交易信息用于审核
+
+	h.GET("/api/audit/categorized-items", middle.GetCategorizedItems) // 添加新的分类API路由
+	// 添加GET请求处理,正确映射audit.html
+	h.GET("/audit", func(c context.Context, ctx *app.RequestContext) {
+		ctx.HTML(http.StatusOK, "audit.html", nil)
+	})
 
 	h.GET("/chat_ws", middle.ChatWebsocket)
 }
