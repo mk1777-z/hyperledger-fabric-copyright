@@ -53,7 +53,7 @@ func Search(_ context.Context, c *app.RequestContext) {
 		page = 1
 	}
 	if pageSize <= 0 {
-		pageSize = 15 // 设置默认pageSize
+		pageSize = 12 // 设置默认pageSize
 	}
 
 	offset := (page - 1) * pageSize

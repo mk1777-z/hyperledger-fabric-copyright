@@ -596,6 +596,198 @@
                 gap: 10px;
             }
         }
+
+        /* 详情弹窗样式 - 与卡片风格一致 */
+        .custom-detail-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transform: translate(-50%, -50%);
+            width: 480px;
+            max-height: 80vh;
+            background:  rgba(10, 8, 24, 0.95) !important;
+            border: 1px solid rgba(110, 64, 255, 0.2) !important;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(110, 64, 255, 0.15) !important;
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            color: #f1f1f1;
+            /* transition: transform 0.4s ease, box-shadow 0.4s ease; */
+        }
+        
+        /* 鼠标悬浮时漂浮和阴影增强 */
+        /* .custom-detail-modal:hover {
+            transform: translate(-50%, -52%);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 10px 20px rgba(110, 64, 255, 0.3),
+                0 0 30px rgba(80, 150, 255, 0.2);
+        } */
+        .custom-detail-modal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, #6e40ff, #0bdcab);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .custom-detail-modal:hover::before {
+            opacity: 1;
+        }
+
+        .custom-detail-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .custom-detail-content {
+            padding: 0 15px;
+        }
+        
+        .custom-detail-img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: none;             /* 去掉边框 */
+            background: none;         /* 去掉背景颜色 */
+        }
+        
+        .custom-detail-item {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .custom-detail-label {
+            font-weight: 500;
+            color: #a0aec0;
+            display: inline-block;
+            min-width: 80px;
+        }
+        
+        .custom-detail-value {
+            color: white;
+        }
+        
+        .custom-detail-footer {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .custom-detail-close {
+            padding: 8px 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
+        }
+        
+        .custom-detail-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+        
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 2, 10, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 999;
+        }
+
+        /* Webkit 浏览器（Chrome、Edge、Safari） */
+        ::-webkit-scrollbar {
+            width: 8px; /* 滚动条宽度变细 */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent; /* 滚动轨道透明 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08); /* 滚动块半透明淡白 */
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15); /* 鼠标移上时稍微亮一点 */
+        }
+
+        .custom-input,
+        .custom-textarea,
+        .custom-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-top: 4px;
+        }
+
+        .custom-input:focus,
+        .custom-textarea:focus,
+        .custom-select:focus {
+            border-color: #6e40ff;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .custom-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 32px;
+        }
+
+        /* 下拉选项的样式 */
+        .custom-select option {
+            background-color: rgba(30, 30, 30, 0.95);
+            color: white;
+        }
+
+
     </style>
 </head>
 
@@ -658,7 +850,7 @@
             <button class="page-btn" id="prev-page" disabled>上一页</button>
             <span id="page-info">第 1 页 / 1 页</span>
             <button class="page-btn" id="next-page">下一页</button>
-            <input type="number" class="page-number" id="page-number" min="1" value="1">
+            <input type="text" class="page-number" id="page-number" min="1" value="1">
             <button class="go-btn" id="go-page">跳转</button>
         </div>
     </div>
@@ -1056,125 +1248,177 @@
             });
         }
 
-        // 显示项目详情
+        // 显示项目详情 - 自定义版本
         function showDetails(item) {
-            layui.layer.open({
-                type: 1,
-                title: '版权详情',
-                area: ['500px', 'auto'],
-                content: `
-                <div style="padding: 20px;">
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            overlay.onclick = closeModal;
+            
+            // 创建详情弹窗
+            const modal = document.createElement('div');
+            modal.className = 'custom-detail-modal';
+            modal.innerHTML = `
+                <div class="custom-detail-header">版权详情</div>
+                <div class="custom-detail-content">
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <img src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}" 
-                             style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        <img src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120/283250/a0aec0?text=暂无图片'}" 
+                            class="custom-detail-img">
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <h3 style="margin-bottom: 10px; color: #0ea5e9; font-weight: 600;">${item.name}</h3>
-                        <p><strong>ID：</strong>${item.id}</p>
-                        <p><strong>简短描述：</strong>${item.description || "暂无"}</p>
-                        <p><strong>详细描述：</strong>${item.dsc || "暂无"}</p>
-                        <p><strong>价格：</strong>${item.price} 积分</p>
-                        <p><strong>拥有者：</strong>${item.owner}</p>
-                        <p><strong>创建时间：</strong>${item.start_time || "未知"}</p>
-                        <p><strong>是否在售：</strong>${item.on_sale ? "是" : "否"}</p>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">名称：</span>
+                        <span class="custom-detail-value">${item.name}</span>
                     </div>
-                </div>`,
-                btn: ['关闭']
-            });
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">ID：</span>
+                        <span class="custom-detail-value">${item.id}</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">简要描述：</span>
+                        <span class="custom-detail-value">${item.description || "暂无"}</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">详细描述：</span>
+                        <span class="custom-detail-value">${item.dsc || "暂无"}</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">价格：</span>
+                        <span class="custom-detail-value">${item.price} 积分</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">拥有者：</span>
+                        <span class="custom-detail-value">${item.owner}</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">创建时间：</span>
+                        <span class="custom-detail-value">${item.start_time || "未知"}</span>
+                    </div>
+                    
+                    <div class="custom-detail-item">
+                        <span class="custom-detail-label">是否在售：</span>
+                        <span class="custom-detail-value">${item.on_sale ? "是" : "否"}</span>
+                    </div>
+                    
+                    <div class="custom-detail-footer">
+                        <button class="custom-detail-close">关闭</button>
+                    </div>
+                </div>
+            `;
+            
+            // 添加关闭事件
+            modal.querySelector('.custom-detail-close').onclick = closeModal;
+            
+            // 添加到body
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+            
+            function closeModal() {
+                document.body.removeChild(overlay);
+                document.body.removeChild(modal);
+            }
         }
 
-        // 修改项目
         function modifyItem(item) {
-            layui.layer.open({
-                type: 1,
-                title: '修改版权',
-                area: ['600px', 'auto'],
-                content: `
-                <div style="padding: 20px;">
-                    <form class="layui-form" id="modifyForm">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">简短描述</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="description" required value="${item.description || ''}" placeholder="请输入简短描述" class="layui-input">
-                            </div>
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            overlay.onclick = closeModal;
+
+            // 创建弹窗
+            const modal = document.createElement('div');
+            modal.className = 'custom-detail-modal';
+            modal.innerHTML = `
+                <div class="custom-detail-header">修改版权</div>
+                <div class="custom-detail-content">
+                    <form id="modifyForm">
+                        <div class="custom-detail-item">
+                            <label class="custom-detail-label">简短描述：</label>
+                            <input type="text" name="description" required value="${item.description || ''}" class="custom-input">
                         </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">版权价格</label>
-                            <div class="layui-input-block">
-                                <input type="number" name="price" required value="${item.price}" placeholder="请输入价格" class="layui-input">
-                            </div>
+
+                        <div class="custom-detail-item">
+                            <label class="custom-detail-label">版权价格：</label>
+                            <input type="text" name="price" required value="${item.price}" class="custom-input">
                         </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">详细描述</label>
-                            <div class="layui-input-block">
-                                <textarea name="dsc" required placeholder="请输入详细描述" class="layui-textarea">${item.dsc || ''}</textarea>
-                            </div>
+
+                        <div class="custom-detail-item">
+                            <label class="custom-detail-label">详细描述：</label>
+                            <textarea name="dsc" required class="custom-textarea">${item.dsc || ''}</textarea>
                         </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">是否售卖</label>
-                            <div class="layui-input-block">
-                                <select name="on_sale" lay-filter="on_sale">
-                                    <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
-                                    <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
-                                </select>
-                            </div>
+
+                        <div class="custom-detail-item">
+                            <label class="custom-detail-label">是否售卖：</label>
+                            <select name="on_sale" class="custom-select">
+                                <option value="1" ${item.on_sale ? 'selected' : ''}>是</option>
+                                <option value="0" ${!item.on_sale ? 'selected' : ''}>否</option>
+                            </select>
                         </div>
-                        <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
-                            <button type="submit" class="layui-btn">保存修改</button>
+
+                        <div class="custom-detail-footer">
+                            <button type="submit" class="custom-detail-close">保存</button>
                         </div>
                     </form>
-                </div>`,
-                success: function () {
-                    layui.form.render();
+                </div>
+            `;
 
-                    document.getElementById('modifyForm').onsubmit = function (event) {
-                        event.preventDefault();
+            // 处理表单提交
+            modal.querySelector('#modifyForm').onsubmit = function (event) {
+                event.preventDefault();
 
-                        const formData = new FormData(this);
-                        const updateData = {
-                            id: item.id,
-                            description: formData.get('description'),
-                            price: Number(formData.get('price')),
-                            dsc: formData.get('dsc'),
-                            on_sale: formData.get('on_sale') === '1'
-                        };
+                const formData = new FormData(this);
+                const updateData = {
+                    id: item.id,
+                    name: item.name, // 用户输入的名称
+                    description: formData.get('description'),
+                    price: Number(formData.get('price')),
+                    dsc: formData.get('dsc'),
+                    on_sale: formData.get('on_sale') === '1'
+                };
 
-                        // 显示加载状态
-                        const loadingIndex = layui.layer.msg('正在保存...', {
-                            icon: 16,
-                            time: 0,
-                            shade: 0.3
-                        });
+                // 加载状态提示
+                const saving = document.createElement('div');
+                saving.style.color = '#ccc';
+                saving.style.marginTop = '10px';
+                modal.querySelector('.custom-detail-footer').appendChild(saving);
 
-                        fetch('/update', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            },
-                            body: JSON.stringify(updateData)
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                layui.layer.close(loadingIndex);
+                // 发起请求
+                fetch('/updateItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`  // 验证用户身份
+                    },
+                    body: JSON.stringify(updateData)
+                }).then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('修改成功');
+                        closeModal();
+                        location.reload(); // 可按需刷新数据
+                    } else {
+                        alert('修改失败: ' + res.msg);
+                    }
+                }).catch(err => {
+                    alert('请求失败: ' + err.message);
+                });
+            };
 
-                                if (data && data.message === 'success') {
-                                    layui.layer.msg('修改成功', { icon: 1 });
-                                    layui.layer.closeAll('page');
-                                    loadMyProjects(); // 重新加载项目列表
-                                } else {
-                                    layui.layer.msg('修改失败: ' + (data.message || '未知错误'), { icon: 2 });
-                                }
-                            })
-                            .catch(error => {
-                                layui.layer.close(loadingIndex);
-                                console.error('修改请求失败:', error);
-                                layui.layer.msg('网络错误，请稍后重试', { icon: 2 });
-                            });
-                    };
-                }
-            });
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+
+            function closeModal() {
+                document.body.removeChild(overlay);
+                document.body.removeChild(modal);
+            }
         }
+
 
         // 绑定分页事件
         function bindPaginationEvents() {
