@@ -81,7 +81,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">版权审核</h5>
+                    <h5 class="modal-title" id="auditModalTitle">版权审核</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -113,19 +113,23 @@
 
                     <hr>
 
-                    <form id="auditForm">
-                        <input type="hidden" id="modalItemId">
-                        <div class="mb-3">
-                            <label for="auditComment" class="form-label">审核意见</label>
-                            <textarea class="form-control" id="auditComment" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="regulatorPassword" class="form-label">监管者密码确认</label>
-                            <input type="password" class="form-control" id="regulatorPassword" required>
-                        </div>
-                    </form>
+                    <!-- 审核表单区域 - 只在审核时显示 -->
+                    <div id="auditFormSection">
+                        <form id="auditForm">
+                            <input type="hidden" id="modalItemId">
+                            <div class="mb-3">
+                                <label for="auditComment" class="form-label">审核意见</label>
+                                <textarea class="form-control" id="auditComment" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regulatorPassword" class="form-label">监管者密码确认</label>
+                                <input type="password" class="form-control" id="regulatorPassword" required>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="modal-footer justify-content-between">
+                <!-- 审核按钮区域 - 只在审核时显示 -->
+                <div class="modal-footer justify-content-between" id="auditButtonsSection">
                     <button type="button" class="btn btn-danger" id="rejectBtn">拒绝</button>
                     <button type="button" class="btn btn-success" id="approveBtn">批准</button>
                 </div>

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!token || username !== '监管者') {
         console.log('未登录或非监管者用户，重定向到登录页');
-        window.location.href = '/signin.html'; // 修改为正确的登录页路径
+        window.location.href = '/login'; // 修改为正确的登录页路径
         return;
     }
 
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         console.log('登出成功，重定向到登录页');
-        window.location.href = '/signin.html'; // 确保退出后跳转到正确的登录页
+        window.location.href = '/login'; // 确保退出后跳转到正确的登录页
     });
 
     // 刷新数据按钮
@@ -98,98 +98,10 @@ function loadAllItems() {
         });
 }
 
-// 处理项目并分类
-async function processItems(items) {
-    // 清空现有项目
-    document.getElementById('pendingItems').innerHTML = '';
-    document.getElementById('approvedItems').innerHTML = '';
-    document.getElementById('rejectedItems').innerHTML = '';
-
-    const pendingItems = [];
-    const approvedItems = [];
-    const rejectedItems = [];
-
-    // 处理每个项目
-    for (const item of items) {
-        // 如果项目没有transID，则跳过
-        if (!item.transID) {
-            continue;
-        }
-
-        // 获取第一个交易ID（如果有多个用空格分隔）
-        const transIDs = item.transID.split(' ');
-        const firstTransID = transIDs.length > 0 ? transIDs[0] : '';
-
-        if (!firstTransID) {
-            continue;
-        }
-
-        try {
-            // 查询审核历史
-            const status = await checkAuditStatus(firstTransID);
-
-            // 根据状态分类
-            switch (status) {
-                case 'PENDING':
-                    pendingItems.push({ ...item, firstTransID });
-                    break;
-                case 'APPROVE':
-                    approvedItems.push({ ...item, firstTransID });
-                    break;
-                case 'REJECT':
-                    rejectedItems.push({ ...item, firstTransID });
-                    break;
-            }
-        } catch (error) {
-            console.error(`检查项目 ${item.name} 的审核状态失败:`, error);
-            // 出错的项目默认为待审核
-            pendingItems.push({ ...item, firstTransID });
-        }
-    }
-
-    // 更新界面
-    renderItems('pendingItems', pendingItems, 'pending');
-    renderItems('approvedItems', approvedItems, 'approved');
-    renderItems('rejectedItems', rejectedItems, 'rejected');
-
-    // 检查是否有内容
-    toggleEmptyState('pendingEmpty', pendingItems.length === 0);
-    toggleEmptyState('approvedEmpty', approvedItems.length === 0);
-    toggleEmptyState('rejectedEmpty', rejectedItems.length === 0);
-}
-
-// 检查审核状态
-async function checkAuditStatus(tradeID) {
-    try {
-        const response = await fetch(`/api/audit/history?tradeId=${tradeID}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.message === "交易不存在") {
-            return 'PENDING'; // 未审核状态
-        }
-
-        if (data.records && data.records.length > 0) {
-            // 取最新的一条审核记录
-            const latestRecord = data.records[data.records.length - 1];
-            return latestRecord.decision; // APPROVE 或 REJECT
-        }
-
-        return 'PENDING'; // 默认为未审核状态
-    } catch (error) {
-        console.error('获取审核状态失败:', error);
-        throw error;
-    }
-}
-
 // 渲染项目列表 - 使用列表形式而非卡片
 function renderItems(containerId, items, type) {
     const container = document.getElementById(containerId);
+    container.innerHTML = ''; // 清空容器
 
     // 如果没有项目，显示空状态
     if (!items || items.length === 0) {
@@ -233,9 +145,13 @@ function renderItems(containerId, items, type) {
             <td><small class="text-truncate d-inline-block" style="max-width:150px;" 
                 title="${item.firstTransID}">${item.firstTransID}</small></td>
             <td>
-                <button class="btn btn-info btn-sm view-details" data-id="${item.id}">查看详情</button>
-                ${type === 'pending' ? `<button class="btn btn-primary btn-sm ms-1 audit-item" 
-                data-id="${item.id}" data-trans-id="${item.firstTransID}">审核</button>` : ''}
+                ${type === 'pending'
+                ? `<button class="btn btn-primary btn-sm audit-item" data-id="${item.id}" data-trans-id="${item.firstTransID}">审核</button>`
+                : `<div class="btn-group">
+                    <button class="btn btn-info btn-sm view-details" data-id="${item.id}" data-trans-id="${item.firstTransID}">查看详情</button>
+                    <button class="btn btn-secondary btn-sm view-history" data-trans-id="${item.firstTransID}">审核历史</button>
+                   </div>`
+            }
             </td>
         `;
 
@@ -249,7 +165,8 @@ function renderItems(containerId, items, type) {
     container.querySelectorAll('.view-details').forEach(btn => {
         btn.addEventListener('click', function () {
             const itemId = this.getAttribute('data-id');
-            viewItemDetails(itemId);
+            const transId = this.getAttribute('data-trans-id');
+            viewItemDetails(itemId, transId);
         });
     });
 
@@ -260,24 +177,20 @@ function renderItems(containerId, items, type) {
             showAuditModal(itemId, transId);
         });
     });
+
+    // 添加审核历史按钮事件监听
+    container.querySelectorAll('.view-history').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const transId = this.getAttribute('data-trans-id');
+            showAuditHistory(transId);
+        });
+    });
 }
 
-// 获取状态标签 - 改为文本标签
-function getStatusBadge(type) {
-    switch (type) {
-        case 'pending':
-            return '<span class="badge bg-warning">待审核</span>';
-        case 'approved':
-            return '<span class="badge bg-success">已通过</span>';
-        case 'rejected':
-            return '<span class="badge bg-danger">未通过</span>';
-        default:
-            return '';
-    }
-}
+// 查看项目详情 - 修改为使用弹窗显示而非页面跳转
+function viewItemDetails(itemId, transId) {
+    showLoading();
 
-// 显示审核弹窗
-function showAuditModal(itemId, transId) {
     // 获取项目详情
     fetch(`/api/audit/info?tradeId=${transId}`, {
         method: 'GET',
@@ -287,6 +200,8 @@ function showAuditModal(itemId, transId) {
     })
         .then(response => response.json())
         .then(data => {
+            hideLoading();
+
             if (data.message && data.itemDetails) {
                 const item = data.itemDetails;
 
@@ -308,9 +223,12 @@ function showAuditModal(itemId, transId) {
                     imgElement.style.display = 'none';
                 }
 
-                // 清空表单
-                document.getElementById('auditComment').value = '';
-                document.getElementById('regulatorPassword').value = '';
+                // 修改模态窗标题
+                document.getElementById('auditModalTitle').textContent = '版权详情';
+
+                // 隐藏审核表单和按钮
+                document.getElementById('auditFormSection').style.display = 'none';
+                document.getElementById('auditButtonsSection').style.display = 'none';
 
                 // 显示弹窗
                 const modal = new bootstrap.Modal(document.getElementById('auditModal'));
@@ -320,9 +238,192 @@ function showAuditModal(itemId, transId) {
             }
         })
         .catch(error => {
+            hideLoading();
             console.error('获取项目详情错误:', error);
             alert('获取项目详情失败: ' + error.message);
         });
+}
+
+// 显示审核弹窗
+function showAuditModal(itemId, transId) {
+    showLoading();
+
+    // 获取项目详情
+    fetch(`/api/audit/info?tradeId=${transId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+
+            if (data.message && data.itemDetails) {
+                const item = data.itemDetails;
+
+                // 填充弹窗内容
+                document.getElementById('modalItemId').value = transId;
+                document.getElementById('modalItemName').textContent = item.name;
+                document.getElementById('modalItemDesc').textContent = item.dsc || item.simple_dsc || '暂无描述';
+                document.getElementById('modalItemOwner').textContent = item.owner || '未知';
+                document.getElementById('modalItemPrice').textContent = `¥${item.price || 0}`;
+                document.getElementById('modalItemTransID').textContent = transId;
+                document.getElementById('modalItemTime').textContent = formatTime(item.start_time);
+
+                // 设置图片
+                const imgElement = document.getElementById('modalItemImage');
+                if (item.img) {
+                    imgElement.src = item.img;
+                    imgElement.style.display = 'block';
+                } else {
+                    imgElement.style.display = 'none';
+                }
+
+                // 修改模态窗标题
+                document.getElementById('auditModalTitle').textContent = '版权审核';
+
+                // 清空表单
+                document.getElementById('auditComment').value = '';
+                document.getElementById('regulatorPassword').value = '';
+
+                // 显示审核表单和按钮
+                document.getElementById('auditFormSection').style.display = 'block';
+                document.getElementById('auditButtonsSection').style.display = 'flex';
+
+                // 显示弹窗
+                const modal = new bootstrap.Modal(document.getElementById('auditModal'));
+                modal.show();
+            } else {
+                alert('获取项目详情失败');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('获取项目详情错误:', error);
+            alert('获取项目详情失败: ' + error.message);
+        });
+}
+
+// 显示审核历史
+function showAuditHistory(transId) {
+    showLoading();
+
+    fetch(`/api/audit/history?tradeId=${transId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+
+            if (data.records && Array.isArray(data.records)) {
+                // 创建审核历史内容
+                let historyContent = '<div class="list-group">';
+
+                if (data.records.length === 0) {
+                    historyContent += '<div class="text-center py-3 text-muted">暂无审核记录</div>';
+                } else {
+                    data.records.forEach((record, index) => {
+                        const recordDate = new Date(record.timestamp * 1000); // 转换为毫秒
+                        // 修改为精确到秒的完整时间格式
+                        const formattedDate = recordDate.toLocaleString('zh-CN');
+                        const badgeClass = record.decision === 'APPROVE' ? 'bg-success' : 'bg-danger';
+                        const decision = record.decision === 'APPROVE' ? '通过' : '拒绝';
+
+                        historyContent += `
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">审核记录 #${index + 1}</h5>
+                                    <small>${formattedDate}</small>
+                                </div>
+                                <p class="mb-1">${record.comment || '无审核意见'}</p>
+                                <span class="badge ${badgeClass}">${decision}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                historyContent += '</div>';
+
+                // 使用Bootstrap模态框显示审核历史
+                const modalTitle = `交易 ${transId} 的审核历史`;
+                showHistoryModal(modalTitle, historyContent);
+            } else {
+                alert('获取审核历史失败');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('获取审核历史错误:', error);
+            alert('获取审核历史失败: ' + error.message);
+        });
+}
+
+// 显示审核历史模态框 - 修复Bootstrap模态框实例化问题
+function showHistoryModal(title, content) {
+    // 如果已存在模态框，先移除
+    let existingModal = document.getElementById('historyModal');
+    if (existingModal) {
+        const bsModal = bootstrap.Modal.getInstance(existingModal);
+        if (bsModal) {
+            bsModal.dispose();
+        }
+        existingModal.remove();
+    }
+
+    // 创建模态框
+    const modalHTML = `
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${content}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 添加模态框到页面
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 获取新创建的模态框元素
+    const modalElement = document.getElementById('historyModal');
+
+    // 等待DOM更新后再显示模态框
+    setTimeout(() => {
+        try {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } catch (error) {
+            console.error('显示模态框出错:', error);
+            alert('无法显示审核历史，请刷新页面重试');
+        }
+    }, 50);
+}
+
+// 获取状态标签 - 改为文本标签
+function getStatusBadge(type) {
+    switch (type) {
+        case 'pending':
+            return '<span class="badge bg-warning">待审核</span>';
+        case 'approved':
+            return '<span class="badge bg-success">已通过</span>';
+        case 'rejected':
+            return '<span class="badge bg-danger">未通过</span>';
+        default:
+            return '';
+    }
 }
 
 // 提交审核决定
@@ -380,12 +481,6 @@ function submitAudit(decision) {
         });
 }
 
-// 查看项目详情
-function viewItemDetails(itemId) {
-    // 项目详情查看逻辑，可以跳转到项目详情页或显示详情弹窗
-    window.open(`/item.html?id=${itemId}`, '_blank');
-}
-
 // 切换空状态显示
 function toggleEmptyState(elementId, isEmpty) {
     const element = document.getElementById(elementId);
@@ -396,13 +491,14 @@ function toggleEmptyState(elementId, isEmpty) {
     }
 }
 
-// 格式化时间
+// 修改格式化时间函数，只显示年月日
 function formatTime(timestamp) {
     if (!timestamp) return '未知时间';
 
     try {
         const date = new Date(timestamp);
-        return date.toLocaleString('zh-CN');
+        // 只返回年月日，不返回具体时间
+        return date.toLocaleDateString('zh-CN');
     } catch (e) {
         return timestamp;
     }
