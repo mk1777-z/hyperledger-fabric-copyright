@@ -34,6 +34,50 @@
                 },
             },
         }
+
+        function showCustomAlert(message, type = 'success', duration = 2000) {
+            const alert = document.createElement('div');
+            alert.className = `custom-alert ${type}`;
+            alert.innerHTML = `
+                <div class="alert-icon-wrapper">
+                    <i id="alertIcon" class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>
+                </div>
+                <div id="alertMessage">${message}</div>
+            `;
+            document.body.appendChild(alert);
+
+            setTimeout(() => alert.classList.add('show'), 10);
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => document.body.removeChild(alert), 300);
+            }, duration);
+        }
+        
+        function showLoadingMessage(message = '加载') {
+            loadingAlert = document.createElement('div');
+            loadingAlert.className = `custom-alert success`;
+            loadingAlert.innerHTML = `
+                <div class="alert-icon-wrapper">
+                    <i id="alertIcon" class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div id="alertMessage">${message}</div>
+            `;
+            document.body.appendChild(loadingAlert);
+            setTimeout(() => loadingAlert.classList.add('show'), 10);
+        }
+
+        function closeLoadingMessage() {
+            if (loadingAlert) {
+                loadingAlert.classList.remove('show');
+                setTimeout(() => {
+                    if (loadingAlert && loadingAlert.parentNode) {
+                        loadingAlert.parentNode.removeChild(loadingAlert);
+                    }
+                    loadingAlert = null;
+                }, 300);
+            }
+        }
     </script>
     <style>
         :root {
@@ -315,6 +359,7 @@
             gap: 10px;
             width: 100%;
             margin-bottom: 10px;
+            height: 100%;
         }
 
         .card-col {
@@ -324,12 +369,25 @@
         .card-col-left {
             padding-right: 10px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 12px;
+            /* 下移12像素 */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            /* flex: 1 1 40%; */
+            /* 新增：控制左侧弹性比例 */
+            /* min-width: 55%; */
+            /* 防止右侧挤压 */
         }
 
         .card-col-right {
             padding-left: 10px;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
+            /* 新增：顶部对齐 */
+            margin-top: -12px;
+            /* 补偿原有间距 */
         }
 
         .item-title {
@@ -354,13 +412,24 @@
         }
 
         .item-desc {
-            font-size: 0.85rem;
-            color: var(--secondary-text);
-            margin-bottom: 0.5rem;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
+            /* 单行显示 */
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 9em;
+            /* 中文约8字宽度 */
+            margin: 24px 0 8px 0;
+            /* 上边距下移12px */
+            transform: translateY(4px);
+            /* 微调对齐 */
+            line-height: 1.3;
+            font-size: 0.82rem;
+            /* 缩小字号适配空间 */
+            opacity: 0.9;
+            /* 弱化视觉效果 */
+            flex-shrink: 0;
         }
 
         .item-price {
@@ -368,6 +437,10 @@
             font-weight: 500;
             color: white;
             margin-bottom: 0.75rem;
+            margin: 4px 0;
+            margin-top: auto;
+            /* 保持在底部 */
+
         }
 
         /* 按钮样式 */
@@ -607,9 +680,9 @@
             transform: translate(-50%, -50%);
             width: 480px;
             max-height: 80vh;
-            background:  rgba(10, 8, 24, 0.95) !important;
+            background: rgba(10, 8, 24, 0.95) !important;
             border: 1px solid rgba(110, 64, 255, 0.2) !important;
-            box-shadow: 
+            box-shadow:
                 0 10px 25px rgba(0, 0, 0, 0.4),
                 0 0 20px rgba(110, 64, 255, 0.15) !important;
             border-radius: 16px;
@@ -620,15 +693,7 @@
             color: #f1f1f1;
             /* transition: transform 0.4s ease, box-shadow 0.4s ease; */
         }
-        
-        /* 鼠标悬浮时漂浮和阴影增强 */
-        /* .custom-detail-modal:hover {
-            transform: translate(-50%, -52%);
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                0 10px 20px rgba(110, 64, 255, 0.3),
-                0 0 30px rgba(80, 150, 255, 0.2);
-        } */
+
         .custom-detail-modal::before {
             content: "";
             position: absolute;
@@ -655,45 +720,48 @@
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .custom-detail-content {
             padding: 0 15px;
         }
-        
+
         .custom-detail-img {
             width: 100%;
             max-height: 180px;
             object-fit: contain;
             border-radius: 8px;
             margin-bottom: 20px;
-            border: none;             /* 去掉边框 */
-            background: none;         /* 去掉背景颜色 */
+            border: none;
+            /* 去掉边框 */
+            background: none;
+            /* 去掉背景颜色 */
         }
-        
+
         .custom-detail-item {
             margin-bottom: 6px;
             line-height: 1.4;
         }
-        
+
         .custom-detail-label {
             font-weight: 500;
             color: #a0aec0;
             display: inline-block;
             min-width: 80px;
         }
-        
+
         .custom-detail-value {
             color: white;
         }
-        
+
         .custom-detail-footer {
             display: flex;
             justify-content: center;
             margin-top: 25px;
             padding-top: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 15px; /* 控制按钮间距 */
         }
-        
+
         .custom-detail-close {
             padding: 8px 25px;
             background: rgba(255, 255, 255, 0.15);
@@ -704,20 +772,20 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 
+            box-shadow:
                 0 2px 10px rgba(0, 0, 0, 0.1),
                 0 1px 2px rgba(255, 255, 255, 0.05);
         }
-        
+
         .custom-detail-close:hover {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(0, 0, 0, 0.15),
                 0 2px 5px rgba(255, 255, 255, 0.1);
         }
-        
+
         .custom-modal-overlay {
             position: fixed;
             top: 0;
@@ -732,20 +800,24 @@
 
         /* Webkit 浏览器（Chrome、Edge、Safari） */
         ::-webkit-scrollbar {
-            width: 8px; /* 滚动条宽度变细 */
+            width: 8px;
+            /* 滚动条宽度变细 */
         }
 
         ::-webkit-scrollbar-track {
-            background: transparent; /* 滚动轨道透明 */
+            background: transparent;
+            /* 滚动轨道透明 */
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.08); /* 滚动块半透明淡白 */
+            background: rgba(255, 255, 255, 0.08);
+            /* 滚动块半透明淡白 */
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.15); /* 鼠标移上时稍微亮一点 */
+            background: rgba(255, 255, 255, 0.15);
+            /* 鼠标移上时稍微亮一点 */
         }
 
         .custom-input,
@@ -787,6 +859,202 @@
             color: white;
         }
 
+        .item-audit-status {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            margin-top: auto;
+            /* 保持在底部 */
+        }
+
+        .status-approved {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        /* 新增禁用按钮样式 */
+        .modify-btn[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* 修改后的提示样式 */
+        .modify-btn[disabled]:hover::after {
+            content: "审核不通过，请重新上传";
+            position: absolute;
+            top: 50%;
+            left: calc(100% + 10px);
+            /* 移动到按钮右侧 */
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            min-width: 160px;
+            /* 保证最小宽度 */
+            pointer-events: none;
+            z-index: 1000;
+            /* 确保在最上层 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 添加箭头指示 */
+        .modify-btn[disabled]:hover::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            border: 5px solid transparent;
+            border-right-color: rgba(0, 0, 0, 0.9);
+            transform: translate(0, -50%);
+            pointer-events: none;
+        }
+
+        /* 自定义消息弹窗样式 */
+        .custom-alert {
+            position: fixed;
+            top: 50%;    
+            left: 50%;   
+            transform: translate(-50%, -50%);   
+            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            color: #f1f1f1;
+            padding: 15px 20px;
+            border-radius: 20px;
+            /* box-shadow: 0 5px 10px rgba(110, 64, 255, 0.3), 
+                        0 0 0 1px rgba(110, 64, 255, 0.2);  */
+            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 90vw;                 /* 避免内容超出屏幕 */
+            white-space: nowrap;              /* 希望不换行 */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 64, 255, 0.3);
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) !important;
+        }
+
+        .alert-icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: transparent !important; /* 强制透明 */
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .custom-alert.success .alert-icon-wrapper {
+            background: transparent; /* 确保完全透明 */
+            box-shadow: none; /* 去掉任何阴影 */
+        }
+
+        .custom-alert.error .alert-icon-wrapper {
+            background: transparent; /* 确保完全透明 */
+            box-shadow: none; /* 去掉任何阴影 */
+        }
+
+        .custom-alert.success {
+            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+        }
+
+        .custom-alert.error {
+            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+        }
+
+        /* #alertIcon {
+            font-size: 1.8rem;  
+            color: #0bdcab; 
+            animation: spin 2s linear infinite; 
+        } */
+         
+        .fa-check-circle {
+            font-size: 1.8rem !important; /* 与spinner和times-circle保持一致 */
+            color: #0bdcab;
+        }
+
+        /* 改为只对 fa-spinner 应用旋转动画 */
+        .fa-spinner {
+            animation: spin 2s linear infinite;
+            font-size: 1.8rem;  
+            color: #0bdcab; 
+        }
+
+        /* 确保错误图标不会旋转 */
+        .fa-times-circle {
+            animation: none !important;
+            font-size: 1.7rem; 
+        }
+
+        #alertMessage {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .custom-alert.success #alertIcon {
+            color: #0bdcab;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+        }
+
+        .custom-alert.error #alertIcon {
+            color: #ff557a;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+        }
+
+        #alertMessage {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            margin: 1px 0;  /* 上下边距改为8px，左右为0 */
+        }
+
+        /* 旋转动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 入场动画 */
+        @keyframes alertIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .custom-alert.show {
+            animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        .topup-size-modal {
+            width: 340px !important;  /* 调整为充值弹窗专用宽度 */
+            max-height: 70vh !important; /* 如需调整高度 */
+        }
 
     </style>
 </head>
@@ -834,9 +1102,6 @@
                 <a href="/upload" class="function-btn">
                     <i class="fas fa-upload"></i> 上传版权
                 </a>
-                <!-- <a href="/statistics" class="function-btn">
-                    <i class="fas fa-chart-bar"></i> 统计分析
-                </a> -->
             </div>
         </div>
 
@@ -856,10 +1121,67 @@
     </div>
 
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
-    <!-- <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script> -->
     <script>
-        // 初始化Lucide图标
-        // lucide.createIcons();
+        // 加载所有项目的审核状态
+        function loadAuditStatuses() {
+            document.querySelectorAll('.item-audit-status').forEach(element => {
+                const transID = element.dataset.transid;
+                if (!transID) {
+                    element.textContent = '无交易ID';
+                    return;
+                }
+
+                // 发起GET请求获取审核历史
+                fetch(`/api/audit/history?tradeId=${transID}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('请求失败');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const latestDecision = data.records?.[0]?.decision?.toUpperCase() || 'PENDING';
+
+                        // 更新状态显示
+                        element.textContent = `审核状态：${translateDecision(latestDecision)}`;
+                        element.className = `item-audit-status ${getStatusClass(latestDecision)}`;
+
+                        // 查找对应修改按钮
+                        const modifyBtns = document.querySelectorAll(`.modify-btn[data-transid="${transID}"]`);
+                        modifyBtns.forEach(btn => {
+                            btn.disabled = latestDecision === 'REJECT';
+                        });
+                    })
+                    .catch(error => {
+                        console.error('获取审核状态失败:', error);
+                        element.textContent = '审核状态：待审核';
+                        element.className = 'item-audit-status status-pending'; // 使用预设的待审核样式
+                    });
+            });
+        }
+
+        // 转换审核结果为中文
+        function translateDecision(decision) {
+            const map = {
+                'APPROVE': '已通过',
+                'REJECT': '已拒绝',
+                'PENDING': '审核中'
+            };
+            return map[decision] || decision;
+        }
+
+        // 获取状态对应的CSS类名
+        function getStatusClass(decision) {
+            const map = {
+                'APPROVE': 'status-approved',
+                'REJECT': 'status-rejected',
+                'PENDING': 'status-pending'
+            };
+            return map[decision] || 'status-pending';
+        }
+
 
         let currentPage = 1;
         let totalPages = 1;
@@ -891,12 +1213,6 @@
             }
 
             try {
-                // 初始化Lucide图标
-                // if (typeof lucide !== 'undefined') {
-                //     lucide.createIcons();
-                // }
-
-                // 增加API检查
                 checkApiAvailability();
 
                 loadMyProjects();
@@ -963,11 +1279,7 @@
         // 加载我的项目
         function loadMyProjects() {
             // 显示加载状态
-            const loadingMsg = layui.layer.msg('正在加载个人项目...', {
-                icon: 16,
-                time: 0,
-                shade: 0.1
-            });
+            showLoadingMessage('正在加载个人项目...');
 
             // 确保URL是正确的
             const url = window.location.origin + '/myproject'; // 使用绝对路径
@@ -977,10 +1289,11 @@
                 pageSize: pageSize
             })
                 .then(data => {
-                    layui.layer.close(loadingMsg);
+                    closeLoadingMessage();
 
                     if (data?.items) {
                         renderProjects(data.items);
+                        loadAuditStatuses();
                         totalPages = data.totalPages || Math.ceil(data.items.length / pageSize);
                         updatePagination();
                     } else {
@@ -1009,16 +1322,23 @@
                                     <div class="item-owner">
                                         <i class="fas fa-user"></i> ${truncateText(item.owner, 15)}
                                     </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <a href="#" onclick="showDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="action-btn">详情</a>
+                                        <button class="action-btn modify-btn" 
+                                                data-transid="${item.transID}"
+                                                onclick="modifyItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                            修改
+                                        </button>
+                                    </div>
                                 </div>
                                 
                                 <!-- 右列：描述、价格和操作按钮 -->
                                 <div class="card-col card-col-right">
                                     <div class="item-desc">${truncateText(item.description || "暂无描述", 40)}</div>
                                     <div class="item-price">￥ ${item.price}</div>
-                                    <div style="display: flex; gap: 10px;">
-                                        <a href="#" onclick="showDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="action-btn">详情</a>
-                                        <a href="#" onclick="modifyItem(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="action-btn">修改</a>
-                                    </div>
+                                    <!-- 新增审核状态区域 -->
+                                    <div class="item-audit-status" data-transid="${item.transID}"></div>
+                    
                                 </div>
                             </div>
                         </div>
@@ -1102,150 +1422,260 @@
             });
         }
 
-        // 充值弹窗 - 增强错误处理
         function showTopup() {
-            layui.layer.open({
-                type: 1,
-                title: '充值',
-                content: `
-                <div style="padding: 20px;">
-                    <div class="layui-form">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">充值金额</label>
-                            <div class="layui-input-block">
-                                <input type="number" id="topupAmount" required placeholder="请输入充值金额" class="layui-input">
-                            </div>
-                        </div>
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            
+            // 创建弹窗（复用修改弹窗的CSS类）
+            const modal = document.createElement('div');
+            modal.className = 'custom-detail-modal topup-size-modal';
+            modal.innerHTML = `
+                <div class="custom-detail-header">充值</div>
+                <div class="custom-detail-content">
+                    <div class="custom-detail-item">
+                        <input type="text" id="topupAmount" required 
+                            placeholder="请输入充值金额" class="custom-input">
                     </div>
-                </div>`,
-                btn: ['确认', '取消'],
-                yes: function (index) {
-                    const amount = document.getElementById('topupAmount').value;
-                    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-                        layui.layer.msg('请输入有效金额', { icon: 2 });
-                        return;
-                    }
-
-                    const username = localStorage.getItem('username');
-                    fetch('/balance', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: JSON.stringify({
-                            action: 'topup',
-                            owner: username,
-                            amount: Number(amount)
-                        })
-                    })
-                        .then(res => {
-                            // 添加响应检查，确保是JSON格式
-                            if (!res.ok) {
-                                return res.text().then(text => {
-                                    console.error('充值失败，服务器返回:', text);
-                                    throw new Error(`服务器错误: ${res.status} ${res.statusText}`);
-                                });
-                            }
-
-                            const contentType = res.headers.get('content-type');
-                            if (!contentType || !contentType.includes('application/json')) {
-                                return res.text().then(text => {
-                                    console.error('服务器返回非JSON数据:', text.substring(0, 200));
-                                    throw new Error('服务器返回格式错误，请联系管理员');
-                                });
-                            }
-
-                            return res.json();
-                        })
-                        .then(data => {
-                            if (data && data.message && data.message.includes('success')) {
-                                layui.layer.msg('充值成功', { icon: 1 });
-                                updateBalance();
-                            } else {
-                                layui.layer.msg('失败: ' + (data ? data.message || '未知错误' : '服务器无响应'), { icon: 2 });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('充值请求失败:', error);
-                            layui.layer.msg('充值失败: ' + error.message, { icon: 2 });
-                        });
-                    layui.layer.close(index);
+                </div>
+                <div class="custom-detail-footer">
+                    <button type="button" class="custom-detail-close confirm-btn">确认</button>
+                    <button type="button" class="custom-detail-close cancel-btn">取消</button>
+                </div>
+            `;
+            
+            // 添加到DOM
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            
+            // 关闭弹窗函数
+            const closeModal = () => {
+                document.body.removeChild(overlay);
+            };
+            
+            // 点击遮罩层关闭
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    closeModal();
                 }
-            });
+            };
+            
+            // 取消按钮事件
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            
+            // 确认按钮事件
+            modal.querySelector('.confirm-btn').onclick = () => {
+                const amountInput = document.getElementById('topupAmount');
+                const amount = amountInput.value.trim();
+                
+                // 验证输入
+                if (!amount || isNaN(amount) || Number(amount) <= 0) {
+                    showCustomAlert('请输入有效金额（必须大于0）', 'error');
+                    amountInput.focus();
+                    return;
+                }
+                
+                const username = localStorage.getItem('username');
+                const token = localStorage.getItem('token');
+                
+                if (!username || !token) {
+                    showCustomAlert('用户未登录或会话已过期', 'error');
+                    return;
+                }
+                
+                // 显示加载状态
+                const confirmBtn = modal.querySelector('.confirm-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '处理中...';
+                
+                fetch('/balance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action: 'topup',
+                        owner: username,
+                        amount: Number(amount)
+                    })
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
+                    }
+                    
+                    const contentType = res.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('服务器返回了非JSON格式的响应');
+                    }
+                    
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.message && data.message.includes('success')) {
+                        // 修改按钮状态为"充值成功"
+                        confirmBtn.textContent = '充值成功';
+                        showCustomAlert('充值成功', 'success');
+                        if (typeof updateBalance === 'function') {
+                            updateBalance();
+                        }
+                        setTimeout(closeModal, 1000); // 延迟2秒关闭
+                    } else {
+                        throw new Error(data?.message || '充值操作未成功');
+                    }
+                })
+                .catch(error => {
+                    console.error('充值请求失败:', error);
+                    showCustomAlert(`充值失败: ${error.message}`, 'error');
+                })
+            };
+            
+            // 自动聚焦输入框
+            setTimeout(() => {
+                modal.querySelector('#topupAmount').focus();
+            }, 100);
         }
 
-        // 提现弹窗 - 同样增强错误处理
+        // 辅助函数：显示自定义提示（替换layui.layer.msg）
+        function showCustomAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `custom-alert custom-alert-${type}`;
+            alert.textContent = message;
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.add('fade-out');
+                setTimeout(() => {
+                    document.body.removeChild(alert);
+                }, 300);
+            }, 3000);
+        }
+
+        // 提现弹窗
         function showWithdraw() {
-            layui.layer.open({
-                type: 1,
-                title: '提现',
-                content: `
-                <div style="padding: 20px;">
-                    <div class="layui-form">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">提现金额</label>
-                            <div class="layui-input-block">
-                                <input type="number" id="withdrawAmount" required placeholder="请输入提现金额" class="layui-input">
-                            </div>
-                        </div>
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            
+            // 创建弹窗（复用相同CSS类）
+            const modal = document.createElement('div');
+            modal.className = 'custom-detail-modal topup-size-modal';
+            modal.innerHTML = `
+                <div class="custom-detail-header">提现</div>
+                <div class="custom-detail-content">
+                    <div class="custom-detail-item">
+                        <input type="text" id="withdrawAmount" required 
+                            placeholder="请输入提现金额" class="custom-input">
                     </div>
-                </div>`,
-                btn: ['确认', '取消'],
-                yes: function (index) {
-                    const amount = document.getElementById('withdrawAmount').value;
-                    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-                        layui.layer.msg('请输入有效金额', { icon: 2 });
-                        return;
-                    }
-
-                    const username = localStorage.getItem('username');
-                    fetch('/balance', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: JSON.stringify({
-                            action: 'withdraw',
-                            owner: username,
-                            amount: Number(amount)
-                        })
-                    })
-                        .then(res => {
-                            // 添加响应检查，确保是JSON格式
-                            if (!res.ok) {
-                                return res.text().then(text => {
-                                    console.error('提现失败，服务器返回:', text);
-                                    throw new Error(`服务器错误: ${res.status} ${res.statusText}`);
-                                });
-                            }
-
-                            const contentType = res.headers.get('content-type');
-                            if (!contentType || !contentType.includes('application/json')) {
-                                return res.text().then(text => {
-                                    console.error('服务器返回非JSON数据:', text.substring(0, 200));
-                                    throw new Error('服务器返回格式错误，请联系管理员');
-                                });
-                            }
-
-                            return res.json();
-                        })
-                        .then(data => {
-                            if (data && data.message && data.message.includes('success')) {
-                                layui.layer.msg('提现成功', { icon: 1 });
-                                updateBalance();
-                            } else {
-                                layui.layer.msg('失败: ' + (data ? data.message || '未知错误' : '服务器无响应'), { icon: 2 });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('提现请求失败:', error);
-                            layui.layer.msg('提现失败: ' + error.message, { icon: 2 });
-                        });
-                    layui.layer.close(index);
+                </div>
+                <div class="custom-detail-footer">
+                    <button type="button" class="custom-detail-close confirm-btn">确认</button>
+                    <button type="button" class="custom-detail-close cancel-btn">取消</button>
+                </div>
+            `;
+            
+            // 添加到DOM
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            
+            // 关闭弹窗函数
+            const closeModal = () => {
+                document.body.removeChild(overlay);
+            };
+            
+            // 点击遮罩层关闭
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    closeModal();
                 }
-            });
+            };
+            
+            // 取消按钮事件
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            
+            // 确认按钮事件
+            modal.querySelector('.confirm-btn').onclick = () => {
+                const amountInput = document.getElementById('withdrawAmount');
+                const amount = amountInput.value.trim();
+                
+                // 验证输入
+                if (!amount || isNaN(amount) || Number(amount) <= 0) {
+                    showCustomAlert('请输入有效金额（必须大于0）', 'error');
+                    amountInput.focus();
+                    return;
+                }
+                
+                const username = localStorage.getItem('username');
+                const token = localStorage.getItem('token');
+                
+                if (!username || !token) {
+                    showCustomAlert('用户未登录或会话已过期', 'error');
+                    return;
+                }
+                
+                // 显示加载状态
+                const confirmBtn = modal.querySelector('.confirm-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '处理中...';
+                
+                fetch('/balance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action: 'withdraw',
+                        owner: username,
+                        amount: Number(amount)
+                    })
+                })
+                .then(async res => {
+                    // 增强错误处理（与充值逻辑一致）
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
+                    }
+                    
+                    const contentType = res.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('服务器返回了非JSON格式的响应');
+                    }
+                    
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.message && data.message.includes('success')) {
+                        // 更新按钮状态为"提现成功"
+                        confirmBtn.textContent = '提现成功';
+                        showCustomAlert('提现成功', 'success');
+                        updateBalance?.();
+                        
+                        // 2秒后关闭弹窗（让用户看到成功状态）
+                        setTimeout(closeModal, 1000);
+                    } else {
+                        throw new Error(data?.message || '提现操作未成功');
+                    }
+                })
+                .catch(error => {
+                    console.error('提现请求失败:', error);
+                    
+                    // 失败时恢复按钮状态
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = '确认';
+                    confirmBtn.style.backgroundColor = ''; // 清除背景色
+                    
+                    showCustomAlert(`提现失败: ${error.message}`, 'error');
+                });
+            };
+            
+            // 自动聚焦输入框
+            setTimeout(() => {
+                modal.querySelector('#withdrawAmount').focus();
+            }, 100);
         }
 
         // 显示项目详情 - 自定义版本
@@ -1254,7 +1684,7 @@
             const overlay = document.createElement('div');
             overlay.className = 'custom-modal-overlay';
             overlay.onclick = closeModal;
-            
+
             // 创建详情弹窗
             const modal = document.createElement('div');
             modal.className = 'custom-detail-modal';
@@ -1311,14 +1741,14 @@
                     </div>
                 </div>
             `;
-            
+
             // 添加关闭事件
             modal.querySelector('.custom-detail-close').onclick = closeModal;
-            
+
             // 添加到body
             document.body.appendChild(overlay);
             document.body.appendChild(modal);
-            
+
             function closeModal() {
                 document.body.removeChild(overlay);
                 document.body.removeChild(modal);
@@ -1397,17 +1827,17 @@
                     },
                     body: JSON.stringify(updateData)
                 }).then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('修改成功');
-                        closeModal();
-                        location.reload(); // 可按需刷新数据
-                    } else {
-                        alert('修改失败: ' + res.msg);
-                    }
-                }).catch(err => {
-                    alert('请求失败: ' + err.message);
-                });
+                    .then(data => {
+                        if (data.success) {
+                            alert('修改成功');
+                            closeModal();
+                            location.reload(); // 可按需刷新数据
+                        } else {
+                            alert('修改失败: ' + res.msg);
+                        }
+                    }).catch(err => {
+                        alert('请求失败: ' + err.message);
+                    });
             };
 
             document.body.appendChild(overlay);
@@ -1440,7 +1870,7 @@
                 const pageInput = document.getElementById('page-number');
                 let page = parseInt(pageInput.value, 10);
                 if (isNaN(page) || page < 1 || page > totalPages) {
-                    layui.layer.msg('请输入有效的页码范围 1 - ' + totalPages, { icon: 2 });
+                    showCustomAlert('请输入有效的页码范围 1-' + totalPages, 'error');
                     pageInput.value = currentPage;
                     return;
                 }

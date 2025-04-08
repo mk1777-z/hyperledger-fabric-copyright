@@ -416,11 +416,11 @@ function showHistoryModal(title, content) {
 function getStatusBadge(type) {
     switch (type) {
         case 'pending':
-            return '<span class="badge bg-warning">待审核</span>';
+            return '<span class="status-badge pending">待审核</span>';
         case 'approved':
-            return '<span class="badge bg-success">已通过</span>';
+            return '<span class="status-badge approved">已通过</span>';
         case 'rejected':
-            return '<span class="badge bg-danger">未通过</span>';
+            return '<span class="status-badge rejected">未通过</span>';
         default:
             return '';
     }

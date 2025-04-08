@@ -42,9 +42,9 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	defer rows.Close()
 
 	if rows.Next() { // 如果存在该用户
-		log.Printf("Username %s already exists", user.Username)
+		log.Printf("用户名%s已存在", user.Username)
 		c.JSON(http.StatusBadRequest, map[string]string{
-			"error": fmt.Sprintf("Username %s already exists", user.Username),
+			"error": "用户名已存在",
 		})
 		return
 	}

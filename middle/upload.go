@@ -76,12 +76,12 @@ func Upload(_ context.Context, c *app.RequestContext) {
 	}
 	defer db.Close()
 
-	exists, _ := db.Query("SELECT * FROM item WHERE name = ? OR id = ? ", uploadInfo.Name, uploadInfo.ID)
-	if exists.Next() {
-		c.Status(http.StatusConflict)
-		c.JSON(http.StatusConflict, utils.H{"message": "Item Already Exist"})
-		return
-	}
+	// exists, _ := db.Query("SELECT * FROM item WHERE name = ? OR id = ? ", uploadInfo.Name, uploadInfo.ID)
+	// if exists.Next() {
+	// 	c.Status(http.StatusConflict)
+	// 	c.JSON(http.StatusConflict, utils.H{"message": "Item Already Exist"})
+	// 	return
+	// }
 
 	startTime := time.Now()                                     // 使用上传时间作为 start_time
 	assetID := fmt.Sprintf("asset%d", startTime.UnixNano()/1e6) // 生成唯一 ID

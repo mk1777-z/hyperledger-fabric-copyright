@@ -1,191 +1,837 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜索结果</title>
-    <link href="//unpkg.com/layui@2.10.3/dist/css/layui.css" rel="stylesheet">
-    <style>
-        /* 这里可以复制版权展示页面的 CSS 样式 */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f9fafb;
-            color: #333;
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/layui@2.9.16/dist/css/layui.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': {
+                            '50': '#f0f9ff',
+                            '100': '#e0f2fe',
+                            '300': '#7dd3fc',
+                            '400': '#38bdf8',
+                            '500': '#0ea5e9',
+                            '600': '#0284c7',
+                            '700': '#0369a1',
+                            '800': '#075985',
+                            '900': '#0c4a6e',
+                        },
+                        'dark': {
+                            '400': '#1e293b',
+                            '500': '#0a101f',
+                            '600': '#070b16',
+                        },
+                    },
+                },
+            },
         }
 
-        .header {
+        function showCustomAlert(message, type = 'success', duration = 2000) {
+            const alert = document.createElement('div');
+            alert.className = `custom-alert ${type}`;
+            alert.innerHTML = `
+                <div class="alert-icon-wrapper">
+                    <i id="alertIcon" class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>
+                </div>
+                <div id="alertMessage">${message}</div>
+            `;
+            document.body.appendChild(alert);
+
+            setTimeout(() => alert.classList.add('show'), 10);
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => document.body.removeChild(alert), 300);
+            }, duration);
+        }
+
+        let loadingAlert = null;
+
+        function showLoadingMessage(message = '加载中...') {
+            loadingAlert = document.createElement('div');
+            loadingAlert.className = `custom-alert success`;
+            loadingAlert.innerHTML = `
+                <div class="alert-icon-wrapper">
+                    <i id="alertIcon" class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div id="alertMessage">${message}</div>
+            `;
+            document.body.appendChild(loadingAlert);
+            setTimeout(() => loadingAlert.classList.add('show'), 10);
+        }
+
+        function closeLoadingMessage() {
+            if (loadingAlert) {
+                loadingAlert.classList.remove('show');
+                setTimeout(() => {
+                    if (loadingAlert && loadingAlert.parentNode) {
+                        loadingAlert.parentNode.removeChild(loadingAlert);
+                    }
+                    loadingAlert = null;
+                }, 300);
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
+            --dark-bg-left: #03020A;
+            --dark-bg-right: #0A0818;
+            --card-bg: rgba(30, 40, 70, 0.9);
+            --card-border: rgba(80, 100, 240, 0.3);
+            --card-glow: rgba(110, 64, 255, 0.2);
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(90deg, var(--dark-bg-left), var(--dark-bg-right));
+            background-attachment: fixed;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 背景光晕效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(110, 64, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(11, 220, 171, 0.1) 0%, transparent 30%);
+            z-index: -1;
+        }
+
+        /* 额外背景效果 */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            z-index: -1;
+        }
+
+        .bg-amber {
+            height: 600px;
+            width: 600px;
+            right: 0;
+            margin-top: -100px;
+            background-color: rgba(245, 158, 11, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+
+        .bg-primary {
+            height: 600px;
+            width: 600px;
+            left: 0;
+            background-color: rgba(110, 64, 255, 0.1);
+            border-radius: 1rem;
+            filter: blur(200px);
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(3, 2, 10, 0.6);
+            color: var(--text-color);
+            padding: 15px 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(90deg, #006d77, #004d5b);
-            color: #fff;
-            padding: 15px 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
+        /* 品牌标识区 */
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
         }
 
-        .item {
+        /* 主导航 */
+        .main-nav {
             display: flex;
-            flex-direction: column;
+            gap: 10px;
             align-items: center;
-            width: 280px;
-            padding: 15px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            justify-content: center;
+            flex: 1;
         }
 
-        .item img {
+        .nav-item {
+            padding: 8px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: white;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        /* 用户导航 */
+        .user-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome-text {
+            color: var(--secondary-text);
+        }
+
+        .username {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            cursor: pointer;
+        }
+
+        /* 搜索框样式 */
+        .search-container {
+            position: relative;
+            width: 66%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
             width: 100%;
-            max-width: 250px;
-            height: 140px;
-            border-radius: 8px;
-            object-fit: cover;
-            margin-bottom: 10px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            padding: 0.75rem 3.5rem 0.75rem 3.5rem;
+            outline: none;
+            border-radius: 0.5rem;
+            background-color: rgba(241, 241, 241, 0.05);
+            color: var(--text-color);
+            font-size: 1.125rem;
+            cursor: pointer;
+            border: 1px solid rgba(241, 241, 241, 0.1);
+            transition: all 0.3s;
         }
 
-        .item img.loaded {
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            color: rgba(241, 241, 241, 0.5);
+            z-index: 2;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        /* 项目网格布局 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* 卡片样式 */
+        .card {
+            position: relative;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            height: 22rem;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 1px 3px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease-in-out;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow:
+                0 8px 15px rgba(0, 0, 0, 0.2),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 0.75rem 0.75rem 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
             opacity: 1;
         }
 
-        .item-content {
-            text-align: left;
-            width: 100%;
-            padding: 10px 0;
+        /* 卡片内容区域 */
+        .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(10, 15, 35, 0.85), rgba(10, 15, 35, 0.4), transparent);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
         }
 
-        .item-content p {
-            font-size: 14px;
-            margin: 5px 0;
-            color: #333;
-        }
-
-        .item-content a {
+        /* 卡片图片 */
+        .item-icon {
+            background-color: rgba(241, 241, 241, 0.05);
             display: inline-block;
-            padding: 8px 15px;
-            margin-top: 10px;
-            background-color: #006d77;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-            transition: background-color 0.3s ease;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(241, 241, 241, 0.05);
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
         }
 
+        .item-img {
+            width: 100%;
+            height: 180px;
+            border-radius: 8px;
+            object-fit: cover;
+            opacity: 0;
+            transition: all 0.5s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-img.loaded {
+            opacity: 1;
+        }
+
+        /* 左右布局的卡片内容 */
+        .card-flex-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .card-col {
+            flex: 1;
+        }
+
+        .card-col-left {
+            padding-right: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-col-right {
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-owner {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-desc {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-price {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .action-btn {
+            margin-top: auto;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            display: inline-block;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 卡片元数据 */
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+
+        .meta-label {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            min-width: 60px;
+        }
+
+        .meta-value {
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(241, 241, 241, 0.1);
+            margin: 4px 0;
+        }
+
+        /* 用户样式 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding-top: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .user-avatar {
+            height: 1rem;
+            width: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        /* 无数据提示样式 */
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-text);
+            font-size: 18px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 分页容器样式 */
         .pagination-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            gap: 15px;
+            margin: 40px auto;
+            padding: 20px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.05);
         }
 
-        .pagination-container button {
-            height: 34px;
-            padding: 0 15px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            color: #333;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-        }
-
-        .pagination-container button:disabled {
-            background-color: #eee;
-            color: #999;
-            border-color: #eee;
-            cursor: default;
-        }
-
-        .pagination-container button:hover:not(:disabled) {
-            background-color: #e1e1e1;
-            border-color: #ccc;
-            color: #000;
-        }
-
-        .pagination-container span {
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            margin: 0 10px;
-        }
-
-        .pagination-container .page-input {
+        .page-number {
             width: 40px;
-            height: 30px;
-            margin: 0 5px;
+            height: 36px;
             text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
             outline: none;
+            transition: all 0.3s ease;
         }
 
-        .pagination-container .go-button {
-            height: 34px;
-            padding: 0 10px;
+        .page-number:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn {
+            height: 36px;
+            padding: 0 15px;
             border: none;
-            background-color: #006d77;
-            color: #fff;
-            border-radius: 4px;
+            color: white;
+            border-radius: 18px;
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .pagination-container .go-button:hover {
-            background-color: #004d5b;
+        .page-btn:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            cursor: default;
+            box-shadow: none;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .go-btn {
+            height: 36px;
+            padding: 0 15px;
+            border: none;
+            color: white;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                0 1px 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .go-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 页面通用容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部标题区 */
+        .header-section {
+            padding-top: 24px;
+            padding-bottom: 24px;
+            text-align: center;
+        }
+
+        .header-section h2 {
+            font-size: 2.25rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+        }
+
+        /* 增大搜索组件与周围元素的间距 */
+        .search-form {
+            margin: 45px auto 60px auto;
+            text-align: center;
+        }
+
+        /* 自定义消息弹窗样式 */
+        .custom-alert {
+            position: fixed;
+            top: 50%;    
+            left: 50%;   
+            transform: translate(-50%, -50%);   
+            background: rgba(24, 35, 56, 0.95);
+            color: #f1f1f1;
+            padding: 15px 20px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 90vw;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 64, 255, 0.3);
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) !important;
+        }
+
+        .alert-icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .custom-alert.success .alert-icon-wrapper {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .custom-alert.error .alert-icon-wrapper {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .custom-alert.success {
+            border: 2px solid rgba(11, 220, 171, 0.7);
+        }
+
+        .custom-alert.error {
+            border: 2px solid rgba(255, 85, 122, 0.7);
+        }
+
+        .fa-spinner {
+            animation: spin 2s linear infinite;
+            font-size: 1.8rem;  
+            color: #0bdcab; 
+        }
+
+        .fa-check-circle {
+            font-size: 1.8rem !important;
+            color: #0bdcab;
+        }
+
+        .fa-times-circle {
+            animation: none !important;
+            font-size: 1.8rem; 
+            color: #ff557a;
+        }
+
+        #alertMessage {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            margin: 1px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes alertIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .custom-alert.show {
+            animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .search-container {
+                width: 100%;
+            }
+
+            .navbar {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .main-nav {
+                margin: 10px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-nav {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .welcome-text {
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+
+            .pagination-container {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
+    <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
 </head>
 
 <body>
-    <div class="header">
-        <h1>搜索结果</h1>
-        <div class="search-box">
-            <input type="text" class="layui-input" id="search-input" placeholder="搜索项目"
-                onkeydown="handleSearchKey(event)">
-            <button class="layui-btn layui-btn-primary" id="search-btn" onclick="searchItems()">搜索</button>
-        </div>
-        <ul class="layui-nav">
-            <span class="welcome-text">欢迎，<span id="username">未登录</span></span>
-            <li class="layui-nav-item"><a href="homepage">个人中心</a></li>
-            <li class="layui-nav-item"><a href="statistics">统计分析</a></li>
-            <li class="layui-nav-item"><a class="logout" onclick="logout()" style="cursor: pointer;">退出</a></li>
-        </ul>
-    </div>
+    <!-- 背景色块 -->
+    <div class="bg-gradient bg-amber"></div>
+    <div class="bg-gradient bg-primary"></div>
 
+    <!-- 导航条 -->
+    <nav class="navbar">
+        <!-- 品牌标识 -->
+        <div class="navbar-brand">区块链版权</div>
+
+        <!-- 主导航 - 居中 -->
+        <div class="main-nav">
+            <a href="/display" class="nav-item">版权展示</a>
+            <a href="/homepage" class="nav-item">个人中心</a>
+            <a href="/statistics" class="nav-item">统计分析</a>
+        </div>
+
+        <!-- 用户导航 - 右侧 -->
+        <div class="user-nav">
+            <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
+            <a class="nav-link logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 搜索表单 -->
     <div class="container">
+        <div class="search-form">
+            <div class="header-section">
+                <h2>搜索结果</h2>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="search-input" placeholder="搜索版权项目" class="search-input"
+                        onkeydown="handleSearchKey(event)">
+                </div>
+            </div>
         </div>
 
-    <div class="pagination-container" style="text-align:center; margin-top:20px;">
-        <button class="layui-btn" id="prev-page" disabled>上一页</button>
-        <span id="page-info">第 1 页 / 1 页</span>
-        <button class="layui-btn" id="next-page">下一页</button>
-        <input type="number" class="page-input" id="page-number" min="1" value="1">
-        <button class="layui-btn go-button" id="go-page">跳转</button>
+        <!-- 项目网格 -->
+        <div id="projects-grid" class="grid-container">
+            <!-- 动态内容将通过 JavaScript 生成 -->
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <button class="page-btn" id="prev-page" disabled>上一页</button>
+            <span id="page-info">第 1 页 / 1 页</span>
+            <button class="page-btn" id="next-page">下一页</button>
+            <input type="text" id="page-number" min="1" value="1" class="page-number">
+            <button class="go-btn" id="go-page">跳转</button>
+        </div>
     </div>
 
-    <script src="//unpkg.com/layui@2.9.16/dist/layui.js"></script>
     <script>
         let currentPage = 1;
         let totalPages = 1;
@@ -206,14 +852,19 @@
             document.getElementById("username").textContent = username || "未登录";
             token = localStorage.getItem('token');
             if (!token) {
-                alert('请登录');
+                showCustomAlert('请登录', 'error');
                 return (window.location.href = '/');
             }
 
             currentSearchQuery = getQueryParam('query') || '';
             document.getElementById('search-input').value = currentSearchQuery; // 将搜索关键词填充到搜索框
 
-            fetchItemsForPage(currentPage, currentSearchQuery); // 加载搜索结果
+            if (currentSearchQuery) {
+                fetchItemsForPage(currentPage, currentSearchQuery); // 加载搜索结果
+            } else {
+                showCustomAlert('请输入搜索关键词', 'error');
+            }
+            
             bindPaginationEvents();
         };
 
@@ -242,12 +893,12 @@
             })
             .catch(error => {
                 console.error(`API请求错误 (${url}):`, error);
-                layui.layer.msg('数据加载失败，请稍后重试', {icon: 2});
+                showCustomAlert('数据加载失败，请稍后重试', 'error');
                 // 返回空对象以避免后续处理错误
                 return { items: [], totalPages: 1 };
             });
 
-        // 请求项目数据 - 修正API路径
+        // 请求项目数据
         function fetchItemsForPage(page, searchQuery) {
             const params = { page: page, pageSize: pageSize };
             if (searchQuery) {
@@ -255,16 +906,12 @@
             }
 
             // 显示加载状态
-            const loadingMsg = layui.layer.msg('数据加载中...', {
-                icon: 16,
-                time: 0,
-                shade: 0.1
-            });
+            showLoadingMessage('搜索中...');
             
-            // 修正API路径
+            // 发送请求
             fetchData('/api/search', params)
                 .then(data => {
-                    layui.layer.close(loadingMsg);
+                    closeLoadingMessage();
                     
                     if (data?.items && data?.totalPages) {
                         renderItems(data.items);
@@ -279,29 +926,55 @@
                 });
         }
 
-        // 渲染项目数据
+        // 渲染项目数据 - 使用新的卡片设计
         function renderItems(items) {
-            const container = document.querySelector('.container');
-            container.innerHTML = items.length
-                ? items.map(item => `
-                                    <div id="${item.name}" class="item">
-                                        <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/200x120?text=暂无图片'}"
-                                            src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="版权图片" class="item-image">
-                                        <div class="item-content">
-                                            <p>名称：${item.name}</p>
-                                            <p>描述：${item.description}</p>
-                                            <p>价格：${item.price}</p>
-                                            <p>拥有者：${item.owner}</p>
-                                            <a href="#" onclick="viewDetails('${item.name}')">查看详情</a>
-                                        </div>
-                                    </div>
-                                `).join('') : '<p>没有找到符合条件的项目</p>';
+            const container = document.getElementById('projects-grid');
 
+            if (items.length) {
+                container.innerHTML = items.map(item => `
+                    <div class="card shadow-xl relative">
+                        <div class="item-icon">
+                            <img data-src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/280x180/283250/a0aec0?text=暂无图片'}"
+                                alt="${item.name}" class="item-img">
+                        </div>
+                        <div class="card-content">
+                            <div class="card-flex-container">
+                                <!-- 左列：名称和拥有者 -->
+                                <div class="card-col card-col-left">
+                                    <div class="item-title">${truncateText(item.name, 20)}</div>
+                                    <div class="item-owner">
+                                        <img src="${item.img && item.img !== 'noimage' ? item.img : 'https://via.placeholder.com/280x180/283250/a0aec0?text=暂无图片'}" 
+                                            class="h-4 w-4 rounded-lg inline-block user-avatar"> 
+                                        ${truncateText(item.owner, 15)}
+                                    </div>
+                                </div>
+                                
+                                <!-- 右列：描述、价格和操作按钮 -->
+                                <div class="card-col card-col-right">
+                                    <div class="item-desc">${truncateText(item.description || "暂无描述", 40)}</div>
+                                    <div class="item-price">￥ ${item.price}</div>
+                                    <a href="#" onclick="viewDetails('${item.name}')" class="action-btn">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="no-data">没有找到符合条件的项目</div>';
+            }
+
+            // 观察图片进行懒加载
             observeImages();
         }
 
+        // 添加文本截断函数防止内容溢出
+        function truncateText(text, maxLength) {
+            if (!text || text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
         function observeImages() {
-            const images = document.querySelectorAll('.item-image');
+            const images = document.querySelectorAll('.item-img');
             images.forEach(img => {
                 if (!img.dataset.loaded) {
                     lazyLoadObserver.observe(img);
@@ -322,19 +995,21 @@
             });
         }
 
-
         function viewDetails(itemName) {
             if (!token) {
-                alert('用户未登录，请先登录！');
+                showCustomAlert('用户未登录，请先登录！', 'error');
                 return;
             }
 
             if (!itemName) {
-                alert('无效的项目名称！');
+                showCustomAlert('无效的项目名称！', 'error');
                 return;
             }
 
-            fetch('/information', {
+            // 显示加载状态
+            showLoadingMessage('加载详情...');
+
+            fetch('/api/information', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -343,32 +1018,31 @@
                 body: JSON.stringify({ name: itemName })
             })
                 .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        return response.json().then(err => {
-                            console.error('查看详情请求失败:', err);
-                            alert('查看详情失败，请稍后重试！');
-                        });
+                    closeLoadingMessage();
+
+                    if (!response.ok) {
+                        throw new Error(`请求失败: ${response.status} ${response.statusText}`);
                     }
+                    return response.json();
                 })
                 .then(data => {
                     if (data && data.items && data.items.length > 0) {
                         const item = data.items[0];
                         const processedItem = {
                             ...item,
-                            img: item.img === "NULL" ? "https://via.placeholder.com/200x120?text=暂无图片" : item.img
+                            img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
                         };
                         sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
                         window.location.href = '/information';
                     } else {
                         console.error('未找到相关项');
-                        alert('未找到相关项');
+                        showCustomAlert('未找到项目详情', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('网络错误:', error);
-                    alert('网络错误，请稍后重试！');
+                    closeLoadingMessage();
+                    console.error('获取详情失败:', error);
+                    showCustomAlert('获取详情失败，请稍后重试', 'error');
                 });
         }
 
@@ -380,10 +1054,14 @@
             document.getElementById('page-number').value = currentPage;
         }
 
-        // 搜索功能：跳转到 search.html 页面
+        // 搜索功能
         function searchItems() {
             const searchQuery = document.getElementById('search-input').value.trim();
-            window.location.href = `search.html?query=${encodeURIComponent(searchQuery)}`;
+            if (searchQuery) {
+                window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
+            } else {
+                showCustomAlert('搜索内容不能为空', 'error');
+            }
         }
 
         // 监听键盘事件
@@ -409,8 +1087,8 @@
                 const pageInput = document.getElementById('page-number');
                 let page = parseInt(pageInput.value, 10);
                 if (isNaN(page) || page < 1 || page > totalPages) {
-                    alert('请输入有效的页码，范围在 1 到 ' + totalPages + '!');
-                    pageInput.value = currentPage; // Reset input to current page
+                    showCustomAlert('请输入有效的页码，范围在 1 到 ' + totalPages + '!', 'error');
+                    pageInput.value = currentPage; // 重置输入为当前页码
                     return;
                 }
                 currentPage = page;

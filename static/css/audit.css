@@ -1,8 +1,8 @@
 /* 审核系统专用样式 - 深色主题优化版 */
 :root {
-    --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
-    --secondary-gradient: linear-gradient(90deg, #ff557a, #6172ff);
-    --accent-gradient: linear-gradient(90deg, #0bdcab, #6e40ff);
+    --primary-gradient: linear-gradient(90deg, #5c38d2dc, #0aa984d2);
+    --secondary-gradient: linear-gradient(90deg, #ca4562e0, #6172ff);
+    --accent-gradient: linear-gradient(90deg, #0ab38cdc, #5c37d6d7);
     --dark-bg: #0F172A;
     --darker-bg: #080d18;
     --card-bg: #182338;
@@ -13,9 +13,9 @@
     --muted-text: #94a3b8;
     --accent-color: #6e40ff;
     --accent-hover: #5930d8;
-    --success-color: #0bdcab;
-    --warning-color: #ffc107;
-    --danger-color: #ff557a;
+    --success-color: #099473d0;
+    --warning-color: #a77e03;
+    --danger-color: #d04765e4;
     --border-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -27,6 +27,40 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     letter-spacing: 0.3px;
+}
+
+.status-badge {
+    border-radius: 2em;
+    /* 增大圆角半径 */
+    padding: 0.35em 1.1em;
+    /* 对称的左右内边距 */
+    font-size: 0.85em;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--base-color);
+    /* 统一基础色变量 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 极细边框增强辨识度 */
+}
+
+.status-badge.pending {
+    background-color: var(--warning-color);
+    border-radius: 1.8em 0.8em;
+    /* 非对称圆角 */
+}
+
+.status-badge.approved {
+    background-color: var(--success-color);
+    border-radius: 0.8em 1.8em;
+    /* 反向非对称圆角 */
+}
+
+.status-badge.rejected {
+    background-color: var(--danger-color);
+    border-radius: 1.2em 1.2em 2em 2em;
+    /* 底部更圆润 */
 }
 
 /* 页头样式 */

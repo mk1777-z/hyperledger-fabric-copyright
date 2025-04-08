@@ -149,6 +149,93 @@
             margin-top: 1.5rem;
             text-align: center;
         }
+
+        /* 自定义消息弹窗样式 */
+        .custom-alert {
+            position: fixed;
+            top: 50%;    
+            left: 50%;   
+            transform: translate(-50%, -50%);   
+            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            color: #f1f1f1;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(110, 64, 255, 0.3), 
+                        0 0 0 1px rgba(110, 64, 255, 0.2);
+            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 90vw;                 /* 避免内容超出屏幕 */
+            white-space: nowrap;              /* 希望不换行 */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 64, 255, 0.3);
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) !important;
+        }
+
+        .alert-icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .custom-alert.success .alert-icon-wrapper {
+            background: rgba(11, 220, 171, 0.15);
+            box-shadow: 0 0 15px rgba(11, 220, 171, 0.3);
+        }
+
+        .custom-alert.error .alert-icon-wrapper {
+            background: rgba(255, 85, 122, 0.15);
+            box-shadow: 0 0 15px rgba(255, 85, 122, 0.3);
+        }
+
+        .custom-alert.success {
+            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+        }
+
+        .custom-alert.error {
+            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+        }
+
+        #alertIcon {
+            font-size: 1.4rem;
+        }
+
+        .custom-alert.success #alertIcon {
+            color: #0bdcab;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+        }
+
+        .custom-alert.error #alertIcon {
+            color: #ff557a;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+        }
+
+        #alertMessage {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* 入场动画 */
+        @keyframes alertIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .custom-alert.show {
+            animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
     </style>
     <!-- 先确保 layui.js 加载完成 -->
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
@@ -175,6 +262,12 @@
             </div>
         </div>
     </div>
+    <!-- 自定义消息弹窗 -->
+    <div id="customAlert" class="custom-alert" style="display: none;">
+        <i id="alertIcon" class="fas fa-check-circle"></i>
+        <span id="alertMessage">提示内容</span>
+    </div>
+      
 </body>
 
 </html>

@@ -55,8 +55,8 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 	}
 	defer db.Close() // 确保数据库连接在结束时关闭
 
-	// 查询数据库，获取该用户的项目列表
-	rows, err := db.Query("SELECT id, name, simple_dsc, price, owner, dsc, img, start_time, on_sale FROM item WHERE owner = ?", claims.Username)
+	// 查询数据库，获取该用户的项目列表，增加 transID 字段
+	rows, err := db.Query("SELECT id, name, simple_dsc, price, owner, dsc, img, start_time, on_sale, transID FROM item WHERE owner = ?", claims.Username)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database query error"})
@@ -71,12 +71,15 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 		var name, simple_des, img, dsc, owner, start_time string
 		var price float32
 		var on_sale bool
-		if err := rows.Scan(&id, &name, &simple_des, &price, &owner, &dsc, &img, &start_time, &on_sale); err != nil {
+		var transID sql.NullString // 使用 NullString 处理可能为 NULL 的 transID
+
+		if err := rows.Scan(&id, &name, &simple_des, &price, &owner, &dsc, &img, &start_time, &on_sale, &transID); err != nil {
 			c.Status(http.StatusInternalServerError)
 			c.JSON(http.StatusInternalServerError, utils.H{"message": "Error reading row"})
 			return
 		}
-		items = append(items, map[string]interface{}{
+
+		item := map[string]interface{}{
 			"id":          id,
 			"name":        name,
 			"description": simple_des,
@@ -86,7 +89,19 @@ func Myproject(_ context.Context, c *app.RequestContext) {
 			"owner":       owner,
 			"start_time":  start_time,
 			"on_sale":     on_sale,
-		})
+		}
+
+		// 只有当 transID 不为 NULL 时才添加到返回结果中
+		// 并且只返回第一个 transID（以空格分隔）
+		if transID.Valid {
+			// 按空格分割 transID 字符串，获取第一个元素
+			transIDParts := strings.Split(transID.String, " ")
+			if len(transIDParts) > 0 {
+				item["transID"] = transIDParts[0]
+			}
+		}
+
+		items = append(items, item)
 	}
 
 	// 返回结果

@@ -30,6 +30,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// 自定义消息提示函数
+function showAlert(message, type = 'success', duration = 2000) {
+    const alert = document.getElementById('customAlert');
+    const icon = document.getElementById('alertIcon');
+    const messageEl = document.getElementById('alertMessage');
+
+    // 设置内容
+    messageEl.textContent = message;
+    alert.className = `custom-alert ${type}`;
+    icon.className = type === 'success' 
+        ? 'fas fa-check-circle' 
+        : 'fas fa-times-circle';
+    
+    // 显示弹窗（带动画）
+    alert.style.display = 'flex';
+    setTimeout(() => alert.classList.add('show'), 10);
+    
+    // 自动隐藏
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.style.display = 'none', 400);
+    }, duration);
+}
+
 // 统一的登录处理函数
 function handleLogin() {
     const username = document.getElementById('username').value;
@@ -38,7 +62,7 @@ function handleLogin() {
 
     // 输入验证
     if (!username || !passwordValue) {
-        layer.msg('请输入用户名和密码。', { icon: 0, time: 2000 });
+        showAlert('请输入用户名和密码', 'error', 2000);
         return;
     }
 
@@ -77,7 +101,7 @@ function handleRegulatorLogin(username, password) {
                 localStorage.setItem('username', username);
 
                 // 显示成功消息
-                layer.msg('监管者登录成功！', { icon: 1, time: 1000 });
+                showAlert('监管者登录成功！', 'success', 1000);
 
                 // 使用准确的HTML完整路径
                 console.log('即将跳转到审核页面...');
@@ -89,12 +113,12 @@ function handleRegulatorLogin(username, password) {
                 // 清空输入框
                 clearInputs();
             } else {
-                layer.msg('监管者登录失败：' + (data.message || '验证失败'), { icon: 2, time: 2000 });
+                showAlert('监管者登录失败：' + (data.message || '验证失败'), 'error', 2000);
             }
         })
         .catch(error => {
             console.error('登录错误:', error);
-            layer.msg('监管者登录失败，请检查网络连接', { icon: 2, time: 2000 });
+            showAlert('监管者登录失败，请检查网络连接', 'error', 2000);
         });
 }
 
@@ -115,13 +139,13 @@ function handleUserLogin(username, password) {
                 return response.json();
             } else if (response.status === 400) {
                 const errorText = await response.text();
-                layer.msg(errorText || '用户名或密码错误。', { icon: 2, time: 2000 });
+                showAlert(errorText || '用户名或密码错误', 'error', 2000);
                 return null;
             } else if (response.status === 500) {
-                layer.msg('服务器出现问题，请稍后再试。', { icon: 2, time: 2000 });
+                showAlert('服务器出现问题，请稍后再试', 'error', 2000);
                 return null;
             } else {
-                layer.msg('用户名或密码错误。', { icon: 2, time: 2000 });
+                showAlert('用户名或密码错误', 'error', 2000);
                 return null;
             }
         })
@@ -131,7 +155,7 @@ function handleUserLogin(username, password) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', username);
 
-                layer.msg('登录成功！', { icon: 1, time: 1000 });
+                showAlert('登录成功！', 'success', 1000);
 
                 setTimeout(() => {
                     window.location.href = '/display'; // 普通用户跳转页面
@@ -143,7 +167,7 @@ function handleUserLogin(username, password) {
         })
         .catch(error => {
             console.error('登录请求失败：', error);
-            layer.msg('登录请求失败，请检查网络连接。', { icon: 2, time: 2000 });
+            showAlert('登录请求失败，请检查网络连接', 'error', 2000);
         });
 }
 
