@@ -289,6 +289,24 @@ func getPriceData(db *sql.DB, timeRange, category string) ([]map[string]interfac
 	return result, nil
 }
 
+// 检查交易是否为初始上传而非实际购买
+func isInitialUpload(transaction map[string]interface{}) bool {
+	// 初次上传时，卖家通常为admin，价格为0
+	seller, hasSeller := transaction["Seller"].(string)
+	price := 0.0
+
+	// 获取价格
+	switch p := transaction["Price"].(type) {
+	case float64:
+		price = p
+	case string:
+		fmt.Sscanf(p, "%f", &price)
+	}
+
+	// 初次上传特征：卖家为admin且价格为0
+	return hasSeller && seller == "admin" && price == 0.0
+}
+
 // 从区块链读取交易数据 - 重命名以避免与information.go中的函数冲突
 func readTransactionFromBlockchainForStats() ([]map[string]interface{}, error) {
 	log.Println("从区块链读取交易数据...")
@@ -346,7 +364,7 @@ func readTransactionFromBlockchainForStats() ([]map[string]interface{}, error) {
 	return allTransactions, nil
 }
 
-// 从数据库获取交易趋势数据
+// 从数据库获取交易趋势数据，只统计实际购买的交易
 func getTrendData(db *sql.DB, timeRange, category string) (map[string]interface{}, error) {
 	startTime, endTime, err := parseTimeRange(timeRange)
 	if err != nil {
@@ -395,6 +413,11 @@ func getTrendData(db *sql.DB, timeRange, category string) (map[string]interface{
 
 	// 处理每个交易
 	for _, transaction := range allTransactions {
+		// 过滤初次上传记录，只计算实际购买记录
+		if isInitialUpload(transaction) {
+			continue
+		}
+
 		// 获取交易时间
 		transTime, ok := transaction["Transtime"].(string)
 		if !ok {
@@ -570,6 +593,11 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 	if err == nil {
 		// 按日期统计交易用户
 		for _, tx := range allTransactions {
+			// 跳过初次上传记录，只统计实际购买交易
+			if isInitialUpload(tx) {
+				continue
+			}
+
 			transTime, ok := tx["Transtime"].(string)
 			if !ok {
 				continue
@@ -905,6 +933,11 @@ func getSimplifiedActivityData(db *sql.DB, timeRange string, c *app.RequestConte
 	allTransactions, _ := readTransactionFromBlockchainForStats()
 	if allTransactions != nil {
 		for _, tx := range allTransactions {
+			// 跳过初次上传记录，只统计实际购买交易
+			if isInitialUpload(tx) {
+				continue
+			}
+
 			transTime, ok := tx["Transtime"].(string)
 			if !ok {
 				continue
@@ -991,10 +1024,18 @@ func GetStatisticsSummaryAPI(ctx context.Context, c *app.RequestContext) {
 	var totalValue float64
 
 	if err == nil {
-		transactionCount = len(allTransactions)
+		// 过滤掉初次上传记录，只统计实际购买记录
+		var actualTransactions []map[string]interface{}
+		for _, tx := range allTransactions {
+			if !isInitialUpload(tx) {
+				actualTransactions = append(actualTransactions, tx)
+			}
+		}
+
+		transactionCount = len(actualTransactions)
 
 		// 计算总交易金额
-		for _, tx := range allTransactions {
+		for _, tx := range actualTransactions {
 			var price float64
 			switch p := tx["Price"].(type) {
 			case float64:
