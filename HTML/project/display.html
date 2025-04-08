@@ -821,23 +821,27 @@
         /* 自定义消息弹窗样式 */
         .custom-alert {
             position: fixed;
-            top: 50%;    
-            left: 50%;   
-            transform: translate(-50%, -50%);   
-            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(24, 35, 56, 0.95);
+            /* 半透明深蓝紫底色 */
             color: #f1f1f1;
             padding: 15px 20px;
             border-radius: 20px;
             /* box-shadow: 0 5px 10px rgba(110, 64, 255, 0.3), 
                         0 0 0 1px rgba(110, 64, 255, 0.2);  */
-            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            display: inline-flex;
+            /* inline-flex 使其宽度随内容自适应 */
             align-items: center;
             gap: 15px;
             z-index: 9999;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            max-width: 90vw;                 /* 避免内容超出屏幕 */
-            white-space: nowrap;              /* 希望不换行 */
+            max-width: 90vw;
+            /* 避免内容超出屏幕 */
+            white-space: nowrap;
+            /* 希望不换行 */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(110, 64, 255, 0.3);
         }
@@ -855,27 +859,34 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            background: transparent !important; /* 强制透明 */
+            background: transparent !important;
+            /* 强制透明 */
             box-shadow: none !important;
             border: none !important;
         }
 
         .custom-alert.success .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.error .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.success {
-            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+            border: 2px solid rgba(11, 220, 171, 0.7);
+            /* 成功：淡绿色边框 */
         }
 
         .custom-alert.error {
-            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+            border: 2px solid rgba(255, 85, 122, 0.7);
+            /* 失败：淡红色边框 */
         }
 
         /* #alertIcon {
@@ -885,21 +896,22 @@
         } */
 
         .fa-check-circle {
-            font-size: 1.8rem !important; /* 与spinner和times-circle保持一致 */
+            font-size: 1.8rem !important;
+            /* 与spinner和times-circle保持一致 */
             color: #0bdcab;
         }
 
         /* 改为只对 fa-spinner 应用旋转动画 */
         .fa-spinner {
             animation: spin 2s linear infinite;
-            font-size: 1.8rem;  
-            color: #0bdcab; 
+            font-size: 1.8rem;
+            color: #0bdcab;
         }
 
         /* 确保错误图标不会旋转 */
         .fa-times-circle {
             animation: none !important;
-            font-size: 1.8rem; 
+            font-size: 1.8rem;
         }
 
         #alertMessage {
@@ -907,35 +919,51 @@
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
+
         .custom-alert.success #alertIcon {
             color: #0bdcab;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         .custom-alert.error #alertIcon {
             color: #ff557a;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         #alertMessage {
             font-weight: 500;
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            margin: 1px 0;  /* 上下边距改为8px，左右为0 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            margin: 1px 0;
+            /* 上下边距改为8px，左右为0 */
         }
 
         /* 旋转动画 */
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 入场动画 */
         @keyframes alertIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .custom-alert.show {
             animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
@@ -999,12 +1027,10 @@
     </div>
 
     <script>
-        // 初始化Lucide图标
-        // lucide.createIcons();
 
         let currentPage = 1;
         let totalPages = 1;
-        const pageSize = 10;
+        const pageSize = 12;
         let token;
         const lazyLoadObserver = new IntersectionObserver(handleLazyLoad, { threshold: 0.2 });
 
@@ -1236,7 +1262,7 @@
             };
             document.getElementById('go-page').onclick = () => {
                 const pageInput = document.getElementById('page-number');
-                let page = parseInt(pageInput.value, 10);
+                let page = parseInt(pageInput.value, 12);
                 if (isNaN(page) || page < 1 || page > totalPages) {
                     showCustomAlert('请输入有效的页码范围 1-' + totalPages, 'error');
                     pageInput.value = currentPage;

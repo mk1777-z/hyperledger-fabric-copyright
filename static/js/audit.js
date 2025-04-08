@@ -1,3 +1,146 @@
+// Modal类 - 修复滚动问题
+class Modal {
+    constructor(element) {
+        this.element = element;
+        this.isVisible = false;
+    }
+
+    show() {
+        this.element.classList.add('show');
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+        this.isVisible = true;
+    }
+
+    hide() {
+        this.element.classList.remove('show');
+        document.body.style.overflow = ''; // 恢复滚动
+        this.isVisible = false;
+    }
+
+    toggle() {
+        if (this.isVisible) {
+            this.hide();
+        } else {
+            this.show();
+        }
+    }
+
+    static getInstance(element) {
+        return new Modal(element);
+    }
+}
+
+// TabManager类 - 修改为使用nav-item类
+class TabManager {
+    constructor() {
+        this.initTabs();
+    }
+
+    initTabs() {
+        const tabs = document.querySelectorAll('[data-toggle="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.activateTab(tab);
+            });
+        });
+    }
+
+    activateTab(tabElement) {
+        const targetId = tabElement.getAttribute('href');
+
+        // 移除所有活动标签
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // 激活当前标签
+        document.querySelector(targetId).classList.add('active');
+        tabElement.classList.add('active');
+    }
+}
+
+// 设置响应式导航栏
+function setupMobileNav() {
+    const toggler = document.getElementById('navbarToggler');
+    const collapse = document.getElementById('navbarNav');
+
+    if (toggler && collapse) {
+        toggler.addEventListener('click', () => {
+            collapse.classList.toggle('show');
+        });
+    }
+}
+
+// 初始化模态框事件监听
+function initModalEvents() {
+    // 为所有关闭按钮添加事件
+    document.querySelectorAll('.modal-close').forEach(button => {
+        const modalId = button.closest('.modal').id;
+        button.addEventListener('click', () => {
+            document.getElementById(modalId).classList.remove('show');
+        });
+    });
+
+    // 点击模态框背景关闭
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (event) => {
+            if (event.target === backdrop) {
+                const modal = backdrop.closest('.modal');
+                modal.classList.remove('show');
+            }
+        });
+    });
+}
+
+// 显示自定义提示框
+function showCustomAlert(message, type = 'success', duration = 2000) {
+    const alert = document.createElement('div');
+    alert.className = `custom-alert ${type}`;
+    alert.innerHTML = `
+        <div class="alert-icon-wrapper">
+            <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>
+        </div>
+        <div>${message}</div>
+    `;
+    document.body.appendChild(alert);
+
+    setTimeout(() => alert.classList.add('show'), 10);
+
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => document.body.removeChild(alert), 300);
+    }, duration);
+}
+
+// 修复关闭模态框时恢复滚动问题
+function fixScrollAfterModalClose() {
+    // 确保模态框关闭后恢复正常滚动
+    document.querySelectorAll('.modal').forEach(modal => {
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.attributeName === 'class' &&
+                    !modal.classList.contains('show')) {
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        observer.observe(modal, { attributes: true });
+    });
+}
+
+// 缓存数据，避免重复请求
+let cachedData = {
+    pendingItems: [],
+    approvedItems: [],
+    rejectedItems: []
+};
+
+// 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function () {
     // 检查登录状态
     const token = localStorage.getItem('token');
@@ -14,26 +157,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // 显示用户信息
     document.getElementById('userInfo').textContent = username;
 
-    // 初始化Bootstrap标签页
-    const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function (event) {
-            event.preventDefault();
-            const targetId = this.getAttribute('href');
+    // 初始化标签页管理
+    new TabManager();
 
-            // 移除所有活动标签
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('show', 'active');
-            });
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
+    // 设置移动导航
+    setupMobileNav();
 
-            // 激活当前标签
-            document.querySelector(targetId).classList.add('show', 'active');
-            this.classList.add('active');
-        });
-    });
+    // 初始化模态框事件
+    initModalEvents();
+
+    // 修复滚动问题
+    fixScrollAfterModalClose();
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function () {
@@ -44,7 +178,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // 刷新数据按钮
-    document.getElementById('refreshBtn').addEventListener('click', loadAllItems);
+    document.getElementById('refreshBtn').addEventListener('click', function () {
+        showCustomAlert('正在刷新数据...', 'success', 1000);
+        loadAllItems();
+    });
 
     // 加载所有版权项目
     loadAllItems();
@@ -60,13 +197,36 @@ document.addEventListener('DOMContentLoaded', function () {
     rejectBtn.addEventListener('click', function () {
         submitAudit('REJECT');
     });
+
+    // 关闭审核模态框的事件
+    document.getElementById('closeAuditModal').addEventListener('click', function () {
+        const modalElement = document.getElementById('auditModal');
+        const modal = Modal.getInstance(modalElement);
+        modal.hide();
+    });
 });
+
+// 修改排序函数，默认按时间降序排序（最新的在最上面）
+function sortAndRenderItems(status) {
+    if (cachedData[`${status}Items`] && cachedData[`${status}Items`].length > 0) {
+        const sortedItems = [...cachedData[`${status}Items`]].sort((a, b) => {
+            // 获取审核时间
+            const timeA = a.auditTime || 0;
+            const timeB = b.auditTime || 0;
+
+            // 默认降序排列（最新的在前）
+            return timeB - timeA;
+        });
+
+        renderItems(`${status}Items`, sortedItems, status);
+    }
+}
 
 // 加载所有版权项目
 function loadAllItems() {
     showLoading();
 
-    fetch('/api/audit/categorized-items', {  // 使用新的分类API
+    fetch('/api/audit/categorized-items', {  // 使用分类API
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -79,23 +239,79 @@ function loadAllItems() {
         .then(data => {
             console.log('获取到分类项目数据:', data);
 
-            // 直接从响应中获取已分类的项目数据
-            renderItems('pendingItems', data.pendingItems || [], 'pending');
-            renderItems('approvedItems', data.approvedItems || [], 'approved');
-            renderItems('rejectedItems', data.rejectedItems || [], 'rejected');
+            // 缓存数据
+            cachedData.pendingItems = data.pendingItems || [];
+            cachedData.approvedItems = data.approvedItems || [];
+            cachedData.rejectedItems = data.rejectedItems || [];
+
+            // 渲染待审核项目（无需排序）
+            renderItems('pendingItems', cachedData.pendingItems, 'pending');
+
+            // 加载审核时间戳后再渲染其他项目
+            loadAuditTimestamps('approved');
+            loadAuditTimestamps('rejected');
 
             // 检查是否有内容
-            toggleEmptyState('pendingEmpty', !data.pendingItems || data.pendingItems.length === 0);
-            toggleEmptyState('approvedEmpty', !data.approvedItems || data.approvedItems.length === 0);
-            toggleEmptyState('rejectedEmpty', !data.rejectedItems || data.rejectedItems.length === 0);
+            toggleEmptyState('pendingEmpty', cachedData.pendingItems.length === 0);
+            toggleEmptyState('approvedEmpty', cachedData.approvedItems.length === 0);
+            toggleEmptyState('rejectedEmpty', cachedData.rejectedItems.length === 0);
         })
         .catch(error => {
             console.error('获取项目列表错误：', error);
-            alert('获取版权项目失败：' + error.message);
+            showCustomAlert('获取版权项目失败：' + error.message, 'error');
         })
         .finally(() => {
             hideLoading();
         });
+}
+
+// 加载指定类型项目的审核时间戳
+function loadAuditTimestamps(status) {
+    const items = cachedData[`${status}Items`];
+    if (!items || items.length === 0) return;
+
+    // 创建一个计数器跟踪加载完成的项目数
+    let loadedCount = 0;
+    const totalItems = items.length;
+
+    items.forEach(item => {
+        if (!item.firstTransID) {
+            loadedCount++;
+            return;
+        }
+
+        // 获取审核历史记录
+        fetch(`/api/audit/history?tradeId=${item.firstTransID}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 找到最新的审核记录
+                if (data.records && data.records.length > 0) {
+                    // 记录中的时间戳通常是秒，转换为毫秒
+                    const latestRecord = data.records[0]; // 假设记录按时间降序排列
+                    item.auditTime = latestRecord.timestamp * 1000; // 转为毫秒
+                    item.auditDecision = latestRecord.decision;
+                    item.auditComment = latestRecord.comment;
+                }
+            })
+            .catch(error => {
+                console.error(`获取项目 ${item.id} 的审核历史失败:`, error);
+            })
+            .finally(() => {
+                loadedCount++;
+
+                // 当所有项目都加载完成后，应用排序并渲染
+                if (loadedCount === totalItems) {
+                    sortAndRenderItems(status);
+                }
+            });
+    });
+
+    // 如果没有项目需要加载，立即渲染
+    if (totalItems === 0) {
+        renderItems(`${status}Items`, [], status);
+    }
 }
 
 // 渲染项目列表 - 使用列表形式而非卡片
@@ -146,10 +362,10 @@ function renderItems(containerId, items, type) {
                 title="${item.firstTransID}">${item.firstTransID}</small></td>
             <td>
                 ${type === 'pending'
-                ? `<button class="btn btn-primary btn-sm audit-item" data-id="${item.id}" data-trans-id="${item.firstTransID}">审核</button>`
+                ? `<button class="btn btn-primary btn-sm audit-item" data-id="${item.id}" data-trans-id="${item.firstTransID}"><i class="fas fa-gavel"></i> 审核</button>`
                 : `<div class="btn-group">
-                    <button class="btn btn-info btn-sm view-details" data-id="${item.id}" data-trans-id="${item.firstTransID}">查看详情</button>
-                    <button class="btn btn-secondary btn-sm view-history" data-trans-id="${item.firstTransID}">审核历史</button>
+                    <button class="btn btn-info btn-sm view-details" data-id="${item.id}" data-trans-id="${item.firstTransID}"><i class="fas fa-info-circle"></i> 详情</button>
+                    <button class="btn btn-secondary btn-sm view-history" data-trans-id="${item.firstTransID}"><i class="fas fa-history"></i> 历史</button>
                    </div>`
             }
             </td>
@@ -220,7 +436,8 @@ function viewItemDetails(itemId, transId) {
                     imgElement.src = item.img;
                     imgElement.style.display = 'block';
                 } else {
-                    imgElement.style.display = 'none';
+                    imgElement.src = 'https://via.placeholder.com/200x120/283250/a0aec0?text=暂无图片';
+                    imgElement.style.display = 'block';
                 }
 
                 // 修改模态窗标题
@@ -231,16 +448,17 @@ function viewItemDetails(itemId, transId) {
                 document.getElementById('auditButtonsSection').style.display = 'none';
 
                 // 显示弹窗
-                const modal = new bootstrap.Modal(document.getElementById('auditModal'));
+                const modalElement = document.getElementById('auditModal');
+                const modal = Modal.getInstance(modalElement);
                 modal.show();
             } else {
-                alert('获取项目详情失败');
+                showCustomAlert('获取项目详情失败', 'error');
             }
         })
         .catch(error => {
             hideLoading();
             console.error('获取项目详情错误:', error);
-            alert('获取项目详情失败: ' + error.message);
+            showCustomAlert('获取项目详情失败: ' + error.message, 'error');
         });
 }
 
@@ -277,7 +495,8 @@ function showAuditModal(itemId, transId) {
                     imgElement.src = item.img;
                     imgElement.style.display = 'block';
                 } else {
-                    imgElement.style.display = 'none';
+                    imgElement.src = 'https://via.placeholder.com/200x120/283250/a0aec0?text=暂无图片';
+                    imgElement.style.display = 'block';
                 }
 
                 // 修改模态窗标题
@@ -292,16 +511,17 @@ function showAuditModal(itemId, transId) {
                 document.getElementById('auditButtonsSection').style.display = 'flex';
 
                 // 显示弹窗
-                const modal = new bootstrap.Modal(document.getElementById('auditModal'));
+                const modalElement = document.getElementById('auditModal');
+                const modal = Modal.getInstance(modalElement);
                 modal.show();
             } else {
-                alert('获取项目详情失败');
+                showCustomAlert('获取项目详情失败', 'error');
             }
         })
         .catch(error => {
             hideLoading();
             console.error('获取项目详情错误:', error);
-            alert('获取项目详情失败: ' + error.message);
+            showCustomAlert('获取项目详情失败: ' + error.message, 'error');
         });
 }
 
@@ -330,8 +550,8 @@ function showAuditHistory(transId) {
                         const recordDate = new Date(record.timestamp * 1000); // 转换为毫秒
                         // 修改为精确到秒的完整时间格式
                         const formattedDate = recordDate.toLocaleString('zh-CN');
-                        const badgeClass = record.decision === 'APPROVE' ? 'bg-success' : 'bg-danger';
                         const decision = record.decision === 'APPROVE' ? '通过' : '拒绝';
+                        const badgeClass = record.decision === 'APPROVE' ? 'approved' : 'rejected';
 
                         historyContent += `
                             <div class="list-group-item">
@@ -340,7 +560,7 @@ function showAuditHistory(transId) {
                                     <small>${formattedDate}</small>
                                 </div>
                                 <p class="mb-1">${record.comment || '无审核意见'}</p>
-                                <span class="badge ${badgeClass}">${decision}</span>
+                                <span class="status-badge ${badgeClass}">${decision}</span>
                             </div>
                         `;
                     });
@@ -348,46 +568,45 @@ function showAuditHistory(transId) {
 
                 historyContent += '</div>';
 
-                // 使用Bootstrap模态框显示审核历史
+                // 创建并显示历史记录模态框
                 const modalTitle = `交易 ${transId} 的审核历史`;
                 showHistoryModal(modalTitle, historyContent);
             } else {
-                alert('获取审核历史失败');
+                showCustomAlert('获取审核历史失败', 'error');
             }
         })
         .catch(error => {
             hideLoading();
             console.error('获取审核历史错误:', error);
-            alert('获取审核历史失败: ' + error.message);
+            showCustomAlert('获取审核历史失败: ' + error.message, 'error');
         });
 }
 
-// 显示审核历史模态框 - 修复Bootstrap模态框实例化问题
+// 显示审核历史模态框 - 修复滚动问题
 function showHistoryModal(title, content) {
     // 如果已存在模态框，先移除
     let existingModal = document.getElementById('historyModal');
     if (existingModal) {
-        const bsModal = bootstrap.Modal.getInstance(existingModal);
-        if (bsModal) {
-            bsModal.dispose();
-        }
         existingModal.remove();
     }
 
     // 创建模态框
     const modalHTML = `
-        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal" id="historyModal">
+            <div class="modal-backdrop"></div>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="historyModalLabel">${title}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="modal-close" id="closeHistoryModal">&times;</button>
                     </div>
                     <div class="modal-body">
                         ${content}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-secondary" id="closeHistoryBtn">
+                            <i class="fas fa-times"></i> 关闭
+                        </button>
                     </div>
                 </div>
             </div>
@@ -400,14 +619,38 @@ function showHistoryModal(title, content) {
     // 获取新创建的模态框元素
     const modalElement = document.getElementById('historyModal');
 
+    // 添加关闭事件 - 修复滚动问题
+    document.getElementById('closeHistoryModal').addEventListener('click', function () {
+        modalElement.classList.remove('show');
+        setTimeout(() => {
+            document.body.style.overflow = '';
+        }, 300);
+    });
+
+    document.getElementById('closeHistoryBtn').addEventListener('click', function () {
+        modalElement.classList.remove('show');
+        setTimeout(() => {
+            document.body.style.overflow = '';
+        }, 300);
+    });
+
+    // 点击背景关闭 - 修复滚动问题
+    modalElement.querySelector('.modal-backdrop').addEventListener('click', function (event) {
+        if (event.target === this) {
+            modalElement.classList.remove('show');
+            setTimeout(() => {
+                document.body.style.overflow = '';
+            }, 300);
+        }
+    });
+
     // 等待DOM更新后再显示模态框
     setTimeout(() => {
         try {
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
+            modalElement.classList.add('show');
         } catch (error) {
             console.error('显示模态框出错:', error);
-            alert('无法显示审核历史，请刷新页面重试');
+            showCustomAlert('无法显示审核历史，请刷新页面重试', 'error');
         }
     }, 50);
 }
@@ -416,29 +659,29 @@ function showHistoryModal(title, content) {
 function getStatusBadge(type) {
     switch (type) {
         case 'pending':
-            return '<span class="status-badge pending">待审核</span>';
+            return '<span class="status-badge pending"><i class="fas fa-clock"></i> 待审核</span>';
         case 'approved':
-            return '<span class="status-badge approved">已通过</span>';
+            return '<span class="status-badge approved"><i class="fas fa-check-circle"></i> 已通过</span>';
         case 'rejected':
-            return '<span class="status-badge rejected">未通过</span>';
+            return '<span class="status-badge rejected"><i class="fas fa-times-circle"></i> 未通过</span>';
         default:
             return '';
     }
 }
 
-// 提交审核决定
+// 提交审核决定 - 修复模态框关闭后的滚动问题
 function submitAudit(decision) {
     const tradeId = document.getElementById('modalItemId').value;
     const comment = document.getElementById('auditComment').value;
     const password = document.getElementById('regulatorPassword').value;
 
     if (!comment) {
-        alert('请输入审核意见');
+        showCustomAlert('请输入审核意见', 'error');
         return;
     }
 
     if (!password) {
-        alert('请输入监管者密码');
+        showCustomAlert('请输入监管者密码', 'error');
         return;
     }
 
@@ -448,7 +691,7 @@ function submitAudit(decision) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
             tradeId: tradeId,
@@ -461,20 +704,26 @@ function submitAudit(decision) {
         .then(data => {
             if (data.message === '审核成功') {
                 // 关闭弹窗
-                bootstrap.Modal.getInstance(document.getElementById('auditModal')).hide();
+                const modalElement = document.getElementById('auditModal');
+                modalElement.classList.remove('show');
 
-                // 重新加载数据
-                loadAllItems();
+                // 恢复滚动
+                document.body.style.overflow = '';
 
                 // 显示成功消息
-                alert(`版权审核${decision === 'APPROVE' ? '通过' : '拒绝'}成功！`);
+                showCustomAlert(`版权审核${decision === 'APPROVE' ? '通过' : '拒绝'}成功！`, 'success');
+
+                // 重新加载数据
+                setTimeout(() => {
+                    loadAllItems();
+                }, 500);
             } else {
-                alert('审核失败: ' + (data.message || '未知错误'));
+                showCustomAlert('审核失败: ' + (data.message || '未知错误'), 'error');
             }
         })
         .catch(error => {
             console.error('审核提交错误:', error);
-            alert('审核提交失败: ' + error.message);
+            showCustomAlert('审核提交失败: ' + error.message, 'error');
         })
         .finally(() => {
             hideLoading();
@@ -512,7 +761,7 @@ function showLoading() {
         spinner = document.createElement('div');
         spinner.className = 'spinner-overlay';
         spinner.innerHTML = `
-            <div class="spinner-border text-primary" role="status">
+            <div class="spinner" role="status">
                 <span class="visually-hidden">加载中...</span>
             </div>
         `;
@@ -529,3 +778,6 @@ function hideLoading() {
         spinner.style.display = 'none';
     }
 }
+
+// 导出Modal类，供全局使用
+window.Modal = Modal;

@@ -5,71 +5,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>版权审核管理系统</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/audit.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">版权审核管理系统</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#pending">待审核版权</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#approved">已通过版权</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#rejected">未通过版权</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <span class="navbar-text me-3" id="userInfo">监管者</span>
-                    <button class="btn btn-outline-light btn-sm" id="logoutBtn">退出</button>
-                </div>
-            </div>
+    <!-- 背景色块 -->
+    <div class="bg-gradient bg-amber"></div>
+    <div class="bg-gradient bg-primary"></div>
+
+    <!-- 导航条 - 简化为仅版权审核系统 -->
+    <nav class="navbar">
+        <!-- 品牌标识 -->
+        <div class="navbar-brand">区块链版权审核系统</div>
+
+        <!-- 标签页导航 - 使用与homepage一致的样式 -->
+        <div class="navbar-tabs">
+            <a class="nav-item active" data-toggle="tab" href="#pending">
+                <i class="fas fa-clock"></i> 待审核版权
+            </a>
+            <a class="nav-item" data-toggle="tab" href="#approved">
+                <i class="fas fa-check-circle"></i> 已通过版权
+            </a>
+            <a class="nav-item" data-toggle="tab" href="#rejected">
+                <i class="fas fa-times-circle"></i> 未通过版权
+            </a>
+        </div>
+
+        <!-- 用户导航 -->
+        <div class="user-nav">
+            <span class="welcome-text">欢迎，<span id="userInfo" class="username">监管者</span></span>
+            <a class="nav-link logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> 退出
+            </a>
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container">
         <div class="tab-content">
             <!-- 待审核版权 -->
-            <div class="tab-pane fade show active" id="pending">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="tab-pane active" id="pending">
+                <div class="header-actions">
                     <h3>待审核版权</h3>
-                    <button class="btn btn-success btn-sm" id="refreshBtn">
-                        <i class="bi bi-arrow-clockwise"></i> 刷新数据
+                    <button class="refresh-btn" id="refreshBtn">
+                        <i class="fas fa-sync"></i> 刷新数据
                     </button>
                 </div>
-                <div class="row" id="pendingItems"></div>
-                <div class="text-center py-5 d-none" id="pendingEmpty">
-                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                <div id="pendingItems"></div>
+                <div class="empty-state d-none" id="pendingEmpty">
+                    <i class="fas fa-inbox"></i>
                     <p class="mt-2">暂无待审核的版权</p>
                 </div>
             </div>
 
             <!-- 已通过版权 -->
-            <div class="tab-pane fade" id="approved">
-                <h3 class="mb-3">已通过版权</h3>
-                <div class="row" id="approvedItems"></div>
-                <div class="text-center py-5 d-none" id="approvedEmpty">
-                    <i class="bi bi-check-circle fs-1 text-muted"></i>
+            <div class="tab-pane" id="approved">
+                <div class="header-actions">
+                    <h3>已通过版权</h3>
+                </div>
+                <div id="approvedItems"></div>
+                <div class="empty-state d-none" id="approvedEmpty">
+                    <i class="fas fa-check"></i>
                     <p class="mt-2">暂无已通过的版权</p>
                 </div>
             </div>
 
             <!-- 未通过版权 -->
-            <div class="tab-pane fade" id="rejected">
-                <h3 class="mb-3">未通过版权</h3>
-                <div class="row" id="rejectedItems"></div>
-                <div class="text-center py-5 d-none" id="rejectedEmpty">
-                    <i class="bi bi-x-circle fs-1 text-muted"></i>
+            <div class="tab-pane" id="rejected">
+                <div class="header-actions">
+                    <h3>未通过版权</h3>
+                </div>
+                <div id="rejectedItems"></div>
+                <div class="empty-state d-none" id="rejectedEmpty">
+                    <i class="fas fa-times"></i>
                     <p class="mt-2">暂无未通过的版权</p>
                 </div>
             </div>
@@ -77,19 +86,20 @@
     </div>
 
     <!-- 审核弹窗 -->
-    <div class="modal fade" id="auditModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+    <div class="modal" id="auditModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="auditModalTitle">版权审核</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="modal-close" id="closeAuditModal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-4">
-                            <img id="modalItemImage" class="img-fluid rounded" src="" alt="版权图像">
+                        <div class="col-4">
+                            <img id="modalItemImage" class="img-fluid" src="" alt="版权图像">
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-8">
                             <h4 id="modalItemName"></h4>
                             <p class="text-muted" id="modalItemDesc"></p>
                             <div class="mb-3">
@@ -129,15 +139,17 @@
                     </div>
                 </div>
                 <!-- 审核按钮区域 - 只在审核时显示 -->
-                <div class="modal-footer justify-content-between" id="auditButtonsSection">
-                    <button type="button" class="btn btn-danger" id="rejectBtn">拒绝</button>
-                    <button type="button" class="btn btn-success" id="approveBtn">批准</button>
+                <div class="modal-footer" id="auditButtonsSection">
+                    <button type="button" class="btn btn-danger" id="rejectBtn"><i class="fas fa-times"></i> 拒绝</button>
+                    <button type="button" class="btn btn-success" id="approveBtn"><i class="fas fa-check"></i>
+                        批准</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 历史记录弹窗将由JS动态创建 -->
+
     <script src="/static/js/audit.js"></script>
 </body>
 
