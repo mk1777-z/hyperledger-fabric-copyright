@@ -617,6 +617,11 @@ func getActivityData(db *sql.DB, timeRange string) (map[string]interface{}, erro
 			// 获取日期格式
 			dateKey := txTime.Format("01-02")
 
+			// 确保该日期的map已初始化
+			if _, exists := tradingUsersMap[dateKey]; !exists {
+				tradingUsersMap[dateKey] = make(map[string]bool)
+			}
+
 			// 记录买家和卖家作为交易用户
 			if buyer, ok := tx["Purchaser"].(string); ok {
 				tradingUsersMap[dateKey][buyer] = true
