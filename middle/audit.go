@@ -96,6 +96,45 @@ func submitAuditTransaction(contract *client.Contract, tradeID string, decision 
 	}
 
 	log.Printf("审核记录提交成功")
+
+	// 当审核决定是APPROVE时，更新数据库中对应项目的decision字段
+	if decision == "APPROVE" {
+		// 从基础链获取交易信息，找到对应项目
+		tradeInfo, err := getTradeInfoFromBasic(tradeID)
+		if err != nil {
+			log.Printf("获取交易信息失败，无法更新数据库: %v", err)
+			return nil // 不影响主流程，所以返回nil
+		}
+
+		// 从交易信息中获取项目名称
+		itemName, ok := tradeInfo["Name"].(string)
+		if !ok || itemName == "" {
+			log.Printf("交易信息中未找到有效的项目名称，无法更新数据库")
+			return nil
+		}
+
+		// 连接数据库
+		dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s",
+			conf.Con.Mysql.DbUser, conf.Con.Mysql.DbPassword, conf.Con.Mysql.DbName)
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			log.Printf("数据库连接失败，无法更新项目状态: %v", err)
+			return nil
+		}
+		defer db.Close()
+
+		// 更新项目的decision字段为APPROVE
+		updateQuery := "UPDATE item SET decision = 'APPROVE' WHERE name = ?"
+		result, err := db.Exec(updateQuery, itemName)
+		if err != nil {
+			log.Printf("更新项目状态失败: %v", err)
+			return nil
+		}
+
+		rowsAffected, _ := result.RowsAffected()
+		log.Printf("已将项目 %s 的decision字段更新为APPROVE，影响行数: %d", itemName, rowsAffected)
+	}
+
 	return nil
 }
 
