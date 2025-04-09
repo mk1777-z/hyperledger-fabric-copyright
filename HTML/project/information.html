@@ -571,7 +571,7 @@
             flex-shrink: 0;
             background: transparent !important; /* 强制透明 */
             box-shadow: none !important;
-            border: none !important;
+            border: none !重要;
         }
 
         .custom-alert.success .alert-icon-wrapper {
@@ -650,8 +650,250 @@
 
         .topup-size-modal {
             width: 340px !important;  /* 调整为充值弹窗专用宽度 */
-            max-height: 70vh !important; /* 如需调整高度 */
+            max-height: 70vh !重要; /* 如需调整高度 */
         }
+
+        /* 区块链交易进度样式 */
+    .blockchain-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(3, 2, 10, 0.9);
+        z-index: 2000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .blockchain-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .blockchain-progress-container {
+        background: rgba(30, 40, 70, 0.6);
+        border: 1px solid rgba(110, 64, 255, 0.3);
+        border-radius: 20px;
+        padding: 30px;
+        width: 80%;
+        max-width: 600px;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.2),
+            0 0 20px rgba(110, 64, 255, 0.2);
+    }
+
+    .blockchain-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .blockchain-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 5px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .blockchain-subtitle {
+        font-size: 14px;
+        color: var(--secondary-text);
+    }
+
+    .blockchain-animation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 30px 0;
+        height: 60px;
+        position: relative;
+    }
+
+    .node {
+        width: 20px;
+        height: 20px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px rgba(110, 64, 255, 0.7);
+    }
+
+    .node.active {
+        background: #0bdcab;
+        transform: scale(1.2);
+        box-shadow: 0 0 15px rgba(11, 220, 171, 0.8);
+    }
+
+    .node.pulse {
+        animation: node-pulse 2s infinite;
+    }
+
+    .connection {
+        height: 3px;
+        background: rgba(110, 64, 255, 0.3);
+        flex-grow: 1;
+        margin: 0 5px;
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .connection::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, #0bdcab, transparent);
+        animation: data-flow 3s infinite;
+        opacity: 0;
+    }
+
+    .connection.active::after {
+        opacity: 1;
+    }
+
+    .progress-container {
+        margin: 25px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .progress-bar {
+        flex-grow: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-right: 15px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--primary-gradient);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-percentage {
+        font-size: 16px;
+        font-weight: 500;
+        color: #fff;
+        width: 50px;
+        text-align: right;
+    }
+
+    .step-container {
+        text-align: center;
+        margin: 20px 0;
+        min-height: 50px;
+    }
+
+    .current-step {
+        font-size: 18px;
+        font-weight: 500;
+        color: #fff;
+        margin-bottom: 5px;
+    }
+
+    .step-details {
+        font-size: 14px;
+        color: var(--secondary-text);
+    }
+
+    .transaction-details {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .detail-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-label {
+        color: var(--secondary-text);
+        font-size: 14px;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-size: 14px;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+    }
+
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        background: #ffaa00;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+        animation: status-blink 1.5s infinite;
+    }
+
+    @keyframes node-pulse {
+        0% { transform: scale(1); box-shadow: 0 0 10px rgba(110, 64, 255, 0.7); }
+        50% { transform: scale(1.2); box-shadow: 0 0 15px rgba(110, 64, 255, 0.9); }
+        100% { transform: scale(1); box-shadow: 0 0 10px rgba(110, 64, 255, 0.7); }
+    }
+
+    @keyframes data-flow {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    @keyframes status-blink {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
+
+    .hashAnimation {
+        display: inline-block;
+        font-family: monospace;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hashAnimation::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(11, 220, 171, 0.8) 50%, 
+            transparent 100%);
+        animation: hash-scan 2s infinite;
+    }
+
+    @keyframes hash-scan {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
     </style>
 </head>
 
@@ -755,6 +997,55 @@
             <div class="modal-buttons">
                 <button id="confirm-button" class="layui-btn">确认</button>
                 <button id="cancel-button" class="layui-btn">取消</button>
+            </div>
+        </div>
+
+        <!-- 区块链交易进度条 -->
+        <div id="blockchain-progress-overlay" class="blockchain-overlay">
+            <div class="blockchain-progress-container">
+                <div class="blockchain-header">
+                    <div class="blockchain-title">区块链交易进行中</div>
+                    <div class="blockchain-subtitle">您的版权交易正在区块链网络中处理</div>
+                </div>
+                
+                <div class="blockchain-animation">
+                    <div class="node node-1 pulse"></div>
+                    <div class="connection connection-1-2"></div>
+                    <div class="node node-2"></div>
+                    <div class="connection connection-2-3"></div>
+                    <div class="node node-3"></div>
+                    <div class="connection connection-3-4"></div>
+                    <div class="node node-4"></div>
+                    <div class="connection connection-4-5"></div>
+                    <div class="node node-5"></div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-percentage">0%</div>
+                </div>
+                
+                <div class="step-container">
+                    <div class="current-step">初始化交易...</div>
+                    <div class="step-details">正在准备交易数据</div>
+                </div>
+                
+                <div class="transaction-details">
+                    <div class="detail-row">
+                        <div class="detail-label">交易ID:</div>
+                        <div class="detail-value" id="tx-hash">生成中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">区块高度:</div>
+                        <div class="detail-value" id="block-height">等待中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">网络状态:</div>
+                        <div class="detail-value" id="network-status"><span class="status-indicator"></span>处理中</div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -1183,12 +1474,22 @@
         async function handleConfirmButtonClick() {
             modalOverlay.style.display = 'none';
             contractModal.style.display = 'none';
+            
+            // 显示区块链进度条
+            const progressOverlay = document.getElementById('blockchain-progress-overlay');
+            progressOverlay.classList.add('active');
+            
+            // 模拟区块链处理过程
+            simulateBlockchainProcess();
+            
             try {
                 buyButton.disabled = true;
                 const token = localStorage.getItem('token');
                 const transactionData = {
                     name: currentItem.name
                 };
+                
+                // 在后台发送真实请求
                 const response = await fetch('/transaction', {
                     method: 'POST',
                     headers: {
@@ -1197,18 +1498,20 @@
                     },
                     body: JSON.stringify(transactionData)
                 });
+                
                 const result = await response.json();
+                
+                // 不论成功失败，都让模拟进度走完
                 if (response.ok) {
-                    showCustomAlert('购买成功！感谢您的支持！', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/display';
-                    }, 2000); // 2秒后跳转，和弹窗持续时间一致
+                    // 交易成功时会在模拟完成后跳转
+                    window.transactionSuccess = true;
                 } else {
-                    alert(`购买失败：${result.message || '未知错误'}`);
+                    // 保存错误信息，模拟完成后显示
+                    window.transactionError = result.message || '未知错误';
                 }
             } catch (error) {
                 console.error('购买失败', error);
-                alert('购买请求失败，请稍后重试。');
+                window.transactionError = '网络请求失败，请稍后重试';
             } finally {
                 buyButton.disabled = false;
             }
@@ -1280,6 +1583,193 @@
                 top: chatHistory.scrollHeight,
                 behavior: 'smooth'
             });
+        }
+
+        // 模拟区块链处理的函数
+        function simulateBlockchainProcess() {
+            const progressFill = document.querySelector('.progress-fill');
+            const progressPercentage = document.querySelector('.progress-percentage');
+            const currentStep = document.querySelector('.current-step');
+            const stepDetails = document.querySelector('.step-details');
+            const txHash = document.getElementById('tx-hash');
+            const blockHeight = document.getElementById('block-height');
+            const networkStatus = document.getElementById('network-status');
+            const progressOverlay = document.getElementById('blockchain-progress-overlay');
+            const nodes = document.querySelectorAll('.node');
+            const connections = document.querySelectorAll('.connection');
+            
+            // 生成随机交易哈希的函数
+            function generateRandomHash() {
+                const characters = '0123456789abcdef';
+                let hash = '0x';
+                for (let i = 0; i < 64; i++) {
+                    hash += characters.charAt(Math.floor(Math.random() * characters.length));
+                }
+                return hash;
+            }
+            
+            // 区块链处理步骤
+            const steps = [
+                {
+                    step: "初始化交易...", 
+                    detail: "正在准备交易数据",
+                    percentage: 5
+                },
+                {
+                    step: "验证用户余额...", 
+                    detail: "确认账户余额足够完成此次交易",
+                    percentage: 15,
+                    node: 1,
+                    connection: 0
+                },
+                {
+                    step: "生成交易哈希...", 
+                    detail: "使用SHA-256算法加密交易数据",
+                    percentage: 25,
+                    action: () => {
+                        // 生成随机交易哈希
+                        const hash = generateRandomHash();
+                        txHash.innerHTML = `<span class="hashAnimation">${hash}</span>`;
+                    }
+                },
+                {
+                    step: "创建交易请求...", 
+                    detail: "组装交易参数并签名",
+                    percentage: 35,
+                    node: 2,
+                    connection: 1
+                },
+                {
+                    step: "发送至Fabric网络...", 
+                    detail: "向区块链网络广播交易请求",
+                    percentage: 45
+                },
+                {
+                    step: "节点验证中...", 
+                    detail: "对等节点正在验证交易有效性",
+                    percentage: 60,
+                    node: 3,
+                    connection: 2
+                },
+                {
+                    step: "共识过程进行中...", 
+                    detail: "正在进行Raft共识以确保交易一致性",
+                    percentage: 75,
+                    action: () => {
+                        // 更新区块高度
+                        const height = Math.floor(Math.random() * 10000) + 50000;
+                        blockHeight.textContent = height.toString();
+                    }
+                },
+                {
+                    step: "区块打包中...", 
+                    detail: "将交易打包入新区块",
+                    percentage: 85,
+                    node: 4,
+                    connection: 3
+                },
+                {
+                    step: "更新状态数据库...", 
+                    detail: "更新链上版权所有权数据",
+                    percentage: 95
+                },
+                {
+                    step: "交易已确认", 
+                    detail: "版权所有权转移成功！",
+                    percentage: 100,
+                    node: 5,
+                    connection: 4,
+                    action: () => {
+                        networkStatus.innerHTML = '<span class="status-indicator" style="background: #0bdcab;"></span>已完成';
+                    }
+                }
+            ];
+            
+            let currentIndex = 0;
+            let isCompleted = false; // 添加状态标记，防止多次执行完成逻辑
+            
+            // 执行下一步
+            function executeNextStep() {
+                // 若已经完成或弹窗已关闭，则不再继续
+                if (isCompleted || !document.body.contains(progressOverlay)) {
+                    return;
+                }
+                
+                if (currentIndex >= steps.length) {
+                    // 防止重复执行完成步骤
+                    if (isCompleted) return;
+                    isCompleted = true;
+                    
+                    // 全部步骤完成
+                    setTimeout(() => {
+                        if (progressOverlay && document.body.contains(progressOverlay)) {
+                            progressOverlay.classList.remove('active');
+                            
+                            // 在移除active类后稍等片刻，确保过渡动画完成
+                            setTimeout(() => {
+                                if (window.transactionError) {
+                                    showCustomAlert(`购买失败：${window.transactionError}`, 'error');
+                                    window.transactionError = null;
+                                } else {
+                                    showCustomAlert('购买成功！感谢您的支持！', 'success');
+                                    setTimeout(() => {
+                                        window.location.href = '/display';
+                                    }, 2000);
+                                }
+                            }, 500);
+                        }
+                    }, 1000);
+                    return;
+                }
+                
+                const step = steps[currentIndex];
+                
+                // 更新进度条
+                if (progressFill) progressFill.style.width = `${step.percentage}%`;
+                if (progressPercentage) progressPercentage.textContent = `${step.percentage}%`;
+                
+                // 更新步骤文本
+                if (currentStep) currentStep.textContent = step.step;
+                if (stepDetails) stepDetails.textContent = step.detail;
+                
+                // 更新节点和连接线状态，添加安全检查
+                if (step.node !== undefined && step.node > 0 && step.node <= nodes.length) {
+                    nodes[step.node - 1].classList.add('active');
+                }
+                
+                if (step.connection !== undefined && step.connection >= 0 && step.connection < connections.length) {
+                    connections[step.connection].classList.add('active');
+                }
+                
+                // 执行特定动作
+                if (step.action) {
+                    try {
+                        step.action();
+                    } catch (err) {
+                        console.error('执行动作时发生错误:', err);
+                    }
+                }
+                
+                // 计算下一步延迟（模拟不同步骤所需时间不同）
+                const baseDelay = 800;
+                let stepDelay;
+                
+                // 某些步骤花费更长时间
+                if (step.step.includes("共识") || step.step.includes("验证")) {
+                    stepDelay = baseDelay * 1.5;
+                } else if (step.step.includes("打包") || step.step.includes("更新状态")) {
+                    stepDelay = baseDelay * 1.2;
+                } else {
+                    stepDelay = baseDelay;
+                }
+                
+                // 进入下一步
+                currentIndex++;
+                setTimeout(executeNextStep, stepDelay);
+            }
+            
+            // 开始执行第一步
+            executeNextStep();
         }
     </script>
 
