@@ -58,20 +58,12 @@
     <style>
         /* CSS 变量定义 */
         :root {
-            --primary-color: #00796b;
-            --box-shadow-card: 0 8px 16px rgba(0, 0, 0, 0.1);
-            --border-radius-card: 15px;
-            --border-radius-button: 20px;
-
             --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
             --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
-            --dark-bg-left: #03020A;
-            /* 极暗的紫黑色 */
-            --dark-bg-right: #0A0818;
-            /* 极暗的蓝紫色 */
-            --card-bg: rgba(30, 40, 70, 0.9);
-            /* 更不透明，移除毛玻璃效果 */
-            --card-border: rgba(80, 100, 240, 0.3);
+            --dark-bg-left: #03020A; /* 极暗的紫黑色 */
+            --dark-bg-right: #0A0818; /* 极暗的蓝紫色 */
+            --card-bg: rgba(255, 255, 255, 0.1); /* 透明白色背景 */
+            --card-border: rgba(255, 255, 255, 0.15);
             --card-glow: rgba(110, 64, 255, 0.2);
             --text-color: #f1f1f1;
             --secondary-text: #a0aec0;
@@ -92,7 +84,7 @@
             padding: 0;
         }
 
-        /* 背景光晕效果 - 移除点状图案 */
+        /* 背景光晕效果 */
         body::before {
             content: '';
             position: fixed;
@@ -132,93 +124,288 @@
             filter: blur(200px);
         }
 
+        /* 主内容区域 */
         main {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            min-height: 100vh;
+            padding: 40px 0;
+            box-sizing: border-box;
         }
 
+        /* 容器布局 */
         .container {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
             width: 90%;
             max-width: 1200px;
-            margin-top: 50px;
-            gap: 30px;
+            margin: 20px auto;
+            gap: 20px;
+            height: calc(100vh - 100px);
+            min-height: 600px;
         }
 
-        /* 公共卡片样式 */
+        /* 公共卡片样式 - 改为与display.html一致的磨砂效果，增加白色成分 */
         .card-container {
-            background: var(--card-background);
-            padding: 30px;
-            box-shadow: var(--box-shadow-card);
-            border-radius: var(--border-radius-card);
-        }
-
-        .item-info {
-            width: 48%;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+            background-color: rgba(40, 50, 80, 0.35);  /* 更亮一些 */
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(120, 75, 255, 0.25);
+            color: var(--text-color);
+        }
+
+        /* 统一为所有卡片添加悬浮效果和顶部彩条 */
+        .card-container:hover,
+        .transaction-history:hover,
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 卡片顶部光带 */
+        .card-container::before,
+        .transaction-history::before,
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            z-index: 1;
+        }
+
+        /* 版权信息卡片内部间距调整 */
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 增加元素间距 */
+        }
+
+        /* 商品详情区域样式调整 */
+        .item-details {
+            margin-bottom: 30px; /* 增加下方间距 */
+            background: rgba(255, 255, 255, 0.08); /* 稍微更亮 */
+            border-radius: 8px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .item-details strong {
+            font-size: 1.05rem; /* 统一字体大小 */
+            display: block;
+            margin-bottom: 15px; /* 增加与下方内容的间距 */
+        }
+
+        /* 价格和拥有者信息样式 */
+        .item-info p {
+            margin: 12px 0; /* 增加垂直间距 */
+            color: var(--text-color);
+            font-size: 1.05rem; /* 增大字体 */
+        }
+
+        .item-info strong {
+            font-weight: 600;
+            color: #0bdcab;
+            font-size: 1.1rem; /* 墛大字体 */
+        }
+
+        /* 调整交易历史和图表卡片 */
+        .transaction-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 墛加卡片间距 */
         }
 
         .transaction-history {
-            width: 48%;
-        }
-
-        .chat-container {
-            width: 48%;
-            background: var(--card-background);
-            padding: 20px;
-            box-shadow: var(--box-shadow-card);
-            border-radius: var(--border-radius-card);
+            flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            height: 500px;
-        }
-
-        .item-info h2 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .item-info img {
-            display: block;
-            margin: 20px auto;
-            max-width: 200px;
-            max-height: 200px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .purchase-button {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #buy-button {
+            background: rgba(40, 50, 80, 0.35); /* 匹配其他卡片 */
+            border-radius: 12px;
+            padding: 25px; /* 墛加内边距 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(120, 75, 255, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
 
-        .back-button {
-            margin-left: 20px;
+        .chart-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(40, 50, 80, 0.35); /* 匹配其他卡片 */
+            border-radius: 12px;
+            padding: 25px; /* 墛加内边距 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(120, 75, 255, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
+        /* 交易历史内容间距 */
         .timelineContainer {
-            padding-left: 30px;
-            margin-top: 20px;
+            margin-top: 15px; /* 墛加与标题的间距 */
+            padding-left: 20px;
+            flex: 1;
         }
 
-         /* 合同协议的框 */
+        /* 美化AI助手聊天界面 */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(20, 30, 50, 0.3); /* 较深但半透明的背景 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 64, 255, 0.2);
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(110, 64, 255, 0.4) rgba(255, 255, 255, 0.05);
+        }
+
+        /* 用户消息样式优化 */
+        .user-message {
+            text-align: right;
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 18px 18px 4px 18px;
+            align-self: flex-end;
+            max-width: 80%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            background: linear-gradient(135deg, #6e40ff, #8866ff);
+            color: white;
+            box-shadow: 0 2px 10px rgba(110, 64, 255, 0.2);
+            position: relative;
+            animation: message-in-right 0.3s ease;
+        }
+
+        /* AI消息样式优化 */
+        .bot-message {
+            text-align: left;
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 18px 18px 18px 4px;
+            align-self: flex-start;
+            max-width: 80%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            background: linear-gradient(135deg, #0bdcab, #06a582);
+            color: white;
+            box-shadow: 0 2px 10px rgba(11, 220, 171, 0.2);
+            position: relative;
+            animation: message-in-left 0.3s ease;
+        }
+
+        .bot-message .markdown-body {
+            padding: 0;
+            background-color: transparent;
+            color: white; /* 确保文字在渐变背景上可见 */
+            font-size: 0.95rem; /* 适当调整大小 */
+        }
+
+        @keyframes message-in-right {
+            from { transform: translateX(10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes message-in-left {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 按钮样式统一 */
+        .layui-btn, .send-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .layui-btn:hover, .send-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* 购买按钮区域 */
+        .purchase-button {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        /* 聊天输入区域 */
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #333;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 109, 119, 0.2);
+        }
+
+        /* 自适应样式 */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .card-container {
+                width: 100%;
+                margin-bottom: 20px;
+                height: auto;
+            }
+
+            .chat-history {
+                height: 300px;
+            }
+        }
+
+        /* 合同协议的框 */
         #contract-modal {
             position: fixed;
             top: 50%;
@@ -227,21 +414,17 @@
             width: 90%;
             max-width:400px;
             max-height: 80vh;     /* 变矮：限制高度 */
-            padding: 15px;
-            background: var(--card-bg);
-
-            overflow-y: auto;     /* 允许内容滚动 */
-            scrollbar-width: 12px; /* 加粗 */
-            scrollbar-color: rgba(30, 40, 70, 0.8) transparent;
-
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            background: rgba(15, 25, 40, 0.95); /* 几乎不透明的背景 */
+            color: var(--text-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border-radius: 15px;
             display: none;
             z-index: 1000;
             transition: opacity 0.3s, transform 0.3s;
-
-            border: 1px solid transparent; /* 预留边框位置 */
-            transition: all 0.3s ease; /* 添加过渡动画 */
+            border: 1px solid rgba(110, 64, 255, 0.3);
+            backdrop-filter: blur(15px); /* 强烈模糊效果 */
+            -webkit-backdrop-filter: blur(15px);
         }
 
         /* 鼠标悬停效果 */
@@ -277,7 +460,6 @@
             gap: 15px;
             margin-top: 20px;
         }
-        
 
         /* 合同协议滚动条的设置 */
         #contract-modal::-webkit-scrollbar {
@@ -300,7 +482,6 @@
         #contract-modal::-webkit-scrollbar-thumb:hover {
             background:rgba(30, 40, 70, 1);
         }   
-
 
         #contract-modal.active {
             display: block;
@@ -402,7 +583,6 @@
             transform: translateY(-2px);
         }
 
-
         /* 聊天框样式 */
         .chat-history {
             flex-grow: 1;
@@ -443,7 +623,7 @@
             display: flex;
             margin-top: 10px;
         }
-        
+
         /* AI助手的输入框 */
         .chat-input {
             flex-grow: 1;
@@ -660,13 +840,14 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(3, 2, 10, 0.9);
+        background: rgba(3, 2, 10, 0.85);
         z-index: 2000;
         display: none;
         justify-content: center;
         align-items: center;
         opacity: 0;
         transition: opacity 0.5s ease;
+        backdrop-filter: blur(8px);
     }
 
     .blockchain-overlay.active {
@@ -678,59 +859,91 @@
         background: rgba(30, 40, 70, 0.6);
         border: 1px solid rgba(110, 64, 255, 0.3);
         border-radius: 20px;
-        padding: 30px;
+        padding: 35px;
         width: 80%;
         max-width: 600px;
         backdrop-filter: blur(10px);
         box-shadow: 
-            0 10px 30px rgba(0, 0, 0, 0.2),
-            0 0 20px rgba(110, 64, 255, 0.2);
+            0 15px 35px rgba(0, 0, 0, 0.3),
+            0 0 25px rgba(110, 64, 255, 0.2),
+            inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 发光效果 */
+    .blockchain-progress-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+            circle at center,
+            rgba(110, 64, 255, 0.1) 0%,
+            transparent 60%
+        );
+        z-index: -1;
+        animation: pulse-glow 5s infinite alternate;
+    }
+    
+    @keyframes pulse-glow {
+        0% { opacity: 0.5; }
+        100% { opacity: 1; }
     }
 
     .blockchain-header {
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
 
     .blockchain-title {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 700;
         color: #fff;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
         background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 10px rgba(110, 64, 255, 0.5);
     }
 
     .blockchain-subtitle {
-        font-size: 14px;
+        font-size: 15px;
         color: var(--secondary-text);
+        opacity: 0.9;
     }
 
     .blockchain-animation {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 30px 0;
-        height: 60px;
+        margin: 35px 0;
+        height: 70px;
         position: relative;
     }
 
     .node {
-        width: 20px;
-        height: 20px;
-        background: var(--accent-color);
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #6e40ff, #8a66ff);
         border-radius: 50%;
         position: relative;
         z-index: 2;
         transition: all 0.3s ease;
-        box-shadow: 0 0 10px rgba(110, 64, 255, 0.7);
+        box-shadow: 
+            0 0 15px rgba(110, 64, 255, 0.7),
+            inset 0 1px 2px rgba(255, 255, 255, 0.5);
     }
 
     .node.active {
-        background: #0bdcab;
-        transform: scale(1.2);
-        box-shadow: 0 0 15px rgba(11, 220, 171, 0.8);
+        background: linear-gradient(135deg, #0bdcab, #0fefbc);
+        transform: scale(1.3);
+        box-shadow: 
+            0 0 20px rgba(11, 220, 171, 0.8),
+            0 0 40px rgba(11, 220, 171, 0.4),
+            inset 0 1px 2px rgba(255, 255, 255, 0.5);
     }
 
     .node.pulse {
@@ -738,13 +951,14 @@
     }
 
     .connection {
-        height: 3px;
-        background: rgba(110, 64, 255, 0.3);
+        height: 4px;
+        background: rgba(110, 64, 255, 0.2);
         flex-grow: 1;
         margin: 0 5px;
         position: relative;
         z-index: 1;
         overflow: hidden;
+        border-radius: 2px;
     }
 
     .connection::after {
@@ -754,7 +968,10 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, #0bdcab, transparent);
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(11, 220, 171, 0.8) 50%, 
+            transparent 100%);
         animation: data-flow 3s infinite;
         opacity: 0;
     }
@@ -764,65 +981,118 @@
     }
 
     .progress-container {
-        margin: 25px 0;
+        margin: 30px 0;
         display: flex;
         align-items: center;
     }
 
     .progress-bar {
         flex-grow: 1;
-        height: 8px;
+        height: 10px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+        border-radius: 6px;
         overflow: hidden;
         margin-right: 15px;
+        box-shadow: 
+            inset 0 1px 3px rgba(0, 0, 0, 0.2),
+            0 1px 1px rgba(255, 255, 255, 0.05);
     }
 
     .progress-fill {
         height: 100%;
         width: 0%;
-        background: var(--primary-gradient);
-        border-radius: 4px;
+        background: linear-gradient(90deg, #6e40ff, #0bdcab);
+        border-radius: 6px;
         transition: width 0.5s ease;
+        box-shadow: 0 0 10px rgba(110, 64, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        animation: progress-shimmer 1.5s infinite;
+    }
+    
+    @keyframes progress-shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
     }
 
     .progress-percentage {
         font-size: 16px;
-        font-weight: 500;
+        font-weight: 600;
         color: #fff;
-        width: 50px;
+        width: 60px;
         text-align: right;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .step-container {
         text-align: center;
-        margin: 20px 0;
-        min-height: 50px;
+        margin: 25px 0;
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .current-step {
-        font-size: 18px;
-        font-weight: 500;
+        font-size: 20px;
+        font-weight: 600;
         color: #fff;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        position: relative;
+        display: inline-block;
+    }
+    
+    .current-step::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 1px;
     }
 
     .step-details {
-        font-size: 14px;
+        font-size: 15px;
         color: var(--secondary-text);
+        max-width: 80%;
     }
 
     .transaction-details {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-        padding: 15px;
-        margin-top: 20px;
+        background: rgba(15, 20, 40, 0.4);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 25px;
+        box-shadow: 
+            inset 0 1px 1px rgba(0, 0, 0, 0.2),
+            0 1px 1px rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(110, 64, 255, 0.1);
     }
 
     .detail-row {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        align-items: center;
     }
 
     .detail-row:last-child {
@@ -832,30 +1102,32 @@
     .detail-label {
         color: var(--secondary-text);
         font-size: 14px;
+        font-weight: 500;
     }
 
     .detail-value {
         color: #fff;
         font-size: 14px;
-        font-family: monospace;
+        font-family: 'Roboto Mono', monospace;
         display: flex;
         align-items: center;
     }
 
     .status-indicator {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         background: #ffaa00;
         border-radius: 50%;
         display: inline-block;
-        margin-right: 6px;
+        margin-right: 10px;
         animation: status-blink 1.5s infinite;
+        box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
     }
 
     @keyframes node-pulse {
-        0% { transform: scale(1); box-shadow: 0 0 10px rgba(110, 64, 255, 0.7); }
-        50% { transform: scale(1.2); box-shadow: 0 0 15px rgba(110, 64, 255, 0.9); }
-        100% { transform: scale(1); box-shadow: 0 0 10px rgba(110, 64, 255, 0.7); }
+        0% { transform: scale(1); box-shadow: 0 0 15px rgba(110, 64, 255, 0.7); }
+        50% { transform: scale(1.3); box-shadow: 0 0 25px rgba(110, 64, 255, 0.9), 0 0 40px rgba(110, 64, 255, 0.4); }
+        100% { transform: scale(1); box-shadow: 0 0 15px rgba(110, 64, 255, 0.7); }
     }
 
     @keyframes data-flow {
@@ -864,16 +1136,19 @@
     }
 
     @keyframes status-blink {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
+        0% { opacity: 0.5; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.1); }
+        100% { opacity: 0.5; transform: scale(0.9); }
     }
 
     .hashAnimation {
         display: inline-block;
-        font-family: monospace;
+        font-family: 'Roboto Mono', monospace;
         position: relative;
         overflow: hidden;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        color: #0bdcab;
     }
 
     .hashAnimation::after {
@@ -894,6 +1169,44 @@
         0% { left: -100%; }
         100% { left: 100%; }
     }
+
+        /* 卡片标题样式统一 - 移除下方彩色小条 */
+        .card-container h3,
+        .transaction-history h3,
+        .chart-card h3 {
+            color: #f1f1f1;
+            margin-top: 0;
+            margin-bottom: 25px; /* 墛加与内容的间距 */
+            font-size: 20px; /* 统一标题字体大小 */
+            font-weight: 600;
+            /* 移除下面的padding和after伪元素，即彩色小条 */
+            padding-bottom: 0;
+        }
+
+        /* 删除所有标题下方的彩色小条 */
+        .card-container h3::after,
+        .transaction-history h3::after,
+        .chart-card h3::after {
+            display: none; /* 隐藏彩色小条 */
+        }
+
+        /* 商品名称样式 */
+        .item-info h2 {
+            font-size: 20px;
+            margin-bottom: 25px;
+            color: #f1f1f1;
+            font-weight: 600;
+        }
+
+        /* 墛加价格趋势标题与图表的间距 */
+        .chart-card h3 {
+            margin-bottom: 30px;
+        }
+
+        /* 墛加AI助手标题与聊天区域的间距 */
+        .chat-container h3 {
+            margin-bottom: 25px;
+        }
     </style>
 </head>
 
@@ -902,11 +1215,17 @@
     <div class="bg-gradient bg-amber"></div>
     <div class="bg-gradient bg-primary"></div>
 
+    <!-- 修改页面结构：商品详细描述、分离交易历史和图表 -->
     <main>
         <div class="container">
             <div class="item-info card-container">
                 <h2 id="item-name"></h2>
-                <p><strong>描述：</strong><span id="item-description"></span></p>
+                
+                <div class="item-details">
+                    <strong style="color: #0bdcab;">简要描述：</strong>
+                    <div id="item-description" class="item-description"></div>
+                </div>
+                
                 <p><strong>价格：</strong><span id="item-price"></span></p>
                 <p><strong>拥有者：</strong><span id="item-owner"></span></p>
                 <img id="item-image" src="" alt="项目信息图片" />
@@ -918,13 +1237,15 @@
                 </div>
             </div>
 
-            <div class="transaction-history card-container">
-                <h3>交易历史：</h3>
-                <ul class="timelineContainer" id="transaction-timeline"></ul>
-                <!-- 在交易历史下方添加图表容器 -->
-                <div class="chart-container" id="chart-container">
-                    <h3></h3>
-                    <div id="transactionChart" style="width: 100%; height: 300px;"></div>
+            <div class="transaction-container">
+                <div class="transaction-history">
+                    <h3>交易历史</h3>
+                    <ul class="timelineContainer" id="transaction-timeline"></ul>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>价格趋势</h3>
+                    <div id="transactionChart" style="width: 100%; height: 280px;"></div>
                 </div>
             </div>
 
@@ -1024,7 +1345,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
-                    <div class="progress-percentage">0%</div>
+                    <div class="progress-percentage">0%</</div>
                 </div>
                 
                 <div class="step-container">
@@ -1234,6 +1555,7 @@
             const timelineItem = document.createElement('li');
             timelineItem.className = 'layui-timeline-item';
             const uploadDate = transaction.Transtime.substring(0, 10);
+            
             timelineItem.innerHTML = `
                 <i class="layui-icon layui-timeline-axis">&#xe60b;</i>
                 <div class="layui-timeline-content layui-text">
@@ -1306,7 +1628,7 @@
                         color: 'rgba(255, 255, 255, 0.7)'
                     },
                     padding: [0, 20, 0, 10],  // 调整上下间距（[top, right, bottom, left]）
-                    itemGap: 16,              // 增加图例项之间的间距
+                    itemGap: 16,              // 墛加图例项之间的间距
                 },
                 grid: {
                     left: '5%',
@@ -1335,11 +1657,11 @@
                         position: 'left',
                         axisLine: {
                             lineStyle: {
-                                color: '#ff6b6b' // 与新注册用户折线颜色一致
+                                color: '#8a66ff' // 改为紫色，与整体风格一致
                             }
                         },
                         axisLabel: {
-                            color: '#ff6b6b'
+                            color: '#8a66ff'
                         },
                         splitLine: {
                             lineStyle: {
@@ -1379,16 +1701,16 @@
                         symbol: 'circle',
                         symbolSize: 8,
                         itemStyle: {
-                            color: '#ffd700', // 黄色数据点
+                            color: '#8a66ff', // 更改数据点颜色为紫色
                         },
                         lineStyle: {
                             width: 3,
-                            color: '#ff6b6b'
+                            color: '#8a66ff' // 更改线条颜色为紫色
                         },
                         areaStyle: {
                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
-                                { offset: 1, color: 'rgba(255, 107, 107, 0.05)' }
+                                { offset: 0, color: 'rgba(138, 102, 255, 0.3)' },
+                                { offset: 1, color: 'rgba(138, 102, 255, 0.05)' }
                             ])
                         }
                     },
@@ -1419,7 +1741,6 @@
             myChart.setOption(option);
             window.addEventListener('resize', () => myChart.resize());
         }
-
 
         function initializeSystemPrompt(item) {
             systemPrompt = `你是一个专业的项目介绍和答疑助手。以下是关于 **${item.name}** 版权项目的信息：**项目名称:** ${item.name}**描述:** ${item.description}**价格:** ${item.price} 元**拥有者:** ${item.owner}**交易历史:**${
@@ -1598,14 +1919,20 @@
             const nodes = document.querySelectorAll('.node');
             const connections = document.querySelectorAll('.connection');
             
-            // 生成随机交易哈希的函数
+            // 生成随机交易哈希的函数 - 改为16位
             function generateRandomHash() {
                 const characters = '0123456789abcdef';
                 let hash = '0x';
-                for (let i = 0; i < 64; i++) {
+                for (let i = 0; i < 16; i++) {
                     hash += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
                 return hash;
+            }
+            
+            // 修改区块高度 - 改为3位数
+            function updateBlockHeight() {
+                const height = Math.floor(Math.random() * 900) + 100; // 确保是3位数 (100-999)
+                blockHeight.textContent = height.toString();
             }
             
             // 区块链处理步骤
@@ -1656,9 +1983,8 @@
                     detail: "正在进行Raft共识以确保交易一致性",
                     percentage: 75,
                     action: () => {
-                        // 更新区块高度
-                        const height = Math.floor(Math.random() * 10000) + 50000;
-                        blockHeight.textContent = height.toString();
+                        // 更新为3位数区块高度
+                        updateBlockHeight();
                     }
                 },
                 {
