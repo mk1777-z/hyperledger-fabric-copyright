@@ -27,6 +27,7 @@ type Upload struct {
 	Price      float32 `json:"price"`
 	Img        string  `json:"img"`
 	On_sale    bool    `json:"on_sale"`
+	Category   string  `json:"category"`
 }
 
 type UpdateItem struct {

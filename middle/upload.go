@@ -76,18 +76,11 @@ func Upload(_ context.Context, c *app.RequestContext) {
 	}
 	defer db.Close()
 
-	// exists, _ := db.Query("SELECT * FROM item WHERE name = ? OR id = ? ", uploadInfo.Name, uploadInfo.ID)
-	// if exists.Next() {
-	// 	c.Status(http.StatusConflict)
-	// 	c.JSON(http.StatusConflict, utils.H{"message": "Item Already Exist"})
-	// 	return
-	// }
-
 	startTime := time.Now()                                     // 使用上传时间作为 start_time
 	assetID := fmt.Sprintf("asset%d", startTime.UnixNano()/1e6) // 生成唯一 ID
 
 	_, err = db.Exec(
-		"INSERT INTO item (id, name, owner, simple_dsc, dsc, price, img, on_sale, start_time, transID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO item (id, name, owner, simple_dsc, dsc, price, img, on_sale, start_time, transID, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		uploadInfo.ID,
 		uploadInfo.Name,
 		token.Claims.(*conf.UserClaims).Username,
@@ -98,6 +91,7 @@ func Upload(_ context.Context, c *app.RequestContext) {
 		uploadInfo.On_sale,
 		time.Now(),
 		assetID,
+		uploadInfo.Category,
 	)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)

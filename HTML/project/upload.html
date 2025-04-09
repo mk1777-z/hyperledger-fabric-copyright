@@ -53,7 +53,7 @@
                 setTimeout(() => document.body.removeChild(alert), 300);
             }, duration);
         }
-        
+
         function showLoadingMessage(message = '加载') {
             loadingAlert = document.createElement('div');
             loadingAlert.className = `custom-alert success`;
@@ -83,9 +83,12 @@
         :root {
             --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
             --secondary-gradient: linear-gradient(135deg, #6172ff, #ff557a);
-            --dark-bg-left: #03020A;  /* 极暗的紫黑色 */
-            --dark-bg-right: #0A0818;  /* 极暗的蓝紫色 */
-            --card-bg: rgba(30, 40, 70, 0.9); /* 更不透明，移除毛玻璃效果 */
+            --dark-bg-left: #03020A;
+            /* 极暗的紫黑色 */
+            --dark-bg-right: #0A0818;
+            /* 极暗的蓝紫色 */
+            --card-bg: rgba(30, 40, 70, 0.9);
+            /* 更不透明，移除毛玻璃效果 */
             --card-border: rgba(80, 100, 240, 0.3);
             --card-glow: rgba(110, 64, 255, 0.2);
             --text-color: #f1f1f1;
@@ -105,7 +108,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         /* 背景光晕效果 */
         body::before {
             content: '';
@@ -114,7 +117,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(110, 64, 255, 0.1) 0%, transparent 30%),
                 radial-gradient(circle at 90% 80%, rgba(11, 220, 171, 0.1) 0%, transparent 30%);
             z-index: -1;
@@ -126,7 +129,7 @@
             top: 0;
             z-index: -1;
         }
-        
+
         .bg-amber {
             height: 600px;
             width: 600px;
@@ -136,7 +139,7 @@
             border-radius: 1rem;
             filter: blur(200px);
         }
-        
+
         .bg-primary {
             height: 600px;
             width: 600px;
@@ -160,14 +163,14 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         /* 品牌标识区 */
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
             color: white;
         }
-        
+
         /* 主导航 */
         .main-nav {
             display: flex;
@@ -176,7 +179,7 @@
             justify-content: center;
             flex: 1;
         }
-        
+
         .nav-item {
             padding: 8px 16px;
             color: rgba(255, 255, 255, 0.7);
@@ -186,16 +189,16 @@
             transition: all 0.3s ease;
             position: relative;
         }
-        
+
         .nav-item:hover {
             color: white;
             background: rgba(255, 255, 255, 0.05);
         }
-        
+
         .nav-item.active {
             color: white;
         }
-        
+
         .nav-item.active::after {
             content: '';
             position: absolute;
@@ -206,23 +209,23 @@
             background: white;
             border-radius: 4px;
         }
-        
+
         /* 用户导航 */
         .user-nav {
             display: flex;
             gap: 15px;
             align-items: center;
         }
-        
+
         .welcome-text {
             color: var(--secondary-text);
         }
-        
+
         .username {
             color: var(--accent-color);
             font-weight: 600;
         }
-        
+
         .nav-link {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
@@ -232,7 +235,7 @@
             gap: 5px;
             white-space: nowrap;
         }
-        
+
         .logout-btn {
             cursor: pointer;
         }
@@ -406,22 +409,22 @@
                 flex-direction: column;
                 padding: 10px;
             }
-            
+
             .main-nav {
                 margin: 15px 0;
                 flex-wrap: wrap;
             }
-            
+
             .user-nav {
                 margin-top: 10px;
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+
             .form-card {
                 padding: 20px;
             }
-            
+
             .btn-container {
                 flex-direction: column;
             }
@@ -430,23 +433,27 @@
         /* 自定义消息弹窗样式 */
         .custom-alert {
             position: fixed;
-            top: 50%;    
-            left: 50%;   
-            transform: translate(-50%, -50%);   
-            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(24, 35, 56, 0.95);
+            /* 半透明深蓝紫底色 */
             color: #f1f1f1;
             padding: 15px 20px;
             border-radius: 20px;
             /* box-shadow: 0 5px 10px rgba(110, 64, 255, 0.3), 
                         0 0 0 1px rgba(110, 64, 255, 0.2);  */
-            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            display: inline-flex;
+            /* inline-flex 使其宽度随内容自适应 */
             align-items: center;
             gap: 15px;
             z-index: 9999;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            max-width: 90vw;                 /* 避免内容超出屏幕 */
-            white-space: nowrap;              /* 希望不换行 */
+            max-width: 90vw;
+            /* 避免内容超出屏幕 */
+            white-space: nowrap;
+            /* 希望不换行 */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(110, 64, 255, 0.3);
         }
@@ -464,45 +471,53 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            background: transparent !important; /* 强制透明 */
-            box-shadow: none !重要;
-            border: none !重要;
+            background: transparent !important;
+            /* 强制透明 */
+            box-shadow: none !important;
+            border: none !important;
         }
 
         .custom-alert.success .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.error .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.success {
-            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+            border: 2px solid rgba(11, 220, 171, 0.7);
+            /* 成功：淡绿色边框 */
         }
 
         .custom-alert.error {
-            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+            border: 2px solid rgba(255, 85, 122, 0.7);
+            /* 失败：淡红色边框 */
         }
 
         .fa-check-circle {
-            font-size: 1.8rem !重要; /* 与spinner和times-circle保持一致 */
+            font-size: 1.8rem !important;
+            /* 与spinner和times-circle保持一致 */
             color: #0bdcab;
         }
 
         /* 改为只对 fa-spinner 应用旋转动画 */
         .fa-spinner {
             animation: spin 2s linear infinite;
-            font-size: 1.8rem;  
-            color: #0bdcab; 
+            font-size: 1.8rem;
+            color: #0bdcab;
         }
 
         /* 确保错误图标不会旋转 */
         .fa-times-circle {
-            animation: none !重要;
-            font-size: 1.7rem; 
+            animation: none !important;
+            font-size: 1.7rem;
         }
 
         #alertMessage {
@@ -510,51 +525,77 @@
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
+
         .custom-alert.success #alertIcon {
             color: #0bdcab;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         .custom-alert.error #alertIcon {
             color: #ff557a;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         #alertMessage {
             font-weight: 500;
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            margin: 1px 0;  /* 上下边距改为8px，左右为0 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            margin: 1px 0;
+            /* 上下边距改为8px，左右为0 */
         }
 
         /* 旋转动画 */
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 入场动画 */
         @keyframes alertIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .custom-alert.show {
             animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
 
         .topup-size-modal {
-            width: 340px !重要;  /* 调整为充值弹窗专用宽度 */
-            max-height: 70vh !重要; /* 如需调整高度 */
+            width: 340px !important;
+            /* 调整为充值弹窗专用宽度 */
+            max-height: 70vh !important;
+            /* 如需调整高度 */
+        }
+
+        select.form-input {
+            color: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 8px;
+            padding: 10px 15px; 
+            appearance: none;
         }
 
         /* 专门为下拉选项添加深色主题 */
         select.form-input option {
-            background-color: rgba(30, 30, 30, 0.95) !重要; /* 深色背景 */
-            color: white !重要; /* 白色文字 */
+            background-color: rgba(30, 30, 30, 0.95) !important;  /* 深色背景 */
+            color: white !important;  /* 白色文字 */
             padding: 10px 15px; /* 调整内边距 */
         }
-
+        
     </style>
 </head>
 
@@ -567,7 +608,7 @@
     <nav class="navbar">
         <!-- 品牌标识 -->
         <div class="navbar-brand">区块链版权</div>
-        
+
         <!-- 主导航 -->
         <div class="main-nav">
             <a href="/display" class="nav-item">版权展示</a>
@@ -575,7 +616,7 @@
             <a href="/upload" class="nav-item active">版权上传</a>
             <a href="/statistics" class="nav-item">统计分析</a>
         </div>
-        
+
         <!-- 用户导航 -->
         <div class="user-nav">
             <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
@@ -611,13 +652,27 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">版权类别</label>
+                    <select name="category" class="form-input">
+                        <option value="">请选择</option>
+                        <option value="0">摄影</option>
+                        <option value="1">音乐</option>
+                        <option value="2">艺术</option>
+                        <option value="3">文学</option>
+                        <option value="4">其他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">简要描述</label>
-                    <input type="text" name="shortDesc" required placeholder="十字以内简短描述" class="form-input" maxlength="10">
+                    <input type="text" name="shortDesc" required placeholder="十字以内简短描述" class="form-input"
+                        maxlength="10">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">详细描述</label>
-                    <textarea name="detailedDesc" required placeholder="请输入详细描述" class="form-input form-textarea"></textarea>
+                    <textarea name="detailedDesc" required placeholder="请输入详细描述"
+                        class="form-input form-textarea"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -629,8 +684,10 @@
                             <p class="upload-hint">支持 JPG、PNG 格式，文件大小不超过 5MB</p>
                         </div>
                         <div id="previewContainer" style="display: none; width: 100%; height: 100%;">
-                            <img id="uploadImagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px; margin: 0 auto; display: block;">
-                            <p id="uploadImageText" class="upload-hint" style="margin-top: 8px; text-align: center;"></p>
+                            <img id="uploadImagePreview"
+                                style="max-width: 100%; max-height: 200px; border-radius: 8px; margin: 0 auto; display: block;">
+                            <p id="uploadImageText" class="upload-hint" style="margin-top: 8px; text-align: center;">
+                            </p>
                             <p class="upload-text" style="margin-top: 10px;">点击更换图片</p>
                         </div>
                     </div>
@@ -663,47 +720,48 @@
     <script>
         // 初始化变量
         let OnSale = false;
-        
+        let Category = 0;
+
         // 页面加载时初始化
-        window.onload = function() {
+        window.onload = function () {
             // 显示用户名
             const username = localStorage.getItem('username');
             document.getElementById("username").textContent = username || "未登录";
-            
+
             // 检查登录状态
             const token = localStorage.getItem('token');
             if (!token) {
-                layui.layer.msg('请先登录', {icon: 2}, function() {
+                layui.layer.msg('请先登录', { icon: 2 }, function () {
                     window.location.href = '/';
                 });
             }
-            
+
             // 初始化图标
             lucide.createIcons();
         };
-        
+
         // 退出登录
         function logout() {
             localStorage.clear();
             window.location.href = '/';
         }
-        
+
         // 点击上传区域触发文件选择
-        document.getElementById('uploadImageBtn').addEventListener('click', function() {
+        document.getElementById('uploadImageBtn').addEventListener('click', function () {
             document.getElementById('uploadImageInput').click();
         });
-        
+
         // 图片选择处理
-        document.getElementById('uploadImageInput').addEventListener('change', function(e) {
+        document.getElementById('uploadImageInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 5 * 1024 * 1024) {
-                    layui.layer.msg('图片大小不能超过5MB', {icon: 2});
+                    layui.layer.msg('图片大小不能超过5MB', { icon: 2 });
                     return;
                 }
-                
+
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = function (event) {
                     const imageBase64 = event.target.result;
                     document.getElementById('uploadImagePreview').src = imageBase64;
                     document.getElementById('uploadImageText').innerText = `文件名: ${file.name}`;
@@ -716,18 +774,23 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         // 监听表单选择
-        document.querySelector('select[name="onSale"]').addEventListener('change', function(e) {
+        document.querySelector('select[name="onSale"]').addEventListener('change', function (e) {
             OnSale = e.target.value === '1';
         });
-        
+
+        // 监听版权类型选择
+        document.querySelector('select[name="category"]').addEventListener('change', function (e) {
+            Category = parseInt(e.target.value, 10);
+        });
+
         // 提交按钮事件
-        document.getElementById('submitBtn').addEventListener('click', function() {
+        document.getElementById('submitBtn').addEventListener('click', function () {
             // 表单验证
             const form = document.getElementById('uploadForm');
             const formData = new FormData(form);
-            
+
             // 检查必填字段
             for (const [key, value] of formData.entries()) {
                 if (!value && key !== 'onSale') {
@@ -735,13 +798,13 @@
                     return;
                 }
             }
-            
+
             // 检查图片是否已上传
             if (!document.getElementById('uploadImagePreview').src) {
                 showCustomAlert('请上传图片', 'error');
                 return;
             }
-            
+
             // 整理上传数据
             const imageBase64 = document.getElementById('uploadImagePreview').src;
             const uploadInfo = {
@@ -751,12 +814,13 @@
                 simple_dsc: formData.get('shortDesc'),
                 dsc: formData.get('detailedDesc'),
                 on_sale: OnSale,
+                category: Category,  // 添加版权类别
                 img: imageBase64
             };
-            
+
             // 显示加载中提示
-            const loadingIndex = layui.layer.load(2, {shade: [0.3, '#000']});
-            
+            const loadingIndex = layui.layer.load(2, { shade: [0.3, '#000'] });
+
             // 发送请求
             fetch('/upload', {
                 method: 'POST',
@@ -766,33 +830,33 @@
                 },
                 body: JSON.stringify(uploadInfo)
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else if (response.status >= 400 && response.status < 500) {
-                    return response.json().then(json => {
-                        throw new Error(`客户端错误: ${response.status} - ${JSON.stringify(json)}`);
-                    });
-                } else if (response.status >= 500) {
-                    return response.json().then(json => {
-                        throw new Error(`服务器端错误: ${response.status} - ${JSON.stringify(json)}`);
-                    });
-                }
-            })
-            .then(data => {
-                layui.layer.close(loadingIndex);
-                showCustomAlert('上传成功', 'success');
-                setTimeout(() => {
-                    window.location.href = '/display';
-                }, 2000); // 保持2秒延迟跳转
-            })
-            .catch(error => {
-                layui.layer.close(loadingIndex);
-                showCustomAlert('上传失败: ' + error.message, 'error');
-                console.error('请求出现错误:', error);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status >= 400 && response.status < 500) {
+                        return response.json().then(json => {
+                            throw new Error(`客户端错误: ${response.status} - ${JSON.stringify(json)}`);
+                        });
+                    } else if (response.status >= 500) {
+                        return response.json().then(json => {
+                            throw new Error(`服务器端错误: ${response.status} - ${JSON.stringify(json)}`);
+                        });
+                    }
+                })
+                .then(data => {
+                    layui.layer.close(loadingIndex);
+                    showCustomAlert('上传成功', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/display';
+                    }, 2000); // 保持2秒延迟跳转
+                })
+                .catch(error => {
+                    layui.layer.close(loadingIndex);
+                    showCustomAlert('上传失败: ' + error.message, 'error');
+                    console.error('请求出现错误:', error);
+                });
         });
-        
+
         // 获取字段对应的中文名
         function getFieldLabel(fieldName) {
             const fieldLabels = {
@@ -805,7 +869,7 @@
             };
             return fieldLabels[fieldName] || fieldName;
         }
-        
+
         // 返回功能
         function goBack() {
             window.history.back();

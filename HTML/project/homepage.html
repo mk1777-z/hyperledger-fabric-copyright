@@ -1829,7 +1829,7 @@
                 }).then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            alert('修改成功');
+                            showCustomAlert('修改成功', 'success',5000);
                             closeModal();
                             location.reload(); // 可按需刷新数据
                         } else {

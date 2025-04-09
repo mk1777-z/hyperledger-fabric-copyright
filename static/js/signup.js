@@ -63,10 +63,10 @@ document.getElementById('signup-btn').addEventListener('click', async function (
     })
         .then(response => {
             if (response.status === 200) {
-                showAlert('注册成功！', 'success', 5000);
+                showAlert('注册成功！', 'success', 3000);
                 setTimeout(() => {
                     window.location.href = '/'; // 注册成功后跳转到登录页面
-                }, 5000); // 延迟跳转5秒
+                }, 1000); // 延迟跳转1秒
             }
             else if (response.status === 400) {   // 用户名已存在
                 response.json().then(data => {
