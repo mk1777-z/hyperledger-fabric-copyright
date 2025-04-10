@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易监控 - 区块链版权管理系统</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
+            --dark-bg: #0F172A;
+            --darker-bg: #080d18;
+            --card-bg: #182338;
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
+            --accent-hover: #5930d8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--darker-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .cta-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 1.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            padding: 4rem 0 2rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-title p {
+            color: var(--secondary-text);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 交易监控容器 */
+        .transaction-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .refresh-button {
+            background: var(--secondary-gradient);
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-bar {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            font-size: 1.2rem;
+        }
+
+        /* 交易表格 */
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .transaction-table th {
+            background-color: rgba(110, 64, 255, 0.2);
+            font-weight: 500;
+        }
+
+        /* 哈希列宽度调整 */
+        .hash-column {
+            width: 350px;
+            max-width: 350px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-all;
+        }
+
+        .section-divider {
+            margin: 3rem 0 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 3rem 0;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(110, 64, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 无数据状态 */
+        .no-data {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--secondary-text);
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* 页脚 */
+        .footer {
+            padding: 5rem 5% 2rem;
+            background-color: var(--darker-bg);
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-bar {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .transaction-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background-color: var(--darker-bg);
+                padding: 2rem;
+                gap: 1.5rem;
+                transform: translateY(-200%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+            }
+        }
+
+        /* 导航栏汉堡菜单 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-color);
+            margin-bottom: 5px;
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">区块链版权</div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/home">主页</a>
+            <a href="/transaction-monitor">交易监控</a>
+            <a href="/smart-contracts">智能合约</a>
+            <a href="#">产品</a>
+            <a href="#">文档</a>
+            <a href="#">关于我们</a>
+        </div>
+        <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-title">
+        <h1 data-aos="fade-up">实时交易监控</h1>
+        <p data-aos="fade-up" data-aos-delay="100">
+            查看区块链上所有版权交易的实时数据，包括交易哈希、交易双方、交易金额等关键信息。
+        </p>
+    </div>
+
+    <!-- 交易监控容器 -->
+    <div class="transaction-container">
+        <!-- 控制面板 -->
+        <div class="control-panel" data-aos="fade-up">
+            <button class="cta-button refresh-button" id="refreshButton">
+                <i class="fas fa-sync-alt"></i> 刷新数据
+            </button>
+            <div class="info-bar">
+                <div class="info-item">
+                    <span class="info-label">总交易数</span>
+                    <span class="info-value" id="totalTransactions">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">最近更新</span>
+                    <span class="info-value" id="lastUpdate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">今日交易</span>
+                    <span class="info-value" id="todayTransactions">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易表格 -->
+        <div id="transactionTableContainer" data-aos="fade-up">
+            <!-- 加载状态 -->
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- 无数据状态 -->
+            <div class="no-data" id="noDataState" style="display: none;">
+                <i class="fas fa-database"></i>
+                <h3>暂无交易数据</h3>
+                <p>当前区块链上没有查询到任何交易记录。</p>
+            </div>
+
+            <!-- 交易数据表格 -->
+            <h3>交易记录</h3>
+            <table class="transaction-table" id="transactionTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="hash-column">交易哈希</th>
+                        <th>交易名称</th>
+                        <th>卖方</th>
+                        <th>买方</th>
+                        <th>价格</th>
+                        <th>交易时间</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionTableBody">
+                    <!-- 动态生成的交易数据行 -->
+                </tbody>
+            </table>
+
+            <!-- 上传记录表格 -->
+            <div class="section-divider" id="uploadDivider" style="display: none;">
+                <h3>上传记录</h3>
+            </div>
+            <table class="transaction-table" id="uploadTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="hash-column">交易哈希</th>
+                        <th>交易名称</th>
+                        <th>上传者</th>
+                        <th>上传时间</th>
+                    </tr>
+                </thead>
+                <tbody id="uploadTableBody">
+                    <!-- 动态生成的上传数据行 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>区块链版权</h3>
+                <p style="color: var(--secondary-text); margin-top: 1rem;">
+                    基于区块链技术的创新版权管理解决方案，为创作者提供全方位的版权保护与交易服务。
+                </p>
+            </div>
+            <div class="footer-column">
+                <h3>产品</h3>
+                <ul class="footer-links">
+                    <li><a href="#">版权登记</a></li>
+                    <li><a href="#">版权交易</a></li>
+                    <li><a href="#">数据分析</a></li>
+                    <li><a href="#">企业解决方案</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>资源</h3>
+                <ul class="footer-links">
+                    <li><a href="#">帮助中心</a></li>
+                    <li><a href="#">API文档</a></li>
+                    <li><a href="#">白皮书</a></li>
+                    <li><a href="#">最新动态</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>关注我们</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 区块链版权管理系统. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- 引入 AOS 动画库 -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // 初始化 AOS 动画库
+        document.addEventListener('DOMContentLoaded', function () {
+            AOS.init({
+                duration: 1000,
+                once: true
+            });
+
+            // 汉堡菜单功能
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+
+            hamburger.addEventListener('click', function () {
+                navLinks.classList.toggle('active');
+            });
+
+            // 页面加载时获取交易数据
+            fetchTransactionData();
+
+            // 刷新按钮点击事件
+            document.getElementById('refreshButton').addEventListener('click', function () {
+                fetchTransactionData();
+            });
+        });
+
+        // 获取交易数据的函数
+        function fetchTransactionData() {
+            // 显示加载状态
+            document.getElementById('loadingState').style.display = 'flex';
+            document.getElementById('noDataState').style.display = 'none';
+            document.getElementById('transactionTable').style.display = 'none';
+            document.getElementById('uploadTable').style.display = 'none';
+            document.getElementById('uploadDivider').style.display = 'none';
+
+            // 调用API获取交易数据
+            fetch('/api/transactions')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正常');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 更新最后更新时间
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+                    // 处理交易数据
+                    handleTransactionData(data);
+                })
+                .catch(error => {
+                    console.error('获取交易数据失败:', error);
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('noDataState').style.display = 'block';
+                });
+        }
+
+        // 处理交易数据的函数
+        function handleTransactionData(data) {
+            const transactions = data || [];
+
+            // 更新总交易数
+            document.getElementById('totalTransactions').textContent = transactions.length;
+
+            // 计算今日交易数
+            const today = new Date().toLocaleDateString();
+            const todayTransactions = transactions.filter(tx => {
+                return new Date(tx.Transtime).toLocaleDateString() === today;
+            }).length;
+            document.getElementById('todayTransactions').textContent = todayTransactions;
+
+            // 如果没有交易数据，显示无数据状态
+            if (transactions.length === 0) {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('noDataState').style.display = 'block';
+                return;
+            }
+
+            // 分离普通交易和上传交易(卖方为admin)
+            const normalTransactions = transactions.filter(tx => tx.Seller !== "admin");
+            const uploadTransactions = transactions.filter(tx => tx.Seller === "admin");
+
+            // 清空表格内容
+            const transactionTableBody = document.getElementById('transactionTableBody');
+            const uploadTableBody = document.getElementById('uploadTableBody');
+            transactionTableBody.innerHTML = '';
+            uploadTableBody.innerHTML = '';
+
+            // 填充普通交易表格数据
+            if (normalTransactions.length > 0) {
+                normalTransactions.forEach(tx => {
+                    const row = document.createElement('tr');
+
+                    // 获取交易哈希，如果没有则显示"未记录"
+                    const txHash = tx.TxHash || "未记录";
+
+                    row.innerHTML = `
+                        <td class="hash-column">${txHash}</td>
+                        <td>${tx.Name}</td>
+                        <td>${tx.Seller}</td>
+                        <td>${tx.Purchaser}</td>
+                        <td>¥ ${tx.Price.toFixed(2)}</td>
+                        <td>${formatDate(tx.Transtime)}</td>
+                    `;
+
+                    transactionTableBody.appendChild(row);
+                });
+                document.getElementById('transactionTable').style.display = 'table';
+            }
+
+            // 填充上传交易表格数据
+            if (uploadTransactions.length > 0) {
+                uploadTransactions.forEach(tx => {
+                    const row = document.createElement('tr');
+
+                    // 获取交易哈希，如果没有则显示"未记录"
+                    const txHash = tx.TxHash || "未记录";
+
+                    row.innerHTML = `
+                        <td class="hash-column">${txHash}</td>
+                        <td>${tx.Name}</td>
+                        <td>${tx.Purchaser}</td>
+                        <td>${formatDate(tx.Transtime)}</td>
+                    `;
+
+                    uploadTableBody.appendChild(row);
+                });
+                document.getElementById('uploadDivider').style.display = 'block';
+                document.getElementById('uploadTable').style.display = 'table';
+            }
+
+            // 隐藏加载状态
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+    </script>
+</body>
+
+</html>

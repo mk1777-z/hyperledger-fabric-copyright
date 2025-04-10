@@ -62,6 +62,17 @@ func setupRouter(h *server.Hertz) {
 	})
 
 	h.GET("/chat_ws", middle.ChatWebsocket)
+
+	// 交易监控相关路由
+	h.GET("/transaction-monitor", func(c context.Context, ctx *app.RequestContext) {
+		ctx.HTML(http.StatusOK, "transaction-monitor.html", nil)
+	})
+	h.GET("/api/transactions", middle.GetAllTransactions)
+
+	// 智能合约说明页面路由
+	h.GET("/smart-contracts", func(c context.Context, ctx *app.RequestContext) {
+		ctx.HTML(http.StatusOK, "smart-contracts.html", nil)
+	})
 }
 
 func main() {

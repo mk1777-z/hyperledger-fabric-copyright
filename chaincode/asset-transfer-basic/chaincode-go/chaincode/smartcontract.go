@@ -15,17 +15,22 @@ type SmartContract struct {
 
 // Createtrans 描述一次交易信息
 type Createtrans struct {
-	ID        string
-	Name      string
-	Seller    string
-	Purchaser string
-	Price     float64
-	Transtime string
+	ID        string  `json:"ID"`
+	Name      string  `json:"Name"`
+	Seller    string  `json:"Seller"`
+	Purchaser string  `json:"Purchaser"`
+	Price     float64 `json:"Price"`
+	Transtime string  `json:"Transtime"`
+	TxHash    string  `json:"TxHash"` // 添加交易哈希字段
 }
 
 // InitLedger 添加一组初始的交易数据
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	fmt.Println("Initializing the ledger with predefined transactions...")
+
+	// 获取当前交易ID作为哈希
+	txID := ctx.GetStub().GetTxID()
+
 	createtranses := []Createtrans{
 		{
 			ID:        "tx1",
@@ -34,6 +39,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 			Purchaser: "Bob",
 			Price:     1000.0,
 			Transtime: "2024-01-01 10:00:00",
+			TxHash:    txID + "-1", // 初始化交易使用交易ID+后缀作为哈希
 		},
 		{
 			ID:        "tx2",
@@ -42,6 +48,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 			Purchaser: "Dan",
 			Price:     2000.0,
 			Transtime: "2024-01-02 11:30:00",
+			TxHash:    txID + "-2", // 初始化交易使用交易ID+后缀作为哈希
 		},
 	}
 
@@ -55,7 +62,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		if err != nil {
 			return fmt.Errorf("failed to put to world state: %v", err)
 		}
-		fmt.Printf("Initialized transaction with ID: %s\n", createtrans.ID)
+		fmt.Printf("Initialized transaction with ID: %s, Hash: %s\n", createtrans.ID, createtrans.TxHash)
 	}
 	return nil
 }
@@ -79,6 +86,10 @@ func (s *SmartContract) CreateCreatetrans(
 		return fmt.Errorf("the transaction %s already exists", id)
 	}
 
+	// 获取当前交易ID作为哈希
+	txID := ctx.GetStub().GetTxID()
+	fmt.Printf("Transaction hash: %s\n", txID)
+
 	priceNum, _ := strconv.ParseFloat(price, 64)
 	createtrans := Createtrans{
 		ID:        id,
@@ -87,6 +98,7 @@ func (s *SmartContract) CreateCreatetrans(
 		Purchaser: purchaser,
 		Price:     priceNum,
 		Transtime: transtime,
+		TxHash:    txID, // 保存交易ID作为哈希
 	}
 	createtransJSON, err := json.Marshal(createtrans)
 	if err != nil {
@@ -98,7 +110,7 @@ func (s *SmartContract) CreateCreatetrans(
 	if err != nil {
 		return fmt.Errorf("failed to put state: %v", err)
 	}
-	fmt.Printf("Successfully created transaction %s\n", id)
+	fmt.Printf("Successfully created transaction %s with hash %s\n", id, txID)
 	return nil
 }
 
@@ -141,6 +153,15 @@ func (s *SmartContract) UpdateCreatetrans(
 		return fmt.Errorf("the transaction %s does not exist", id)
 	}
 
+	// 读取现有交易以保留原有哈希
+	existingTrans, err := s.ReadCreatetrans(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// 获取当前交易ID作为更新哈希
+	txID := ctx.GetStub().GetTxID()
+
 	createtrans := Createtrans{
 		ID:        id,
 		Name:      name,
@@ -148,6 +169,7 @@ func (s *SmartContract) UpdateCreatetrans(
 		Purchaser: purchaser,
 		Price:     price,
 		Transtime: transtime,
+		TxHash:    existingTrans.TxHash + "," + txID, // 保留原始哈希并添加新的更新哈希
 	}
 	createtransJSON, err := json.Marshal(createtrans)
 	if err != nil {
@@ -158,7 +180,7 @@ func (s *SmartContract) UpdateCreatetrans(
 	if err != nil {
 		return fmt.Errorf("failed to update state: %v", err)
 	}
-	fmt.Printf("Successfully updated transaction %s\n", id)
+	fmt.Printf("Successfully updated transaction %s, added update hash: %s\n", id, txID)
 	return nil
 }
 
