@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	mspID        = "Org1MSP" //交易者的MSP
+	mspID        = "Org1MSP"
 	cryptoPath   = "/home/sample/fabric1/scripts/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com"
 	certPath     = cryptoPath + "/users/User1@org1.example.com/msp/signcerts"
 	keyPath      = cryptoPath + "/users/User1@org1.example.com/msp/keystore"
@@ -29,7 +29,7 @@ const (
 var (
 	BasicContract     *client.Contract // 资产交易合约
 	FundsContract     *client.Contract // 资金操作合约
-	RegulatorContract *client.Contract // 监管合约
+	RegulatorContract *client.Contract // 监管合约（通过Org1节点访问）
 )
 var Con Config
 
@@ -64,7 +64,7 @@ func Init() {
 		log.Println("数据库初始化成功")
 	}
 
-	// 初始化区块链连接（现有代码）
+	// 初始化区块链连接（Org1节点）
 	clientConnection := newGrpcConnection()
 	id := newIdentity()
 	sign := newSign()
@@ -84,10 +84,17 @@ func Init() {
 		panic(err)
 	}
 
-	// 初始化两个合约
+	// 初始化基本合约（通过Org1节点）
 	network := gw.GetNetwork(channelName)
 	BasicContract = network.GetContract(basicChaincodeName)
 	FundsContract = network.GetContract(fundsChaincodeName)
-	RegulatorContract = network.GetContract(regulatorChaincodeName) // 新增监管合约初始化
+	RegulatorContract = network.GetContract(regulatorChaincodeName) // 基本连接的监管合约（备用）
 
+	// 初始化监管者专用连接（通过Org2节点）
+	errReg := InitRegulatorConnection()
+	if errReg != nil {
+		log.Printf("监管者专用连接初始化失败: %v，将使用Org1节点作为备用", errReg)
+	} else {
+		log.Println("监管者专用连接初始化成功")
+	}
 }

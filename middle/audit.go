@@ -36,6 +36,18 @@ func validateAndParseTradeID(tradeID string) (string, error) {
 	return validID, nil
 }
 
+// 获取当前可用的监管合约
+// 优先使用Org2监管者专用连接，如果不可用则使用备用的Org1连接
+func getRegulatorContract() *client.Contract {
+	if conf.RegulatorContractOrg2 != nil {
+		log.Println("使用监管者专用连接(Org2)")
+		return conf.RegulatorContractOrg2
+	}
+
+	log.Println("警告：监管者专用连接不可用，使用备用连接(Org1)")
+	return conf.RegulatorContract
+}
+
 // 检查交易是否存在
 func checkTradeExists(contract *client.Contract, tradeID string) bool {
 	log.Printf("检查交易是否存在: %s", tradeID)
@@ -333,9 +345,12 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 检查RegulatorContract是否已正确初始化
-	if conf.RegulatorContract == nil {
-		log.Printf("严重错误: RegulatorContract 未初始化")
+	// 获取合适的监管者合约
+	regulatorContract := getRegulatorContract()
+
+	// 检查监管合约是否已正确初始化
+	if regulatorContract == nil {
+		log.Printf("严重错误: 监管合约未初始化")
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{
 			"message": "系统配置错误",
@@ -345,7 +360,7 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 	}
 
 	// 检查交易是否存在，如果不存在则创建
-	err = createTradeIfNeeded(conf.RegulatorContract, req.TradeID)
+	err = createTradeIfNeeded(regulatorContract, req.TradeID)
 	if err != nil {
 		log.Printf("创建交易失败: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -359,7 +374,7 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 	log.Printf("交易准备完成，开始审核...")
 
 	// 提交审核
-	err = submitAuditTransaction(conf.RegulatorContract, req.TradeID, req.Decision, req.Comment)
+	err = submitAuditTransaction(regulatorContract, req.TradeID, req.Decision, req.Comment)
 	if err != nil {
 		log.Printf("审核失败: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -429,8 +444,11 @@ func GetAuditHistory(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// 获取合适的监管者合约
+	regulatorContract := getRegulatorContract()
+
 	// 检查交易是否存在
-	if exists := checkTradeExists(conf.RegulatorContract, tradeID); !exists {
+	if exists := checkTradeExists(regulatorContract, tradeID); !exists {
 		c.Status(http.StatusBadRequest)
 		c.JSON(http.StatusBadRequest, utils.H{
 			"message": "交易不存在",
@@ -439,7 +457,7 @@ func GetAuditHistory(_ context.Context, c *app.RequestContext) {
 	}
 
 	// 调用链码获取审核历史
-	records, err := getAuditHistory(conf.RegulatorContract, tradeID)
+	records, err := getAuditHistory(regulatorContract, tradeID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{
@@ -527,10 +545,13 @@ func GetTradeInfoForAudit(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// 获取合适的监管者合约
+	regulatorContract := getRegulatorContract()
+
 	// 检查监管链上是否已存在该交易
 	tradeExists := false
-	if conf.RegulatorContract != nil {
-		tradeExists = checkTradeExists(conf.RegulatorContract, tradeID)
+	if regulatorContract != nil {
+		tradeExists = checkTradeExists(regulatorContract, tradeID)
 	}
 
 	// 从交易信息中获取项目名称
