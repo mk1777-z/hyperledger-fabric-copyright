@@ -5,15 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能合约说明 - 区块链版权管理系统</title>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- AOS 动画库 -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Prism.js 代码高亮 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         :root {
@@ -141,8 +137,8 @@
         .contract-card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 3rem;
+            padding: 2.5rem;
+            margin-bottom: 4rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -461,25 +457,61 @@
         /* 增强动画效果和视觉样式 */
         .animation-container {
             height: 600px;
+            width: 1300px;
+            /* 固定宽度 */
+            max-width: 100%;
+            margin: 0 auto;
+            /* 居中显示 */
             position: relative;
             overflow: hidden;
             background: linear-gradient(135deg, rgba(24, 35, 56, 0.8), rgba(8, 13, 24, 0.9));
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transform-origin: top center;
+            /* 缩放原点在顶部中央 */
         }
 
-        /* 改进动画阶段样式 */
+        /* 小屏幕适配 - 缩放而不是重排 */
+        @media (max-width: 992px) {
+            .animation-container {
+                transform: scale(0.9);
+                height: 540px;
+                /* 略微减小高度 */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .animation-container {
+                transform: scale(0.8);
+                height: 480px;
+                /* 进一步减小高度 */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .animation-container {
+                transform: scale(0.7);
+                height: 420px;
+                /* 最小高度 */
+                overflow-x: auto;
+                /* 允许水平滚动 */
+            }
+        }
+
+        /* 确保动画阶段是固定尺寸的容器 */
         .animation-phase {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 900px;
+            /* 与容器相同的固定宽度 */
             height: 100%;
             opacity: 0;
             visibility: hidden;
             transition: opacity 1s ease-in-out, visibility 1s;
         }
 
+        /* 改进动画阶段样式 */
         .animation-phase.active {
             opacity: 1;
             visibility: visible;
@@ -655,15 +687,15 @@
         /* 功能块替代代码展示 */
         .function-blocks {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2.5rem 0;
         }
 
         .function-block {
             background: var(--card-bg);
             border-radius: 10px;
-            padding: 1.5rem;
+            padding: 1.8rem;
             border-top: 3px solid var(--accent-color);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -755,6 +787,19 @@
         .animation-btn.secondary:hover {
             background: rgba(110, 64, 255, 0.1);
         }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .function-blocks {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 增加动画与合约之间的间距 */
+        .animation-showcase {
+            margin-bottom: 6rem;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -807,8 +852,8 @@
                 <!-- 阶段1: 版权登记与监管审核 -->
                 <div class="animation-phase phase-1" id="phase1">
                     <div class="phase-description">
-                        <h3>阶段1: 版权登记与监管审核</h3>
-                        <p>创作者提交版权登记申请，必须通过监管审核合约由监管方进行审核批准</p>
+                        <h3>阶段1: 版权上传与监管审核</h3>
+                        <p>创作者提交版权上传申请，必须通过监管审核智能合约由监管方进行审核批准</p>
                     </div>
 
                     <!-- 用户角色 -->
@@ -821,23 +866,23 @@
                     <div class="animation-element animation-block element-upload highlight"
                         style="top: 200px; left: 200px;">
                         <div class="icon"><i class="fas fa-upload"></i></div>
-                        <div class="label">版权登记</div>
+                        <div class="label">版权上传</div>
                     </div>
 
                     <div class="animation-element animation-block element-audit highlight"
-                        style="top: 200px; right: 200px;">
+                        style="top: 200px; left: 700px;">
                         <div class="icon"><i class="fas fa-balance-scale"></i></div>
-                        <div class="label">监管审核合约</div>
+                        <div class="label">监管审核智能合约</div>
                     </div>
 
                     <div class="animation-element animation-user element-regulator highlight"
-                        style="bottom: 100px; right: 230px;">
+                        style="bottom: 100px; left: 730px;">
                         <div class="icon"><i class="fas fa-user-shield"></i></div>
                     </div>
 
                     <!-- 连接箭头 -->
                     <div class="animation-element animation-arrow arrow-creator-to-upload arrow-animate"
-                        style="width: 350px; top: 450px; left: 350px; transform: rotate(-90deg);"></div>
+                        style="width: 330px; top: 450px; left: 350px; transform: rotate(-90deg);"></div>
 
                     <div class="animation-element animation-arrow arrow-upload-to-audit arrow-animate"
                         style="width: 290px; top: 270px; left: 370px;"></div>
@@ -846,7 +891,7 @@
                         style="width: 120px; top: 335px; right: 200px; transform: rotate(90deg);"></div>
 
                     <!-- 流程标签 -->
-                    <div class="animation-element direction-arrow" style="top: 210px; left: 470px;">
+                    <div class="animation-element direction-arrow" style="top: 230px; left: 470px;">
                         <i class="fas fa-long-arrow-alt-right"></i> <span style="font-size: 14px;">提交审核</span>
                     </div>
                 </div>
@@ -854,8 +899,8 @@
                 <!-- 阶段2: 审核通过信息上链 -->
                 <div class="animation-phase phase-2" id="phase2">
                     <div class="phase-description">
-                        <h3>阶段2: 审核通过信息上链</h3>
-                        <p>监管者审核通过的版权信息被记录到区块链上，确保信息不可篡改</p>
+                        <h3>阶段2: 审核信息上链</h3>
+                        <p>将监管者的审核决定记录上链</p>
                     </div>
 
                     <div class="animation-element animation-user element-regulator highlight"
@@ -864,7 +909,7 @@
                     </div>
 
                     <div class="animation-element animation-block element-blockchain highlight"
-                        style="bottom: 250px; right: 200px; transform: translate3d(1.45408px, -0.359909px, 0px);">
+                        style="bottom: 250px; left: 700px; transform: translate3d(1.45408px, -0.359909px, 0px);">
                         <div class="icon"><i class="fas fa-cubes"></i></div>
                         <div class="label">区块链</div>
                     </div>
@@ -872,52 +917,53 @@
                     <div class="animation-element animation-arrow arrow-regulator-to-blockchain arrow-animate"
                         style="width: 350px; top: 260px; left: 300px; transform: rotate(-45deg);"></div>
 
-                    <div class="animation-element direction-arrow" style="top: 220px; left: 450px;">
-                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 14px;">上链存储</span>
+                    <div class="animation-element direction-arrow" style="top: 220px; left: 430px;">
+                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 14px;">审核意见上链存储</span>
                     </div>
                 </div>
 
                 <!-- 阶段3: 版权交易基础合约 -->
                 <div class="animation-phase phase-3" id="phase3">
                     <div class="phase-description">
-                        <h3>阶段3: 版权交易基础合约</h3>
-                        <p>卖方和买方之间的版权交易，通过基础合约记录交易详情和所有权转移</p>
+                        <h3>阶段3: 记录版权交易信息</h3>
+                        <p>卖方和买方之间的版权交易，通过版权交易智能合约记录交易详情和所有权转移</p>
                     </div>
 
                     <div class="animation-element animation-user element-creator highlight"
-                        style="bottom: 120px; left: 120px;">
+                        style="bottom: 250px; left: 120px;">
                         <div class="icon"><i class="fas fa-user-edit"></i></div>
                     </div>
 
                     <div class="animation-element animation-block element-contract highlight"
-                        style="top: 120px; left: 300px;">
+                        style="top: 250px; left: 300px; transform: translate3d(1.49587px, 0.395106px, 0px);">
                         <div class="icon"><i class="fas fa-file-contract"></i></div>
-                        <div class="label">基础合约</div>
+                        <div class="label">版权交易智能合约</div>
                     </div>
 
-                    <div class="animation-element animation-block element-transfer highlight"
-                        style="top: 250px; left: 300px;">
-                        <div class="icon"><i class="fas fa-exchange-alt"></i></div>
-                        <div class="label">版权交易</div>
-                    </div>
 
                     <div class="animation-element animation-user element-buyer highlight"
-                        style="bottom: 120px; right: 120px;">
+                        style="bottom: 250px; left: 820px;">
                         <div class="icon"><i class="fas fa-user"></i></div>
                     </div>
 
-                    <div class="animation-element animation-arrow arrow-creator-to-transfer arrow-animate"
-                        style="width: 170px; bottom: 150px; left: 150px; transform: rotate(45deg);"></div>
+                    <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
+                        style="width: 60px; top: 310px; left: 220px; transform: rotate(-90deg);"></div>
 
-                    <div class="animation-element animation-arrow arrow-buyer-to-transfer arrow-animate"
-                        style="width: 170px; bottom: 150px; right: 150px; transform: rotate(135deg);"></div>
+                    <div class="animation-element direction-arrow" style="top: 280px; left: 205px;">
+                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 12px;">记录交易信息</span>
+                    </div>
+
+                    <div class="animation-element direction-arrow" style="top: 280px; left: 750px;">
+                        <span style="font-size: 12px;">完成交易</span>
+                    </div>
 
                     <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
-                        style="width: 120px; top: 190px; left: 300px; transform: rotate(-90deg);"></div>
+                        style="width: 120px; top: 310px; left: 450px; transform: rotate(-90deg);"></div>
 
-                    <div class="animation-element direction-arrow" style="top: 220px; left: 380px;">
-                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 14px;">记录交易信息</span>
-                    </div>
+                    <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
+                        style="width: 60px; top: 310px; left: 745px; transform: rotate(-90deg);"></div>
+
+
                 </div>
 
                 <!-- 阶段4: 交易资金流动 -->
@@ -928,28 +974,28 @@
                     </div>
 
                     <div class="animation-element animation-user element-creator highlight"
-                        style="bottom: 120px; left: 120px;">
+                        style="bottom: 250px; left: 120px;">
                         <div class="icon"><i class="fas fa-user-edit"></i></div>
                     </div>
 
                     <div class="animation-element animation-block element-funds highlight"
-                        style="top: 200px; left: 300px;">
+                        style="top: 230px; left: 450px;">
                         <div class="icon"><i class="fas fa-wallet"></i></div>
-                        <div class="label">资金流动合约</div>
+                        <div class="label">账户与资产管理合约</div>
                     </div>
 
                     <div class="animation-element animation-user element-buyer highlight"
-                        style="bottom: 120px; right: 120px;">
+                        style="bottom: 250px; left: 820px;">
                         <div class="icon"><i class="fas fa-user"></i></div>
                     </div>
 
                     <div class="animation-element animation-arrow arrow-creator-to-funds arrow-animate"
-                        style="width: 200px; top: 200px; left: 150px; transform: rotate(-45deg);"></div>
+                        style="width: 180px; top: 300px; left: 620px; transform: rotate(-45deg);"></div>
 
                     <div class="animation-element animation-arrow arrow-buyer-to-funds arrow-animate"
-                        style="width: 200px; top: 200px; right: 150px; transform: rotate(-135deg);"></div>
+                        style="width: 200px; top: 300px; right: -220px; transform: rotate(-135deg);"></div>
 
-                    <div class="animation-element direction-arrow" style="top: 280px; left: 300px;">
+                    <div class="animation-element direction-arrow" style="top: 400px; left: 480px;">
                         <i class="fas fa-exchange-alt"></i> <span style="font-size: 14px;">资金结算</span>
                     </div>
                 </div>
@@ -964,6 +1010,12 @@
                 </button>
             </div>
         </section>
+
+        <!-- 添加一个间隔元素 -->
+        <div style="height: 3rem;"></div>
+
+        <!-- 智能合约标题 -->
+        <h2 class="section-title" data-aos="fade-up">智能合约详解</h2>
 
         <!-- 核心交易合约 - 使用功能块替代代码 -->
         <section class="contract-card" data-aos="fade-up">
@@ -1463,6 +1515,25 @@
                 }
             `;
             document.head.appendChild(styleElement);
+
+            // 确保动画容器在小屏幕上正确显示
+            function adjustAnimationContainer() {
+                const container = document.querySelector('.animation-container');
+                if (!container) return;
+
+                // 检测是否需要启用滚动
+                if (window.innerWidth < 576) {
+                    container.style.overflowX = 'auto';
+                } else {
+                    container.style.overflowX = 'hidden';
+                }
+            }
+
+            // 初始调整
+            adjustAnimationContainer();
+
+            // 窗口大小变化时重新调整
+            window.addEventListener('resize', adjustAnimationContainer);
         });
     </script>
 </body>

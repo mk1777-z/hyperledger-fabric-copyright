@@ -7,6 +7,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/hertz-contrib/websocket v0.2.0
+	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.24.9+incompatible
 	github.com/hyperledger/fabric-gateway v1.7.1
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/sashabaranov/go-openai v1.37.0

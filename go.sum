@@ -53,6 +53,8 @@ github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 h1:yE9ULgp02BhY
 github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8/go.mod h1:Nhe/DM3671a5udlv2AdV2ni/MZzgfv2qrPL5nIi3EGQ=
 github.com/hertz-contrib/websocket v0.2.0 h1:ulY/VRHr4iQQ9A0JjdX04Vmz/z5tbsJHIExftF4HTfk=
 github.com/hertz-contrib/websocket v0.2.0/go.mod h1:+xUh5RJ1uaWiKKU5gKy+0iBw7TrcdS1HZbt5RBoK0iI=
+github.com/huaweicloud/huaweicloud-sdk-go-obs v3.24.9+incompatible h1:XQVXdk+WAJ4fSNB6mMRuYNvFWou7BZs6SZB925hPrnk=
+github.com/huaweicloud/huaweicloud-sdk-go-obs v3.24.9+incompatible/go.mod h1:l7VUhRbTKCzdOacdT4oWCwATKyvZqUOlOqr0Ous3k4s=
 github.com/hyperledger/fabric-gateway v1.7.1 h1:bHpQNuvXHlQ11X/vzUbj/0YWm2q+L5cMkIQGvlp47Ac=
 github.com/hyperledger/fabric-gateway v1.7.1/go.mod h1:A9ORxKMXB3vNgL0woWv17pMDdJGrWGtCbTV3FQLMS/Y=
 github.com/hyperledger/fabric-protos-go-apiv2 v0.3.4 h1:YJrd+gMaeY0/vsN0aS0QkEKTivGoUnSRIXxGJ7KI+Pc=

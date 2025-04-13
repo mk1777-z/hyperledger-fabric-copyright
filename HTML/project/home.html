@@ -8,22 +8,28 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- AOS 动画库 -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Three.js 库，用于3D点云动画 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP 库，用于动画控制 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <style>
         :root {
-            --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
-            --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
-            --dark-bg: #0F172A;
-            --darker-bg: #080d18;
-            --card-bg: #182338;
-            --text-color: #f1f1f1;
-            --secondary-text: #a0aec0;
-            --accent-color: #6e40ff;
-            --accent-hover: #5930d8;
+            --primary-color: #4e44ff;
+            --secondary-color: #19B6D4;
+            --gradient-primary: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            --dark-bg: #0c0a26;
+            --darker-bg: #070520;
+            --card-bg: #14123a;
+            --text-color: #f8fafc;
+            --secondary-text: #a1a8c2;
+            --accent-color: #4e44ff;
+            --accent-hover: #3e34e8;
+            --border-color: rgba(255, 255, 255, 0.12);
         }
 
         * {
@@ -33,10 +39,22 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--dark-bg);
+            font-family: 'Inter', sans-serif;
             color: var(--text-color);
             line-height: 1.6;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #050518 0%, #0c0835 50%, #070420 100%);
+        }
+
+        /* 点云动画容器 */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* 导航栏 */
@@ -45,51 +63,75 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 5%;
-            background-color: var(--darker-bg);
-            position: sticky;
+            background-color: rgba(12, 10, 38, 0.85);
+            backdrop-filter: blur(15px);
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             font-weight: 700;
-            background: var(--primary-gradient);
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         .nav-links a {
             color: var(--text-color);
             text-decoration: none;
             font-weight: 500;
+            font-size: 1.05rem;
             transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         .nav-links a:hover {
-            color: var(--accent-color);
+            color: var(--secondary-color);
         }
 
         .cta-button {
-            background: var(--primary-gradient);
+            background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 0.8rem 1.8rem;
-            font-weight: 500;
+            border-radius: 30px;
+            padding: 0.9rem 2rem;
+            font-weight: 600;
+            font-size: 1.05rem;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(78, 68, 255, 0.3);
         }
 
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(78, 68, 255, 0.4);
         }
 
         /* 英雄部分 */
@@ -98,128 +140,201 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 6rem 5% 4rem;
+            padding: 20rem 5% 8rem; /* 从12rem增加到20rem，使文本向下移动 */
             position: relative;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
-        .hero::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: radial-gradient(circle at 30% 20%, rgba(110, 64, 255, 0.2), transparent 40%),
-                radial-gradient(circle at 70% 65%, rgba(11, 220, 171, 0.2), transparent 35%);
-            z-index: -1;
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin-top: 5rem; /* 添加额外的顶部边距，进一步将内容下移 */
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            max-width: 800px;
+            font-size: 5.2rem;
+            font-weight: 800;
+            margin-bottom: 1.8rem;
+            max-width: 1000px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, #ffffff 0%, #a1a8c2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero p {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             color: var(--secondary-text);
-            max-width: 600px;
-            margin-bottom: 2.5rem;
+            max-width: 750px;
+            margin: 0 auto 3.5rem;
+            line-height: 1.6;
         }
 
         .hero-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 2rem;
             margin-bottom: 4rem;
+            justify-content: center;
+        }
+
+        .secondary-button {
+            background: rgba(78, 68, 255, 0.12);
+            color: var(--text-color);
+            border: 1px solid rgba(78, 68, 255, 0.3);
+            border-radius: 30px;
+            padding: 0.9rem 2rem;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .secondary-button:hover {
+            background: rgba(78, 68, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .hero-image {
             width: 100%;
-            max-width: 1000px;
-            margin-top: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 1100px;
+            margin-top: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(78, 68, 255, 0.2), rgba(25, 182, 212, 0.2));
+            pointer-events: none;
         }
 
         /* 特性部分 */
         .features {
-            padding: 6rem 5%;
+            padding: 10rem 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 6rem;
         }
 
         .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            position: relative;
+            font-size: 3.4rem;
+            font-weight: 700;
+            margin-bottom: 1.8rem;
+            background: linear-gradient(90deg, #ffffff 0%, #a1a8c2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
 
-        .section-title::after {
-            content: "";
-            position: absolute;
-            width: 60px;
-            height: 4px;
-            background: var(--primary-gradient);
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
+        .section-subtitle {
+            font-size: 1.4rem;
+            color: var(--secondary-text);
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            position: relative;
+            z-index: 2;
         }
 
         .feature-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 2rem;
+            background-color: rgba(20, 18, 58, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 3rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(78, 68, 255, 0.05), rgba(25, 182, 212, 0.05));
+            z-index: -1;
         }
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(78, 68, 255, 0.3);
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            background: var(--secondary-gradient);
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .feature-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.7rem;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
         }
 
         .feature-text {
             color: var(--secondary-text);
+            line-height: 1.7;
+            font-size: 1.1rem;
         }
 
         /* 工作原理部分 */
         .how-it-works {
-            padding: 6rem 5%;
+            padding: 10rem 5%;
             background-color: var(--darker-bg);
+            position: relative;
+            overflow: hidden;
         }
 
         .steps-container {
             display: flex;
             flex-direction: column;
-            gap: 4rem;
-            max-width: 1000px;
-            margin: 4rem auto 0;
+            gap: 8rem;
+            max-width: 1300px;
+            margin: 6rem auto 0;
+            position: relative;
+            z-index: 2;
         }
 
         .step {
             display: flex;
-            gap: 3rem;
+            gap: 5rem;
             align-items: center;
         }
 
@@ -232,26 +347,36 @@
         }
 
         .step-number {
-            font-size: 5rem;
-            font-weight: 700;
-            color: rgba(110, 64, 255, 0.2);
-            margin-bottom: 1rem;
+            font-size: 7rem;
+            font-weight: 800;
+            line-height: 1;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.8rem;
+            opacity: 0.8;
         }
 
         .step-title {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
+            font-size: 2.4rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
         }
 
         .step-text {
             color: var(--secondary-text);
+            font-size: 1.3rem;
+            line-height: 1.7;
         }
 
         .step-image {
             flex: 1;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .step-image img {
@@ -260,58 +385,98 @@
             display: block;
         }
 
+        .step-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(78, 68, 255, 0.15), rgba(25, 182, 212, 0.15));
+            pointer-events: none;
+        }
+
         /* 统计部分 */
         .stats {
-            padding: 6rem 5%;
+            padding: 10rem 5%;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-top: 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3.5rem;
+            margin-top: 6rem;
+            position: relative;
+            z-index: 2;
         }
 
         .stat-item {
             position: relative;
+            background-color: rgba(20, 18, 58, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 3rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+            border-color: rgba(78, 68, 255, 0.3);
         }
 
         .stat-number {
-            font-size: 3rem;
+            font-size: 4.2rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: var(--primary-gradient);
+            margin-bottom: 1.2rem;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1;
         }
 
         .stat-label {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             color: var(--secondary-text);
+            font-weight: 500;
         }
 
         /* 常见问题 */
         .faq {
-            padding: 6rem 5%;
+            padding: 10rem 5%;
             background-color: var(--darker-bg);
-        }
-
-        .faq-container {
-            max-width: 800px;
-            margin: 4rem auto 0;
-        }
-
-        .faq-item {
-            margin-bottom: 1.5rem;
-            background-color: var(--card-bg);
-            border-radius: 12px;
+            position: relative;
             overflow: hidden;
         }
 
+        .faq-container {
+            max-width: 1000px;
+            margin: 6rem auto 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .faq-item {
+            margin-bottom: 2.5rem;
+            background-color: rgba(20, 18, 58, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(78, 68, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
         .faq-question {
-            padding: 1.5rem;
+            padding: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -320,73 +485,87 @@
         }
 
         .faq-question:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(78, 68, 255, 0.08);
         }
 
         .faq-question h3 {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .faq-question i {
             font-size: 1.2rem;
         }
 
         .faq-answer {
-            padding: 0 1.5rem 1.5rem;
+            padding: 0 2rem 2rem;
             color: var(--secondary-text);
+            font-size: 1.2rem;
+            line-height: 1.7;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
         }
 
         /* CTA 部分 */
         .cta {
-            padding: 6rem 5%;
+            padding: 10rem 5%;
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
-        .cta::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: radial-gradient(circle at 70% 30%, rgba(110, 64, 255, 0.15), transparent 50%),
-                radial-gradient(circle at 30% 70%, rgba(11, 220, 171, 0.15), transparent 50%);
-            z-index: -1;
-        }
-
         .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1.8rem;
+            background: linear-gradient(90deg, #ffffff 0%, #a1a8c2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .cta p {
             color: var(--secondary-text);
-            margin-bottom: 2.5rem;
-            max-width: 600px;
+            margin-bottom: 3.5rem;
+            max-width: 750px;
             margin-left: auto;
             margin-right: auto;
+            font-size: 1.4rem;
+            line-height: 1.7;
+        }
+
+        .cta .cta-button {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
         }
 
         /* 页脚 */
         .footer {
-            padding: 5rem 5% 2rem;
+            padding: 8rem 5% 3rem;
             background-color: var(--darker-bg);
+            border-top: 1px solid var(--border-color);
         }
 
         .footer-content {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 3rem;
-            margin-bottom: 4rem;
+            gap: 5rem;
+            margin-bottom: 6rem;
         }
 
         .footer-column {
             flex: 1;
-            min-width: 200px;
+            min-width: 250px;
         }
 
         .footer-column h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            font-weight: 600;
         }
 
         .footer-links {
@@ -394,45 +573,110 @@
         }
 
         .footer-links li {
-            margin-bottom: 0.75rem;
+            margin-bottom: 1.2rem;
         }
 
         .footer-links a {
             color: var(--secondary-text);
             text-decoration: none;
             transition: color 0.3s ease;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
         }
 
         .footer-links a:hover {
-            color: var(--accent-color);
+            color: var(--secondary-color);
+        }
+
+        .footer-links a i {
+            font-size: 1.2rem;
         }
 
         .copyright {
             text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 3rem;
+            border-top: 1px solid var(--border-color);
             color: var(--secondary-text);
-            font-size: 0.9rem;
+            font-size: 1.05rem;
         }
 
         /* 响应式设计 */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
             .hero h1 {
-                font-size: 2.5rem;
+                font-size: 4.5rem;
             }
 
-            .hero p {
-                font-size: 1rem;
+            .section-title {
+                font-size: 3rem;
             }
 
-            .hero-buttons {
-                flex-direction: column;
+            .step-title {
+                font-size: 2.2rem;
+            }
+
+            .cta h2 {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3.8rem;
             }
 
             .step,
             .step:nth-child(even) {
                 flex-direction: column;
-                gap: 2rem;
+                gap: 3.5rem;
+            }
+
+            .section-title {
+                font-size: 2.8rem;
+            }
+
+            .step-title {
+                font-size: 2rem;
+            }
+
+            .feature-card {
+                padding: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 320px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .cta-button, 
+            .secondary-button {
+                width: 100%;
+            }
+
+            .cta h2 {
+                font-size: 2.8rem;
+            }
+
+            .step-number {
+                font-size: 5.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -441,43 +685,141 @@
             display: none;
             flex-direction: column;
             cursor: pointer;
+            z-index: 101;
         }
 
         .hamburger span {
-            width: 25px;
+            width: 28px;
             height: 2px;
             background-color: var(--text-color);
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             transition: transform 0.3s ease;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .hamburger {
                 display: flex;
             }
 
             .nav-links {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                height: 100vh;
                 flex-direction: column;
                 background-color: var(--darker-bg);
-                padding: 2rem;
-                gap: 1.5rem;
-                transform: translateY(-200%);
+                padding: 7rem 2.5rem 2.5rem;
+                gap: 2.5rem;
+                transform: translateX(100%);
                 transition: transform 0.3s ease;
-                z-index: 99;
+                z-index: 100;
+                align-items: flex-start;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
             }
 
             .nav-links.active {
-                transform: translateY(0);
+                transform: translateX(0);
             }
+
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(6px, 6px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(6px, -6px);
+            }
+        }
+
+        /* 滚动指示器 */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            color: var(--secondary-text);
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .scroll-indicator p {
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .scroll-indicator .mouse {
+            width: 34px;
+            height: 54px;
+            border: 2px solid var(--secondary-text);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            padding-top: 12px;
+        }
+
+        .scroll-indicator .mouse-wheel {
+            width: 4px;
+            height: 10px;
+            background-color: var(--secondary-text);
+            border-radius: 2px;
+            animation: scroll 1.5s infinite;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(15px);
+                opacity: 0;
+            }
+        }
+
+        /* 亮点效果 */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(78, 68, 255, 0.2), rgba(25, 182, 212, 0.1), transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow-1 {
+            top: 15%;
+            left: 8%;
+        }
+
+        .glow-2 {
+            bottom: 10%;
+            right: 5%;
+        }
+
+        .glow-3 {
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(25, 182, 212, 0.2), rgba(78, 68, 255, 0.1), transparent 70%);
         }
     </style>
 </head>
 
 <body>
+    <!-- 点云动画容器 -->
+    <div id="particles-container"></div>
+
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="logo">区块链版权</div>
@@ -490,32 +832,46 @@
             <a href="/home">主页</a>
             <a href="/transaction-monitor">交易监控</a>
             <a href="/smart-contracts">智能合约</a>
-            <a href="#">产品</a>
-            <a href="#">文档</a>
-            <a href="#">关于我们</a>
+            <a href="/upload">版权上传</a>
+            <a href="/statistics">数据统计</a>
+            <a href="/audit">版权审计</a>
         </div>
         <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
     </nav>
 
+    <!-- 亮点效果 -->
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+
     <!-- 英雄部分 -->
     <section class="hero">
-        <h1 data-aos="fade-up">基于区块链技术的版权管理系统</h1>
-        <p data-aos="fade-up" data-aos-delay="100">
-            利用区块链不可篡改的特性，保护您的创作，简化版权交易流程，
-            让每一份创意都得到充分尊重与保护。
-        </p>
-        <div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
-            <button class="cta-button" onclick="window.location.href='/register'">开始使用</button>
-            <button class="cta-button" style="background: transparent; border: 1px solid #6e40ff;"
-                onclick="window.location.href='#how-it-works'">了解更多</button>
+        <div class="hero-content">
+            <h1 data-aos="fade-up">基于<span>区块链技术</span>的<br>版权管理系统</h1>
+            <p data-aos="fade-up" data-aos-delay="100">
+                利用区块链不可篡改的特性，保护您的创作，简化版权交易流程，
+                让每一份创意都得到充分尊重与保护。
+            </p>
+            <div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
+                <button class="cta-button" onclick="window.location.href='/register'">开始使用</button>
+                <button class="secondary-button" onclick="window.location.href='#how-it-works'">了解更多</button>
+            </div>
+            <!-- 删除了平台界面展示图片 -->
         </div>
-        <img src="https://via.placeholder.com/1000x500/182338/cccccc?text=版权系统界面展示" alt="平台界面展示" class="hero-image"
-            data-aos="fade-up" data-aos-delay="300">
+        <div class="scroll-indicator" onclick="document.querySelector('#features').scrollIntoView({behavior: 'smooth'})">
+            <p>向下滚动</p>
+            <div class="mouse">
+                <div class="mouse-wheel"></div>
+            </div>
+        </div>
     </section>
 
     <!-- 特性部分 -->
-    <section class="features">
-        <h2 class="section-title" data-aos="fade-up">系统特性</h2>
+    <section class="features" id="features">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">系统特性</h2>
+            <p class="section-subtitle">我们的区块链版权管理系统提供了全方位的功能，满足您的版权保护需求</p>
+        </div>
         <div class="features-grid">
             <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="feature-icon">
@@ -547,12 +903,45 @@
                     帮助您了解版权资产的市场表现和价值。
                 </p>
             </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="feature-title">溯源查询</h3>
+                <p class="feature-text">
+                    提供完整的版权溯源功能，轻松查询版权来源、
+                    交易历史和使用授权情况。
+                </p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <h3 class="feature-title">智能合约</h3>
+                <p class="feature-text">
+                    通过智能合约自动执行交易规则，确保交易过程
+                    透明公正，减少纠纷风险。
+                </p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h3 class="feature-title">全球共识</h3>
+                <p class="feature-text">
+                    基于分布式账本技术，实现全球范围内的版权确认与
+                    保护，打破地域限制。
+                </p>
+            </div>
         </div>
     </section>
 
     <!-- 工作原理部分 -->
     <section class="how-it-works" id="how-it-works">
-        <h2 class="section-title" data-aos="fade-up">工作原理</h2>
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">工作原理</h2>
+            <p class="section-subtitle">了解我们的系统如何利用区块链技术保护和管理您的版权资产</p>
+        </div>
         <div class="steps-container">
             <div class="step" data-aos="fade-right">
                 <div class="step-content">
@@ -561,10 +950,11 @@
                     <p class="step-text">
                         创作者只需简单几步，即可将作品信息上传至平台，
                         系统将自动生成唯一标识并上链存储，确保版权信息不可篡改。
+                        上传的内容将经过哈希处理，生成唯一指纹，并记录在区块链上。
                     </p>
                 </div>
                 <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=上传界面" alt="版权上传界面">
+                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=上传界面" alt="版权上传界面">
                 </div>
             </div>
             <div class="step" data-aos="fade-left">
@@ -573,11 +963,12 @@
                     <h3 class="step-title">版权交易</h3>
                     <p class="step-text">
                         通过智能合约实现版权的安全交易，交易记录自动上链，
-                        确保交易过程透明可追溯，保障买卖双方权益。
+                        确保交易过程透明可追溯，保障买卖双方权益。智能合约
+                        自动执行交易条款，无需第三方中介参与，降低交易成本。
                     </p>
                 </div>
                 <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=交易界面" alt="版权交易界面">
+                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=交易界面" alt="版权交易界面">
                 </div>
             </div>
             <div class="step" data-aos="fade-right">
@@ -586,19 +977,23 @@
                     <h3 class="step-title">数据统计</h3>
                     <p class="step-text">
                         平台提供全面的统计分析功能，包括交易趋势、用户活跃度、
-                        价格分布等数据，帮助用户全面了解市场状况。
+                        价格分布等数据，帮助用户全面了解市场状况。通过可视化
+                        图表直观呈现数据，辅助决策和市场分析。
                     </p>
                 </div>
                 <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/182338/cccccc?text=统计界面" alt="数据统计界面">
+                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=统计界面" alt="数据统计界面">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- 统计部分 -->
-    <section class="stats">
-        <h2 class="section-title" data-aos="fade-up">平台数据</h2>
+    <section class="stats" id="stats">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">平台数据</h2>
+            <p class="section-subtitle">我们的平台已经积累了丰富的用户基础和交易记录</p>
+        </div>
         <div class="stats-grid">
             <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
                 <div class="stat-number" id="user-count">5000+</div>
@@ -609,19 +1004,22 @@
                 <div class="stat-label">版权登记</div>
             </div>
             <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
-                <div class="stat-number" id="transaction-count">8000+</< /div>
-                    <div class="stat-label">成功交易</div>
-                </div>
-                <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
-                    <div class="stat-number" id="daily-active">1200+</div>
-                    <div class="stat-label">日活跃用户</div>
-                </div>
+                <div class="stat-number" id="transaction-count">8000+</div>
+                <div class="stat-label">成功交易</div>
             </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-number" id="daily-active">1200+</div>
+                <div class="stat-label">日活跃用户</div>
+            </div>
+        </div>
     </section>
 
     <!-- 常见问题 -->
-    <section class="faq">
-        <h2 class="section-title" data-aos="fade-up">常见问题</h2>
+    <section class="faq" id="faq">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">常见问题</h2>
+            <p class="section-subtitle">我们收集了用户最常问的问题，希望能帮助您更好地了解我们的平台</p>
+        </div>
         <div class="faq-container">
             <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
                 <div class="faq-question">
@@ -650,6 +1048,15 @@
                     <p>可以通过平台直接发起版权转让或授权交易，系统将通过智能合约确保交易安全进行。交易完成后，所有权变更记录将自动上链，确保交易的有效性和可追溯性。</p>
                 </div>
             </div>
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="faq-question">
+                    <h3>区块链技术如何保障版权安全？</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>区块链技术通过分布式账本记录数据，一旦信息上链就不可篡改，确保版权记录的真实性和可靠性。同时，智能合约自动执行交易规则，减少人为干预，提高交易安全性。</p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -669,26 +1076,26 @@
         <div class="footer-content">
             <div class="footer-column">
                 <h3>区块链版权</h3>
-                <p style="color: var(--secondary-text); margin-top: 1rem;">
+                <p style="color: var(--secondary-text); margin-top: 1rem; line-height: 1.7; font-size: 1.1rem;">
                     基于区块链技术的创新版权管理解决方案，为创作者提供全方位的版权保护与交易服务。
                 </p>
             </div>
             <div class="footer-column">
                 <h3>产品</h3>
                 <ul class="footer-links">
-                    <li><a href="#">版权登记</a></li>
-                    <li><a href="#">版权交易</a></li>
-                    <li><a href="#">数据分析</a></li>
-                    <li><a href="#">企业解决方案</a></li>
+                    <li><a href="/upload"><i class="fas fa-upload"></i> 版权登记</a></li>
+                    <li><a href="/transaction-monitor"><i class="fas fa-exchange-alt"></i> 版权交易</a></li>
+                    <li><a href="/statistics"><i class="fas fa-chart-bar"></i> 数据分析</a></li>
+                    <li><a href="#"><i class="fas fa-building"></i> 企业解决方案</a></li>
                 </ul>
             </div>
             <div class="footer-column">
                 <h3>资源</h3>
                 <ul class="footer-links">
-                    <li><a href="#">帮助中心</a></li>
-                    <li><a href="#">API文档</a></li>
-                    <li><a href="#">白皮书</a></li>
-                    <li><a href="#">最新动态</a></li>
+                    <li><a href="#"><i class="fas fa-question-circle"></i> 帮助中心</a></li>
+                    <li><a href="#"><i class="fas fa-code"></i> API文档</a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> 白皮书</a></li>
+                    <li><a href="#"><i class="fas fa-newspaper"></i> 最新动态</a></li>
                 </ul>
             </div>
             <div class="footer-column">
@@ -713,7 +1120,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             AOS.init({
                 duration: 1000,
-                once: true
+                once: false,
+                mirror: true
             });
 
             // 汉堡菜单功能
@@ -722,6 +1130,7 @@
 
             hamburger.addEventListener('click', function () {
                 navLinks.classList.toggle('active');
+                hamburger.classList.toggle('active');
             });
 
             // FAQ 展开/收起功能
@@ -743,8 +1152,362 @@
                     }
                 });
             });
+
+            // 实现鼠标跟随发光效果
+            const body = document.querySelector('body');
+            const glow1 = document.querySelector('.glow-1');
+            const glow2 = document.querySelector('.glow-2');
+
+            body.addEventListener('mousemove', function(e) {
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                glow1.style.left = (x / 8) + 'px';
+                glow1.style.top = (y / 10 + 100) + 'px';
+                
+                glow2.style.right = ((window.innerWidth - x) / 8) + 'px';
+                glow2.style.bottom = ((window.innerHeight - y) / 10 + 100) + 'px';
+            });
+
+            // 初始化3D点云动画
+            initParticles();
         });
+
+        // 改进的轻量级点云动画，使用球体点和弧面形状
+        function initParticles() {
+            // 创建场景、相机和渲染器
+            const container = document.getElementById('particles-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 45;
+            camera.position.y = -40; // 放置在更下方，避免遮挡标题
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // 限制像素比以提高性能
+            container.appendChild(renderer.domElement);
+            
+            // 粒子数量，适当减少以提高性能
+            const particlesCount = 2000;
+            
+            // 数组用于存储不同形状的粒子位置
+            const arcPositions = new Float32Array(particlesCount * 3);      // 弧面形状（类似地球表面）
+            const spherePositions = new Float32Array(particlesCount * 3);   // 完整球体形状
+            const gridPositions = new Float32Array(particlesCount * 3);     // 网格形状
+            
+            // 当前使用的位置数组
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            // 创建地球弧面形状（位置显著提高）
+            function createArc(samples, radius, yOffset = -20) { // 将yOffset从-60提高到-20
+                const positions = new Float32Array(samples * 3);
+                
+                for (let i = 0; i < samples; i++) {
+                    // 使用球坐标方程，但仅使用上半球（类似地球表面弧度）
+                    const theta = Math.random() * Math.PI * 2;
+                    // phi范围限制在0到π/2.5之间以创建弧面效果
+                    const phi = Math.random() * (Math.PI / 2.5);
+                    
+                    positions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
+                    // 放置位置大幅提高，并倒置弧面
+                    positions[i * 3 + 1] = -Math.cos(phi) * radius + yOffset;
+                    positions[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * radius;
+                }
+                
+                return positions;
+            }
+            
+            // 创建完整球体（位置显著提高）
+            function createSphere(samples, radius, yOffset = -20) { // 将yOffset从-60提高到-20
+                const positions = new Float32Array(samples * 3);
+                
+                for (let i = 0; i < samples; i++) {
+                    // 完整球体的球坐标方程
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.random() * Math.PI;
+                    
+                    positions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
+                    // 放在更下方的位置
+                    positions[i * 3 + 1] = Math.cos(phi) * radius + yOffset;
+                    positions[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * radius;
+                }
+                
+                return positions;
+            }
+            
+            // 创建网格状分布
+            function createGrid(samples, width, height, depth, yOffset = -60) {
+                const positions = new Float32Array(samples * 3);
+                const cols = Math.floor(Math.sqrt(samples));
+                const rows = Math.floor(samples / cols);
+                
+                for (let i = 0; i < samples; i++) {
+                    // 计算网格位置但添加一些随机性
+                    const col = i % cols;
+                    const row = Math.floor(i / cols) % rows;
+                    const depth_idx = Math.floor(i / (cols * rows));
+                    
+                    positions[i * 3] = (col / cols - 0.5) * width + (Math.random() - 0.5) * 5;
+                    positions[i * 3 + 1] = (row / rows - 0.5) * height + (Math.random() - 0.5) * 5 + yOffset;
+                    positions[i * 3 + 2] = (depth_idx / Math.ceil(samples / (cols * rows)) - 0.5) * depth + (Math.random() - 0.5) * 5;
+                }
+                
+                return positions;
+            }
+            
+            // 生成各种形状
+            const arcPoints = createArc(particlesCount, 50);
+            for (let i = 0; i < particlesCount * 3; i++) {
+                arcPositions[i] = arcPoints[i];
+            }
+            
+            const spherePoints = createSphere(particlesCount, 30);
+            for (let i = 0; i < particlesCount * 3; i++) {
+                spherePositions[i] = spherePoints[i];
+            }
+            
+            const gridPoints = createGrid(particlesCount, 80, 50, 50);
+            for (let i = 0; i < particlesCount * 3; i++) {
+                gridPositions[i] = gridPoints[i];
+            }
+            
+            // 初始形状：弧面
+            for (let i = 0; i < posArray.length; i++) {
+                posArray[i] = arcPositions[i];
+            }
+            
+            // 球体几何体用于点的实例化
+            const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8);
+            const sphereMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // 创建实例化网格
+            const instancedMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, particlesCount);
+            scene.add(instancedMesh);
+            
+            // 临时变量
+            const dummy = new THREE.Object3D();
+            const color = new THREE.Color();
+            
+            // 设置每个实例的初始位置、旋转和颜色
+            for (let i = 0; i < particlesCount; i++) {
+                // 设置位置
+                dummy.position.set(
+                    posArray[i * 3],
+                    posArray[i * 3 + 1],
+                    posArray[i * 3 + 2]
+                );
+                
+                // 随机旋转
+                dummy.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                
+                // 随机缩放，创建不同大小的球体
+                const scale = 0.2 + Math.random() * 0.4;
+                dummy.scale.set(scale, scale, scale);
+                
+                // 应用变换到实例
+                dummy.updateMatrix();
+                instancedMesh.setMatrixAt(i, dummy.matrix);
+                
+                // 设置颜色（蓝白色调）
+                color.setHSL(0.6 + Math.random() * 0.1, 0.8, 0.6 + Math.random() * 0.4);
+                instancedMesh.setColorAt(i, color);
+            }
+            
+            // 需要更新实例
+            instancedMesh.instanceMatrix.needsUpdate = true;
+            if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
+            
+            // 窗口大小调整
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // 动画控制
+            let mouseX = 0;
+            let mouseY = 0;
+            let currentShape = 0; // 0=弧面, 1=球体, 2=网格
+            let targetShape = 0;
+            let animationProgress = 0;
+            let isAnimating = false;
+            
+            // 鼠标移动响应
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+            
+            // 滚动响应，滚动时平滑切换形状
+            window.addEventListener('scroll', () => {
+                const scrollPercentage = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+                
+                if (scrollPercentage < 0.3) {
+                    changeShape(0); // 弧面
+                } else if (scrollPercentage < 0.7) {
+                    changeShape(1); // 球体
+                } else {
+                    changeShape(2); // 网格
+                }
+            });
+            
+            // 形状切换函数
+            function changeShape(newShape) {
+                if (targetShape !== newShape) {
+                    targetShape = newShape;
+                    animationProgress = 0;
+                    isAnimating = true;
+                }
+            }
+            
+            // 更新实例化网格的位置
+            function updateInstancePositions(positions) {
+                for (let i = 0; i < particlesCount; i++) {
+                    dummy.position.set(
+                        positions[i * 3],
+                        positions[i * 3 + 1],
+                        positions[i * 3 + 2]
+                    );
+                    
+                    dummy.updateMatrix();
+                    instancedMesh.setMatrixAt(i, dummy.matrix);
+                }
+                instancedMesh.instanceMatrix.needsUpdate = true;
+            }
+            
+            // 核心动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // 缓慢的基础旋转
+                instancedMesh.rotation.y += 0.003;
+                
+                // 轻微的鼠标响应
+                instancedMesh.rotation.x = mouseY * 0.02;
+                instancedMesh.rotation.z = mouseX * 0.02;
+                
+                // 形状过渡动画
+                if (isAnimating) {
+                    animationProgress += 0.02; // 控制过渡速度
+                    
+                    if (animationProgress >= 1) {
+                        animationProgress = 1;
+                        isAnimating = false;
+                        currentShape = targetShape;
+                    }
+                    
+                    // 计算动画的缓动值
+                    const t = animationProgress < 0.5 ? 
+                              2 * animationProgress * animationProgress : 
+                              1 - Math.pow(-2 * animationProgress + 2, 2) / 2;
+                    
+                    let sourcePositions;
+                    let targetPositions;
+                    
+                    switch (currentShape) {
+                        case 0: sourcePositions = arcPositions; break;
+                        case 1: sourcePositions = spherePositions; break;
+                        case 2: sourcePositions = gridPositions; break;
+                    }
+                    
+                    switch (targetShape) {
+                        case 0: targetPositions = arcPositions; break;
+                        case 1: targetPositions = spherePositions; break;
+                        case 2: targetPositions = gridPositions; break;
+                    }
+                    
+                    // 创建插值后的位置数组
+                    const lerpedPositions = new Float32Array(particlesCount * 3);
+                    for (let i = 0; i < lerpedPositions.length; i++) {
+                        lerpedPositions[i] = sourcePositions[i] * (1 - t) + targetPositions[i] * t;
+                    }
+                    
+                    // 更新实例化网格位置
+                    updateInstancePositions(lerpedPositions);
+                }
+                
+                // 额外的波动效果
+                const positions = new Float32Array(particlesCount * 3);
+                const time = Date.now() * 0.0005;
+                
+                // 获取当前形状的位置
+                let currentPositions;
+                switch (currentShape) {
+                    case 0: currentPositions = arcPositions; break;
+                    case 1: currentPositions = spherePositions; break;
+                    case 2: currentPositions = gridPositions; break;
+                }
+                
+                // 应用微小的波动效果
+                for (let i = 0; i < particlesCount; i++) {
+                    const i3 = i * 3;
+                    positions[i3] = currentPositions[i3] + Math.sin(time + i * 0.1) * 0.3;
+                    positions[i3 + 1] = currentPositions[i3 + 1] + Math.cos(time + i * 0.1) * 0.3;
+                    positions[i3 + 2] = currentPositions[i3 + 2] + Math.sin(time * 0.7 + i * 0.1) * 0.3;
+                }
+                
+                if (!isAnimating) {
+                    updateInstancePositions(positions);
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // 页面加载时的初始过渡动画
+            setTimeout(() => {
+                // 创建一个向上移动的动画
+                const initialPositions = new Float32Array(particlesCount * 3);
+                
+                for (let i = 0; i < particlesCount; i++) {
+                    const i3 = i * 3;
+                    // 复制原始位置
+                    initialPositions[i3] = arcPositions[i3];
+                    // 初始位置在更下方
+                    initialPositions[i3 + 1] = arcPositions[i3 + 1] - 30;
+                    initialPositions[i3 + 2] = arcPositions[i3 + 2];
+                }
+                
+                // 更新实例化网格到初始位置
+                updateInstancePositions(initialPositions);
+                
+                // 使用GSAP创建进入动画
+                gsap.to({progress: 0}, {
+                    progress: 1,
+                    duration: 2,
+                    ease: "power3.out",
+                    onUpdate: function() {
+                        const progress = this.targets()[0].progress;
+                        
+                        for (let i = 0; i < particlesCount; i++) {
+                            const i3 = i * 3;
+                            // 从初始位置插值到目标位置
+                            dummy.position.set(
+                                arcPositions[i3],
+                                arcPositions[i3 + 1] - 30 * (1 - progress),
+                                arcPositions[i3 + 2]
+                            );
+                            
+                            dummy.updateMatrix();
+                            instancedMesh.setMatrixAt(i, dummy.matrix);
+                        }
+                        
+                        instancedMesh.instanceMatrix.needsUpdate = true;
+                    }
+                });
+            }, 500);
+        }
     </script>
 </body>
 
 </html>
+
