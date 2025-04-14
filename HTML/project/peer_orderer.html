@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyperledger Fabric网络流程图</title>
+    <style>
+        :root {
+            --dark-bg: #0F172A;
+            --darker-bg: #080d18;
+            --card-bg: #182338;
+            --accent-color: #6e40ff;
+            --accent-glow: rgba(110, 64, 255, 0.4);
+            --secondary-color: #0bdcab;
+            --peer-color: #6e40ff;
+            --orderer-color: #ff557a;
+            --ca-color: #0bdcab;
+            --user-color: #38bdf8;
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --grid-line: rgba(110, 64, 255, 0.1);
+            --node-border: rgba(110, 64, 255, 0.5);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .flow-chart-container {
+            position: relative;
+            width: 100%;
+            height: 620px;
+            margin: 2rem auto;
+            max-width: 1230px;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(24, 35, 56, 0.8), rgba(8, 13, 24, 0.9));
+        }
+
+        /* 网格背景 */
+        .grid-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+        }
+
+        /* 节点基础样式 */
+        .node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            border-radius: 12px;
+            background: rgba(24, 35, 56, 0.9);
+            border: 1px solid var(--node-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.3s ease;
+            padding: 15px;
+        }
+
+        /* Peer节点样式 */
+        .node.peer {
+            width: 120px;
+            height: 120px;
+            border-color: var(--peer-color);
+            background: linear-gradient(135deg, rgba(110, 64, 255, 0.15), rgba(24, 35, 56, 0.9));
+        }
+
+        .node.peer .icon {
+            background: linear-gradient(135deg, var(--peer-color), rgba(110, 64, 255, 0.7));
+        }
+
+        /* Orderer节点样式 */
+        .node.orderer {
+            width: 120px;
+            height: 120px;
+            border-color: var(--orderer-color);
+            background: linear-gradient(135deg, rgba(255, 85, 122, 0.15), rgba(24, 35, 56, 0.9));
+        }
+
+        .node.orderer .icon {
+            background: linear-gradient(135deg, var(--orderer-color), rgba(255, 85, 122, 0.7));
+        }
+
+        /* CA节点样式 */
+        .node.ca {
+            width: 100px;
+            height: 100px;
+            border-color: var(--ca-color);
+            background: linear-gradient(135deg, rgba(11, 220, 171, 0.15), rgba(24, 35, 56, 0.9));
+        }
+
+        .node.ca .icon {
+            background: linear-gradient(135deg, var(--ca-color), rgba(11, 220, 171, 0.7));
+        }
+
+        /* 用户节点样式 */
+        .node.user {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border-color: var(--user-color);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(24, 35, 56, 0.9));
+        }
+
+        .node.user .icon {
+            background: linear-gradient(135deg, var(--user-color), rgba(56, 189, 248, 0.7));
+            border-radius: 50%;
+        }
+
+        .node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .node .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .node.user .icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+        }
+
+        .node .icon i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .node .label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+            max-width: 120px;
+        }
+
+        .node.user .label {
+            font-size: 12px;
+            max-width: 80px;
+        }
+
+
+        /* 数据流样式 */
+        .data-flow {
+            position: absolute;
+            height: 3px;
+            background: transparent;
+            z-index: 5;
+            transform-origin: left center;
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-glow);
+            animation: flow 3s infinite linear;
+        }
+
+        .data-packet.peer {
+            background: var(--peer-color);
+        }
+
+        .data-packet.orderer {
+            background: var(--orderer-color);
+        }
+
+        .data-packet.ca {
+            background: var(--ca-color);
+        }
+
+        @keyframes flow {
+            0% {
+                opacity: 0;
+                transform: translateX(0) scale(0.5);
+            }
+            10% {
+                opacity: 1;
+                transform: translateX(10%) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateX(90%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100%) scale(0.5);
+            }
+        }
+
+        /* 闪烁节点效果 */
+        .blinking.peer {
+            animation: blinkPeer 3s infinite alternate;
+        }
+
+        .blinking.orderer {
+            animation: blinkOrderer 3s infinite alternate;
+        }
+
+        .blinking.ca {
+            animation: blinkCa 3s infinite alternate;
+        }
+
+        @keyframes blinkPeer {
+            0%, 80% {
+                box-shadow: 0 0 15px rgba(110, 64, 255, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(110, 64, 255, 0.8), 0 0 50px rgba(110, 64, 255, 0.4);
+            }
+        }
+
+        @keyframes blinkOrderer {
+            0%, 80% {
+                box-shadow: 0 0 15px rgba(255, 85, 122, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(255, 85, 122, 0.8), 0 0 50px rgba(255, 85, 122, 0.4);
+            }
+        }
+
+        @keyframes blinkCa {
+            0%, 80% {
+                box-shadow: 0 0 15px rgba(11, 220, 171, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(11, 220, 171, 0.8), 0 0 50px rgba(11, 220, 171, 0.4);
+            }
+        }
+
+        /* 连接线样式 */
+        .connector {
+            position: absolute;
+            height: 2px;
+            z-index: 5;
+            opacity: 0.7;
+            transform-origin: 0 0;
+        }
+
+        .connector.peer {
+            background: linear-gradient(90deg, var(--peer-color), var(--peer-color));
+        }
+
+        .connector.orderer {
+            background: linear-gradient(90deg, var(--orderer-color), var(--orderer-color));
+        }
+
+        .connector.ca {
+            background: linear-gradient(90deg, var(--ca-color), var(--ca-color));
+        }
+
+        .connector.mixed {
+            background: linear-gradient(90deg, var(--peer-color), var(--orderer-color));
+        }
+
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -3px;
+            border-left: 8px solid;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .connector.peer::after {
+            border-left-color: var(--peer-color);
+        }
+
+        .connector.orderer::after {
+            border-left-color: var(--orderer-color);
+        }
+
+        .connector.ca::after {
+            border-left-color: var(--ca-color);
+        }
+
+        .connector.mixed::after {
+            border-left-color: var(--orderer-color);
+        }
+
+        /* 说明文本样式 */
+        .description-text {
+            position: absolute;
+            color: var(--secondary-text);
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(8, 13, 24, 0.7);
+            padding: 5px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--node-border);
+            z-index: 15;
+        }
+
+        /* 标题样式 */
+        .flow-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 20;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            background: rgba(8, 13, 24, 0.7);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid var(--node-border);
+        }
+
+        /* 浮动效果 */
+        .floating {
+            animation: floating 5s infinite ease-in-out;
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 子标题样式 */
+        .flow-subtitle {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--secondary-text);
+            font-size: 14px;
+            text-align: center;
+            z-index: 20;
+            background: rgba(8, 13, 24, 0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #connectors-container, #data-flows-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* 添加通道样式 */
+        .channel {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(110, 64, 255, 0.05), rgba(255, 85, 122, 0.05));
+            border: 2px dashed rgba(110, 64, 255, 0.3);
+            z-index: 2;
+        }
+        
+        .channel-label {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            transform: translateX(-220%);
+            background: var(--dark-bg);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--secondary-text);
+            border: 1px solid rgba(110, 64, 255, 0.3);
+        }
+        
+        .org-area {
+            position: absolute;
+            background: rgba(8, 13, 24, 0.2);
+            border-radius: 15px;
+            z-index: 1;
+        }
+        
+        .org-label {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--dark-bg);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        .orderer-label {
+            color: var(--orderer-color);
+            border-color: var(--orderer-color);
+            background: rgba(255, 85, 122, 0.1);
+            box-shadow: 0 0 8px rgba(255, 85, 122, 0.3);
+            font-weight: 600;
+        }
+
+        .peer-label {
+            color: #be96e1;
+            border-color: #be96e1;
+            /* background: rgba(110, 64, 255, 0.1); */
+            font-weight: 600;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="flow-chart-container">
+        <!-- 网格背景 -->
+        <div class="grid-background"></div>
+        
+        <!-- 流程图标题 -->
+        <div class="flow-title">Hyperledger Fabric  区块链网络</div>
+        
+        <!-- 连接线容器 -->
+        <div id="connectors-container"></div>
+        
+        <!-- 数据流容器 -->
+        <div id="data-flows-container"></div>
+
+        <!-- 通道区域 -->
+        <div id="channel" class="channel" style="left: 150px; top: 280px; width: 580px; height: 190px; border-radius: 20px;">
+            <div class="channel-label">通道 (Channel)</div>
+        </div>
+        
+        <!-- 组织区域 -->
+        <div class="org-area" style="left: 130px; top: 100px; width: 250px; height: 400px; border: 1px dashed rgba(110, 64, 255, 0.3);">
+            <div class="org-label">组织1 (User Org)</div>
+        </div>
+        
+        <div class="org-area" style="left: 500px; top: 100px; width: 250px; height: 400px; border: 1px dashed rgba(11, 220, 171, 0.3);">
+            <div class="org-label">组织2 (Regulator Org)</div>
+        </div>
+        
+        <div class="org-area" style="left: 845px; top: 100px; width: 250px; height: 400px; border: 1px dashed rgba(255, 85, 122, 0.3);">
+            <div class="org-label">组织3 (Orderer Org)</div>
+        </div>
+        
+        <!-- CA节点 - 放在各自组织区域的上部 -->
+        <div id="ca_user" class="node ca blinking ca" style="left: 190px; top: 130px;">
+            <div class="icon">
+                <i class="fas fa-id-badge"></i>
+            </div>
+            <div class="label">CA_User</div>
+        </div>
+        
+        <div id="ca_regulator" class="node ca blinking ca" style="left: 560px; top: 130px;">
+            <div class="icon">
+                <i class="fas fa-id-badge"></i>
+            </div>
+            <div class="label">CA_Regulator</div>
+        </div>
+        
+        <div id="ca_orderer" class="node ca blinking ca" style="left: 910px; top: 130px;">
+            <div class="icon">
+                <i class="fas fa-id-badge"></i>
+            </div>
+            <div class="label">CA_Orderer</div>
+        </div>
+        
+        <!-- Peer节点 - 放在通道内 -->
+        <div id="p1_user" class="node peer blinking peer" style="left: 180px; top: 300px;">
+            <div class="icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="label">P1_User</div>
+        </div>
+        
+        <div id="p2_regulator" class="node peer blinking peer" style="left: 550px; top: 300px;">
+            <div class="icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="label">P2_Regulator</div>
+        </div>
+        
+        <!-- Orderer节点 - 放在通道内 -->
+        <div id="o_orderer" class="node orderer blinking orderer" style="left: 900px; top: 300px;">
+            <div class="icon">
+                <i class="fas fa-sort-amount-down"></i>
+            </div>
+            <div class="label">O_Orderer</div>
+        </div>
+        
+        <!-- 用户 -->
+        <!-- <div id="user" class="node user floating" style="left: 190px; top: 500px;">
+            <div class="icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="label">普通用户</div>
+        </div>
+        
+        <div id="regulator" class="node user floating" style="left: 560px; top: 500px;">
+            <div class="icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="label">监管者</div>
+        </div> -->
+        
+        <!-- 标签和说明 -->
+        <!-- <div class="description-text" style="left: 710px; top: 240px;">颁发证书</div>
+        <div class="description-text" style="left: 560px; top: 210px;">颁发证书</div>
+        <div class="description-text" style="left: 910px; top: 210px;">颁发证书</div>
+         -->
+        <div class="description-text peer-label" style="left: 392px; top: 340px;">背书/审核验证</div>
+        <div class="description-text orderer-label" style="left: 780px; top: 308px;">排序打包</div>
+        <div class="description-text orderer-label" style="left: 780px; top: 418px;">广播区块</div>
+
+        <div class="flow-subtitle">P=Peer节点, O=Orderer节点, CA=Certificate Authority</div>
+    </div>
+
+    <script>
+        // 添加动态生成的连接线、数据包和粒子效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 向下偏移的像素值
+            const offset = 20;
+            
+            // 选择所有带有style属性的元素
+            const elements = document.querySelectorAll('.flow-chart-container [style*="top"]');
+            
+            elements.forEach(el => {
+                // 获取当前top值
+                const currentTop = parseInt(el.style.top) || 0;
+                // 设置新的top值
+                el.style.top = (currentTop + offset) + 'px';
+            });
+            
+            // 创建连接线
+            createConnectors();
+            
+            // 添加更多随机数据包
+            setInterval(function() {
+                addDataPackets();
+            }, 800);
+            
+            // 添加背景粒子
+            createParticles();
+            
+            // 窗口大小变化时重新绘制连接线
+            window.addEventListener('resize', function() {
+                createConnectors();
+            });
+        });
+        
+        // 创建节点间的连接线
+        function createConnectors() {
+            // 清除旧的连接线
+            const connectorsContainer = document.getElementById('connectors-container');
+            const dataFlowsContainer = document.getElementById('data-flows-container');
+            connectorsContainer.innerHTML = '';
+            dataFlowsContainer.innerHTML = '';
+            
+            // 修改连接关系，更准确地表示Fabric交易流程
+            const connections = [
+                // 移除CA到节点的连接线，只保留虚拟关联
+                // 正确的交易流程
+                { from: 'user', to: 'p1_user', type: 'peer', description: '发起交易', dataFlow: true, delay: '0.5s' },
+                { from: 'regulator', to: 'p2_regulator', type: 'peer', description: '审核权限', dataFlow: true, delay: '0.5s' },
+                // 背书流程 - 使用曲线表示不同的路径
+                { from: 'p1_user', to: 'p2_regulator', type: 'peer', description: '提交交易/背书', dataFlow: true, delay: '1s', curve: { type: 'bottom', height: 0.5 } },
+                // 通道到O的连线 - 向上弯曲的曲线 - 上移20像素
+                { from: 'channel', to: 'o_orderer', type: 'orderer', description: '排序', dataFlow: true, delay: '1.5s', 
+                special: true, fromPoint: 'right', toPoint: 'left', curve: { type: 'top', height: 40 }, 
+                verticalOffset: -15 },  // 添加垂直偏移量，负值表示上移
+                
+                // O到通道的连线 - 向下弯曲的曲线 - 下移20像素
+                { from: 'o_orderer', to: 'channel', type: 'orderer', description: '分发区块', dataFlow: true, delay: '2s', 
+                special: true, fromPoint: 'left', toPoint: 'right', curve: { type: 'bottom', height: 40 }, 
+                verticalOffset: 15 }   // 添加垂直偏移量，正值表示下移
+            ];
+            
+            // 为每对节点创建连接线
+            connections.forEach(conn => {
+                let connDetails;
+                
+                if (conn.special) {
+                    // 处理特殊连接线（通道与节点之间）
+                    connDetails = drawSpecialConnector(
+                        conn.from,
+                        conn.to,
+                        conn.type,
+                        connectorsContainer,
+                        conn.fromPoint,
+                        conn.toPoint,
+                        conn.curve,
+                        conn.verticalOffset
+                    );
+                } else {
+                    // 原有节点间的连接线
+                    connDetails = drawConnector(
+                        conn.from, 
+                        conn.to, 
+                        conn.type, 
+                        connectorsContainer, 
+                        conn.verticalAlign,
+                        conn.curve
+                    );
+                }
+                
+                // 如果需要数据流，则添加
+                if (conn.dataFlow && connDetails) {
+                    createDataFlow(connDetails, conn.type, conn.delay, dataFlowsContainer, conn.curve);
+                }
+            });
+            
+            // 为CA添加虚拟指示线，表示证书颁发
+            addCertificateIndicator('ca_user', 'p1_user');
+            addCertificateIndicator('ca_regulator', 'p2_regulator');
+            addCertificateIndicator('ca_orderer', 'o_orderer');
+        }
+        
+       // 修改drawSpecialConnector函数以支持曲线
+        function drawSpecialConnector(fromId, toId, type, container, fromPoint = 'right', toPoint = 'left', curve = null, verticalOffset = 0) {
+            const fromElement = document.getElementById(fromId);
+            const toElement = document.getElementById(toId);
+            
+            if (!fromElement || !toElement) return null;
+            
+            const containerRect = document.querySelector('.flow-chart-container').getBoundingClientRect();
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            
+            // 计算起点和终点
+            let fromX, fromY, toX, toY;
+            
+            // 计算起点（从通道框或节点）
+            if (fromId === 'channel') {
+                // 从通道框出发
+                switch (fromPoint) {
+                    case 'right':
+                        fromX = fromRect.right - containerRect.left;
+                        fromY = fromRect.top - containerRect.top + fromRect.height / 2 + verticalOffset; // 加入偏移量
+                        break;
+                    default:
+                        fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+                        fromY = fromRect.bottom - containerRect.top;
+                }
+            } else {
+                // 从节点出发 - 根据fromPoint确定边缘位置
+                switch (fromPoint) {
+                    case 'left':
+                        fromX = fromRect.left - containerRect.left;
+                        fromY = fromRect.top - containerRect.top + fromRect.height / 2 + verticalOffset; // 加入偏移量
+                        break;
+                    default:
+                        fromX = fromRect.right - containerRect.left;
+                        fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+                }
+            }
+            
+            // 计算终点（到通道框或节点）
+            if (toId === 'channel') {
+                // 到通道框
+                switch (toPoint) {
+                    case 'right':
+                        toX = toRect.right - containerRect.left;
+                        toY = toRect.top - containerRect.top + toRect.height / 2 + verticalOffset; // 加入偏移量
+                        break;
+                    default:
+                        toX = toRect.left - containerRect.left;
+                        toY = toRect.top - containerRect.top + toRect.height / 2;
+                }
+            } else {
+                // 到节点 - 根据toPoint确定边缘位置
+                switch (toPoint) {
+                    case 'left':
+                        toX = toRect.left - containerRect.left;
+                        toY = toRect.top - containerRect.top + toRect.height / 2 + verticalOffset; // 加入偏移量
+                        break;
+                    default:
+                        toX = toRect.right - containerRect.left;
+                        toY = toRect.top - containerRect.top + toRect.height / 2;
+                }
+            }
+            
+            // 如果需要绘制曲线
+            if (curve) {
+                // 创建SVG元素
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.style.position = "absolute";
+                svg.style.top = "0";
+                svg.style.left = "0";
+                svg.style.width = "100%";
+                svg.style.height = "100%";
+                svg.style.zIndex = "5";
+                svg.style.pointerEvents = "none";
+                
+                // 计算控制点
+                const midX = (fromX + toX) / 2;
+                let cpY;
+                
+                if (curve.type === 'top') {
+                    cpY = Math.min(fromY, toY) - curve.height;
+                } else { // bottom
+                    cpY = Math.max(fromY, toY) + curve.height;
+                }
+                
+                // 创建贝塞尔曲线路径
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const pathData = `M ${fromX} ${fromY} Q ${midX} ${cpY}, ${toX} ${toY}`;
+                path.setAttribute("d", pathData);
+                path.setAttribute("fill", "none");
+                
+                // 设置颜色
+                let strokeColor;
+                if (type === 'peer') strokeColor = 'var(--peer-color)';
+                else if (type === 'orderer') strokeColor = 'var(--orderer-color)';
+                else if (type === 'ca') strokeColor = 'var(--ca-color)';
+                else if (type === 'mixed') strokeColor = 'url(#mixedGradient)';
+                
+                path.setAttribute("stroke", strokeColor);
+                path.setAttribute("stroke-width", "2");
+                path.setAttribute("stroke-opacity", "0.8");
+                
+                // 添加箭头
+                const arrowId = `arrow-${type}-${Math.random().toString(36).substring(2, 9)}`;
+                
+                // 创建defs和箭头
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+                marker.setAttribute("id", arrowId);
+                marker.setAttribute("viewBox", "0 0 10 10");
+                marker.setAttribute("refX", "8.5");
+                marker.setAttribute("refY", "5");
+                marker.setAttribute("markerWidth", "6");
+                marker.setAttribute("markerHeight", "6");
+                marker.setAttribute("orient", "auto-start-reverse");
+                
+                const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+                arrow.setAttribute("fill", strokeColor);
+                
+                marker.appendChild(arrow);
+                defs.appendChild(marker);
+                svg.appendChild(defs);
+                
+                path.setAttribute("marker-end", `url(#${arrowId})`);
+                
+                svg.appendChild(path);
+                container.appendChild(svg);
+                
+                // 计算路径长度用于数据包动画
+                const pathLength = path.getTotalLength();
+                
+                return {
+                    isCurve: true,
+                    path: path,
+                    length: pathLength,
+                    start: { x: fromX, y: fromY },
+                    end: { x: toX, y: toY }
+                };
+            } else {
+                // 创建直线连接
+                const lineLength = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                const angleDeg = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+                
+                const connector = document.createElement('div');
+                connector.className = `connector ${type}`;
+                connector.style.width = `${lineLength}px`;
+                connector.style.left = `${fromX}px`;
+                connector.style.top = `${fromY}px`;
+                connector.style.transform = `rotate(${angleDeg}deg)`;
+                
+                container.appendChild(connector);
+                
+                return {
+                    start: { x: fromX, y: fromY },
+                    end: { x: toX, y: toY },
+                    length: lineLength,
+                    angle: angleDeg
+                };
+            }
+        }
+        // 添加证书颁发指示器
+        function addCertificateIndicator(caId, targetId) {
+            const ca = document.getElementById(caId);
+            const target = document.getElementById(targetId);
+            
+            if (!ca || !target) return;
+            
+            // 添加虚线箭头或图标表示证书颁发
+            const indicator = document.createElement('div');
+            indicator.className = 'cert-indicator';
+            
+            // 设置位置在CA的下方
+            const caRect = ca.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const container = document.querySelector('.flow-chart-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // 计算指示器位置
+            const top = caRect.bottom - containerRect.top + 5;
+            const left = caRect.left - containerRect.left + caRect.width / 2;
+            
+            indicator.style.position = 'absolute';
+            indicator.style.top = `${top}px`;
+            indicator.style.left = `${left}px`;
+            indicator.style.width = '20px';
+            indicator.style.height = '30px';
+            indicator.style.borderLeft = '2px dashed var(--ca-color)';
+            indicator.style.zIndex = '4';
+            
+            container.appendChild(indicator);
+        }
+
+        // 扩展drawConnector函数以支持曲线
+        function drawConnector(fromId, toId, type, container, verticalAlign = false, curve = null) {
+            const fromNode = document.getElementById(fromId);
+            const toNode = document.getElementById(toId);
+            
+            if (!fromNode || !toNode) return null;
+            
+            // 获取节点位置和尺寸
+            const fromRect = fromNode.getBoundingClientRect();
+            const toRect = toNode.getBoundingClientRect();
+            const containerRect = document.querySelector('.flow-chart-container').getBoundingClientRect();
+            
+            // 计算节点中心点相对于容器的位置
+            const fromWidth = fromRect.width;
+            const fromHeight = fromRect.height;
+            const toWidth = toRect.width;
+            const toHeight = toRect.height;
+            
+            const fromCenterX = fromRect.left - containerRect.left + fromWidth / 2;
+            const fromCenterY = fromRect.top - containerRect.top + fromHeight / 2;
+            const toCenterX = toRect.left - containerRect.left + toWidth / 2;
+            const toCenterY = toRect.top - containerRect.top + toHeight / 2;
+            
+            // 如果需要绘制曲线
+            if (curve) {
+                // 创建SVG元素
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.style.position = "absolute";
+                svg.style.top = "0";
+                svg.style.left = "0";
+                svg.style.width = "100%";
+                svg.style.height = "100%";
+                svg.style.zIndex = "5";
+                svg.style.pointerEvents = "none";
+                
+                // 计算节点边缘的起止点
+                let fromX, fromY, toX, toY;
+                
+                // 源节点边缘点
+                if (fromNode.classList.contains('user')) {
+                    const radius = fromWidth / 2;
+                    const angle = Math.atan2(toCenterY - fromCenterY, toCenterX - fromCenterX);
+                    fromX = fromCenterX + Math.cos(angle) * radius;
+                    fromY = fromCenterY + Math.sin(angle) * radius;
+                } else {
+                    const halfWidth = fromWidth / 2;
+                    const halfHeight = fromHeight / 2;
+                    const dx = toCenterX - fromCenterX;
+                    const dy = toCenterY - fromCenterY;
+                    
+                    // 根据方向确定起点
+                    if (Math.abs(dx) * halfHeight > Math.abs(dy) * halfWidth) {
+                        // 从左/右边出发
+                        fromX = fromCenterX + Math.sign(dx) * halfWidth;
+                        fromY = fromCenterY + dy * halfWidth / Math.abs(dx);
+                    } else {
+                        // 从上/下边出发
+                        fromX = fromCenterX + dx * halfHeight / Math.abs(dy);
+                        fromY = fromCenterY + Math.sign(dy) * halfHeight;
+                    }
+                }
+                
+                // 目标节点边缘点
+                if (toNode.classList.contains('user')) {
+                    const radius = toWidth / 2;
+                    const angle = Math.atan2(fromCenterY - toCenterY, fromCenterX - toCenterX);
+                    toX = toCenterX + Math.cos(angle) * radius;
+                    toY = toCenterY + Math.sin(angle) * radius;
+                } else {
+                    const halfWidth = toWidth / 2;
+                    const halfHeight = toHeight / 2;
+                    const dx = fromCenterX - toCenterX;
+                    const dy = fromCenterY - toCenterY;
+                    
+                    // 根据方向确定终点
+                    if (Math.abs(dx) * halfHeight > Math.abs(dy) * halfWidth) {
+                        // 从左/右边进入
+                        toX = toCenterX + Math.sign(dx) * halfWidth;
+                        toY = toCenterY + dy * halfWidth / Math.abs(dx);
+                    } else {
+                        // 从上/下边进入
+                        toX = toCenterX + dx * halfHeight / Math.abs(dy);
+                        toY = toCenterY + Math.sign(dy) * halfHeight;
+                    }
+                }
+                
+                // 计算控制点
+                const midX = (fromX + toX) / 2;
+                let cpY;
+                
+                if (curve.type === 'top') {
+                    cpY = Math.min(fromY, toY) - curve.height;
+                } else { // bottom
+                    cpY = Math.max(fromY, toY) + curve.height;
+                }
+                
+                // 创建贝塞尔曲线路径
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const pathData = `M ${fromX} ${fromY} Q ${midX} ${cpY}, ${toX} ${toY}`;
+                path.setAttribute("d", pathData);
+                path.setAttribute("fill", "none");
+                
+                // 设置颜色
+                let strokeColor;
+                if (type === 'peer') strokeColor = 'var(--peer-color)';
+                else if (type === 'orderer') strokeColor = 'var(--orderer-color)';
+                else if (type === 'ca') strokeColor = 'var(--ca-color)';
+                else if (type === 'mixed') strokeColor = 'url(#mixedGradient)';
+                
+                path.setAttribute("stroke", strokeColor);
+                path.setAttribute("stroke-width", "2");
+                path.setAttribute("stroke-opacity", "0.8");
+                
+                // 添加箭头
+                const arrowId = `arrow-${type}-${Math.random().toString(36).substring(2, 9)}`;
+                
+                // 创建defs
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                
+                // 创建箭头marker
+                const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+                marker.setAttribute("id", arrowId);
+                marker.setAttribute("viewBox", "0 0 10 10");
+                marker.setAttribute("refX", "9");
+                marker.setAttribute("refY", "5");
+                marker.setAttribute("markerWidth", "6");
+                marker.setAttribute("markerHeight", "6");
+                marker.setAttribute("orient", "auto-start-reverse");
+                
+                // 创建箭头路径
+                const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+                arrow.setAttribute("fill", strokeColor);
+                
+                // 组装
+                marker.appendChild(arrow);
+                defs.appendChild(marker);
+                
+                // 如果是混合类型，添加渐变
+                if (type === 'mixed') {
+                    const gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+                    gradient.setAttribute("id", `mixedGradient-${Math.random().toString(36).substring(2, 9)}`);
+                    gradient.setAttribute("gradientUnits", "userSpaceOnUse");
+                    gradient.setAttribute("x1", fromX);
+                    gradient.setAttribute("y1", fromY);
+                    gradient.setAttribute("x2", toX);
+                    gradient.setAttribute("y2", toY);
+                    
+                    const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    stop1.setAttribute("offset", "0%");
+                    stop1.setAttribute("stop-color", "var(--peer-color)");
+                    
+                    const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    stop2.setAttribute("offset", "100%");
+                    stop2.setAttribute("stop-color", "var(--orderer-color)");
+                    
+                    gradient.appendChild(stop1);
+                    gradient.appendChild(stop2);
+                    defs.appendChild(gradient);
+                    
+                    path.setAttribute("stroke", `url(#${gradient.id})`);
+                }
+                
+                svg.appendChild(defs);
+                
+                // 设置箭头
+                path.setAttribute("marker-end", `url(#${arrowId})`);
+                
+                svg.appendChild(path);
+                container.appendChild(svg);
+                
+                // 计算路径长度用于数据包动画
+                const pathLength = path.getTotalLength();
+                
+                return {
+                    isCurve: true,
+                    path: path,
+                    length: pathLength,
+                    start: { x: fromX, y: fromY },
+                    end: { x: toX, y: toY }
+                };
+            } else {
+                // 原有的直线连接代码
+                // 计算连接线在源节点和目标节点边缘的位置
+                let fromX, fromY, toX, toY;
+                
+                // 如果需要垂直对齐
+                if (verticalAlign) {
+                    fromX = fromCenterX;
+                    fromY = fromCenterY + fromHeight / 2;
+                    toX = toCenterX;
+                    toY = toCenterY - toHeight / 2;
+                } else {
+                    const angleRad = Math.atan2(toCenterY - fromCenterY, toCenterX - fromCenterX);
+                    
+                    // 计算边缘点位置的代码...
+                    // (保留原有的边缘点计算)
+                    
+                    // 源节点是圆形 (user) 还是矩形
+                    if (fromNode.classList.contains('user')) {
+                        // 用户节点是圆形
+                        const radius = fromWidth / 2;
+                        fromX = fromCenterX + Math.cos(angleRad) * radius;
+                        fromY = fromCenterY + Math.sin(angleRad) * radius;
+                    } else {
+                        // 其他节点是方形
+                        const halfWidth = fromWidth / 2;
+                        const halfHeight = fromHeight / 2;
+                        
+                        // 确定边缘点的位置
+                        const tanAngle = Math.abs(Math.tan(angleRad));
+                        
+                        if (tanAngle < halfHeight / halfWidth) {
+                            // 从右边或左边出来
+                            const signX = Math.sign(toCenterX - fromCenterX);
+                            fromX = fromCenterX + signX * halfWidth;
+                            fromY = fromCenterY + Math.tan(angleRad) * signX * halfWidth;
+                        } else {
+                            // 从上边或下边出来
+                            const signY = Math.sign(toCenterY - fromCenterY);
+                            fromY = fromCenterY + signY * halfHeight;
+                            fromX = fromCenterX + Math.tan(Math.PI/2 - angleRad) * signY * halfHeight;
+                        }
+                    }
+                    
+                    // 目标节点是圆形 (user) 还是矩形
+                    if (toNode.classList.contains('user')) {
+                        // 用户节点是圆形
+                        const radius = toWidth / 2;
+                        toX = toCenterX - Math.cos(angleRad) * radius;
+                        toY = toCenterY - Math.sin(angleRad) * radius;
+                    } else {
+                        // 其他节点是方形
+                        const halfWidth = toWidth / 2;
+                        const halfHeight = toHeight / 2;
+                        
+                        // 确定边缘点的位置
+                        const tanAngle = Math.abs(Math.tan(angleRad));
+                        
+                        if (tanAngle < halfHeight / halfWidth) {
+                            // 从右边或左边进入
+                            const signX = Math.sign(fromCenterX - toCenterX);
+                            toX = toCenterX + signX * halfWidth;
+                            toY = toCenterY + Math.tan(angleRad) * signX * halfWidth;
+                        } else {
+                            // 从上边或下边进入
+                            const signY = Math.sign(fromCenterY - toCenterY);
+                            toY = toCenterY + signY * halfHeight;
+                            toX = toCenterX + Math.tan(Math.PI/2 - angleRad) * signY * halfHeight;
+                        }
+                    }
+                }
+                
+                // 计算线的长度和角度
+                const lineLength = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                const angleDeg = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+                
+                // 创建连接线元素
+                const connector = document.createElement('div');
+                connector.className = `connector ${type}`;
+                connector.style.width = `${lineLength}px`;
+                connector.style.left = `${fromX}px`;
+                connector.style.top = `${fromY}px`;
+                connector.style.transform = `rotate(${angleDeg}deg)`;
+                
+                // 添加到容器
+                container.appendChild(connector);
+                
+                return {
+                    start: { x: fromX, y: fromY },
+                    end: { x: toX, y: toY },
+                    length: lineLength,
+                    angle: angleDeg
+                };
+            }
+        }
+        
+        // 修改createDataFlow以支持曲线路径上的数据包
+        function createDataFlow(connDetails, type, delay, container, curve = null) {
+            if (connDetails.isCurve && connDetails.path) {
+                // SVG路径上的数据包
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.style.position = "absolute";
+                svg.style.top = "0";
+                svg.style.left = "0";
+                svg.style.width = "100%";
+                svg.style.height = "100%";
+                svg.style.zIndex = "6";
+                svg.style.pointerEvents = "none";
+                
+                // 创建移动的圆点
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("r", "5");
+                
+                // 设置颜色
+                let fillColor;
+                if (type === 'peer') fillColor = 'var(--peer-color)';
+                else if (type === 'orderer') fillColor = 'var(--orderer-color)';
+                else if (type === 'ca') fillColor = 'var(--ca-color)';
+                else fillColor = 'var(--peer-color)';
+                
+                circle.setAttribute("fill", fillColor);
+                
+                // 添加路径上的动画
+                const animateMotion = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+                animateMotion.setAttribute("dur", "3s");
+                animateMotion.setAttribute("repeatCount", "indefinite");
+                animateMotion.setAttribute("path", connDetails.path.getAttribute("d"));
+                animateMotion.setAttribute("begin", delay || "0s");
+                
+                // 添加动画
+                circle.appendChild(animateMotion);
+                svg.appendChild(circle);
+                container.appendChild(svg);
+                
+                return svg;
+            } else {
+                // 原有的直线数据流代码
+                const dataFlow = document.createElement('div');
+                dataFlow.className = 'data-flow';
+                dataFlow.style.width = `${connDetails.length}px`;
+                dataFlow.style.left = `${connDetails.start.x}px`;
+                dataFlow.style.top = `${connDetails.start.y}px`;
+                dataFlow.style.transform = `rotate(${connDetails.angle}deg)`;
+                
+                const packet = document.createElement('div');
+                packet.className = `data-packet ${type}`;
+                packet.style.animationDelay = delay;
+                
+                dataFlow.appendChild(packet);
+                container.appendChild(dataFlow);
+                
+                return dataFlow;
+            }
+        }
+
+        // 添加数据包
+        function addDataPackets() {
+            const flows = document.querySelectorAll('#data-flows-container .data-flow');
+            flows.forEach(flow => {
+                if (Math.random() > 0.7) { // 70%概率添加新的数据包
+                    const packetType = flow.querySelector('.data-packet').className.split(' ')[1]; // peer, orderer, ca
+                    
+                    const packet = document.createElement('div');
+                    packet.className = `data-packet ${packetType}`;
+                    packet.style.animationDelay = Math.random() + 's';
+                    flow.appendChild(packet);
+                    
+                    // 动画结束后移除
+                    setTimeout(() => {
+                        packet.remove();
+                    }, 3000);
+                }
+            });
+        }
+
+        function createParticles() {
+            const container = document.querySelector('.flow-chart-container');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 样式设置
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                
+                // 随机选择粒子颜色
+                const colorType = Math.random();
+                if (colorType < 0.33) {
+                    particle.style.backgroundColor = `rgba(110, 64, 255, ${Math.random() * 0.2 + 0.1})`;
+                } else if (colorType < 0.66) {
+                    particle.style.backgroundColor = `rgba(255, 85, 122, ${Math.random() * 0.2 + 0.1})`;
+                } else {
+                    particle.style.backgroundColor = `rgba(11, 220, 171, ${Math.random() * 0.2 + 0.1})`;
+                }
+                
+                particle.style.borderRadius = '50%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.zIndex = '1';
+                
+                // 添加动画
+                const duration = Math.random() * 50 + 10; // 10-60秒
+                const delay = Math.random() * 5; // 0-5秒延迟
+                
+                particle.style.animation = `floatingParticle ${duration}s ${delay}s infinite ease-in-out`;
+                
+                // 添加关键帧动画
+                const styleSheet = document.styleSheets[0];
+                const animationName = 'floatingParticle';
+                const keyframes = `
+                @keyframes ${animationName} {
+                    0%, 100% { transform: translate(0, 0); }
+                    25% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); }
+                    50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); }
+                    75% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); }
+                }`;
+                
+                // 检查并添加关键帧
+                let keyframeExists = false;
+                for (let j = 0; j < styleSheet.cssRules.length; j++) {
+                    if (styleSheet.cssRules[j].type === CSSRule.KEYFRAMES_RULE && 
+                        styleSheet.cssRules[j].name === animationName) {
+                        keyframeExists = true;
+                        break;
+                    }
+                }
+                
+                if (!keyframeExists) {
+                    try {
+                        styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+                    } catch (e) {
+                        console.log("无法插入关键帧: ", e.message);
+                    }
+                }
+                
+                container.appendChild(particle);
+            }
+        }
+    </script>
+</body>
+</html>
