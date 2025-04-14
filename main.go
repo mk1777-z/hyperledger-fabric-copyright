@@ -26,6 +26,11 @@ func setupRouter(h *server.Hertz) {
 	h.GET("/statistics/export-excel", middle.ExportExcelAPI)
 	h.GET("/statistics/export-pdf", middle.ExportPDFAPI)
 
+	h.GET("/peer_orderer.html", func(c context.Context, ctx *app.RequestContext) {
+		// 直接提供文件
+		ctx.File("/home/hyperledger-fabric-copyright/HTML/project/peer_orderer.html")
+	})
+
 	// 余额相关API
 	h.POST("/balance", middle.HandleAccount)
 	h.POST("/getbalance", middle.GetBalance)

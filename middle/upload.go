@@ -44,7 +44,20 @@ var (
 
 // 初始化OBS客户端
 func InitializeOBSClient() {
-	configPath := "../config.yaml"
+	// 如果已经成功初始化，则直接返回
+	if obsClient != nil && initObsErr == nil {
+		return
+	}
+
+	log.Printf("开始初始化OBS客户端...")
+	configPath := "/home/hyperledger-fabric-copyright/config.yaml"
+
+	// 检查配置文件是否存在
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		initObsErr = fmt.Errorf("配置文件不存在 '%s'", configPath)
+		log.Printf("初始化OBS客户端错误: %v", initObsErr)
+		return
+	}
 
 	yamlData, err := os.ReadFile(configPath)
 	if err != nil {
@@ -70,10 +83,57 @@ func InitializeOBSClient() {
 		return
 	}
 
+	log.Printf("尝试连接OBS服务: %s", obsEndPoint)
 	obsClient, initObsErr = obs.New(ak, sk, obsEndPoint)
 	if initObsErr != nil {
 		log.Printf("创建OBS客户端实例错误: %v", initObsErr)
+		return
 	}
+
+	// 尝试一个简单操作验证连接
+	_, err = obsClient.ListBuckets(nil)
+	if err != nil {
+		initObsErr = fmt.Errorf("OBS连接测试失败: %w", err)
+		log.Printf("OBS客户端初始化后连接测试失败: %v", initObsErr)
+		return
+	}
+
+	log.Printf("OBS客户端初始化成功")
+}
+
+// CheckOBSStatus 返回OBS服务状态信息，用于诊断
+func CheckOBSStatus() map[string]string {
+	status := map[string]string{
+		"status":   "未初始化",
+		"error":    "",
+		"endpoint": obsEndPoint,
+		"bucket":   obsBucket,
+	}
+
+	if obsClient == nil {
+		status["status"] = "客户端未创建"
+		if initObsErr != nil {
+			status["error"] = initObsErr.Error()
+		}
+		return status
+	}
+
+	if initObsErr != nil {
+		status["status"] = "初始化错误"
+		status["error"] = initObsErr.Error()
+		return status
+	}
+
+	// 尝试列出桶以确认连接
+	_, err := obsClient.HeadBucket(obsBucket)
+	if err != nil {
+		status["status"] = "连接错误"
+		status["error"] = err.Error()
+		return status
+	}
+
+	status["status"] = "正常"
+	return status
 }
 
 func Upload(_ context.Context, c *app.RequestContext) {
@@ -88,8 +148,13 @@ func Upload(_ context.Context, c *app.RequestContext) {
 	InitializeOBSClient()
 	// 检查OBS客户端是否成功初始化
 	if obsClient == nil || initObsErr != nil {
+		log.Printf("OBS服务不可用: %v", initObsErr)
+		obsStatus := CheckOBSStatus()
 		c.Status(http.StatusInternalServerError)
-		c.JSON(http.StatusInternalServerError, utils.H{"message": "图片存储服务不可用"})
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message":    "图片存储服务不可用",
+			"obs_status": obsStatus,
+		})
 		return
 	}
 

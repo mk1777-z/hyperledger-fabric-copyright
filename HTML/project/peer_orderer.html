@@ -35,12 +35,14 @@
             position: relative;
             width: 100%;
             height: 620px;
-            margin: 2rem auto;
+            margin: 0;  /* 移除外边距 */
             max-width: 1230px;
-            overflow: hidden;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, rgba(24, 35, 56, 0.8), rgba(8, 13, 24, 0.9));
+            overflow: hidden;  
+            border-radius: 0;  /* 移除圆角 */
+            box-shadow: none;  /* 移除阴影 */
+            background: transparent;  /* 透明背景 */
+            transform-origin: center center;  /* 设置缩放中心点 */
+            transition: transform 0.3s ease;  /* 添加平滑过渡效果 */
         }
 
         /* 网格背景 */
@@ -428,6 +430,42 @@
             /* background: rgba(110, 64, 255, 0.1); */
             font-weight: 600;
         }
+
+        /* 添加响应式设计 */
+        @media (max-width: 1200px) {
+            .flow-chart-container {
+                transform: scale(0.9);
+                height: 560px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .flow-chart-container {
+                transform: scale(0.8);
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flow-chart-container {
+                transform: scale(0.7);
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .flow-chart-container {
+                transform: scale(0.6);
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flow-chart-container {
+                transform: scale(0.5);
+                height: 350px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -576,6 +614,9 @@
             connectorsContainer.innerHTML = '';
             dataFlowsContainer.innerHTML = '';
             
+            // 清除所有证书指示器，避免重复
+            document.querySelectorAll('.cert-indicator').forEach(el => el.remove());
+
             // 修改连接关系，更准确地表示Fabric交易流程
             const connections = [
                 // 移除CA到节点的连接线，只保留虚拟关联
@@ -825,6 +866,7 @@
             indicator.style.height = '30px';
             indicator.style.borderLeft = '2px dashed var(--ca-color)';
             indicator.style.zIndex = '4';
+            indicator.className = 'cert-indicator'; // 添加专用class名称
             
             container.appendChild(indicator);
         }
@@ -1251,6 +1293,49 @@
                 container.appendChild(particle);
             }
         }
+
+        // 添加到现有DOMContentLoaded事件监听器中
+        function adjustFlowChartScale() {
+            const container = document.querySelector('.flow-chart-container');
+            const containerWidth = container.parentElement.clientWidth;
+            const desiredWidth = 1230; // 设计宽度
+            
+            if (containerWidth < desiredWidth) {
+                const scale = containerWidth / desiredWidth;
+                const finalScale = Math.max(scale, 0.5); // 设置最小缩放为0.5
+                
+                // 更改变换原点和设置额外空间
+                container.style.transformOrigin = 'center center';
+                container.style.transform = `scale(${finalScale})`;
+                
+                // 关键修改：根据缩放比例增加足够的高度空间
+                const newHeight = Math.max(620 * (1/finalScale) * 0.5, 620);
+                container.style.height = newHeight + 'px';
+                
+                // 对于极小屏幕启用水平滚动而不是极端缩放
+                if (containerWidth < 480) {
+                    container.style.overflowX = 'auto'; 
+                    container.style.overflowY = 'hidden';
+                } else {
+                    container.style.overflow = 'hidden';
+                }
+            } else {
+                // 重置为默认状态
+                container.style.transform = 'none';
+                container.style.height = '620px';
+                container.style.overflow = 'hidden';
+            }
+        }
+
+        // 4. 减少resize事件的触发频率，使用防抖
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                adjustFlowChartScale();
+                createConnectors(); // 需要重新创建连接线
+            }, 250); // 250ms防抖
+        });
     </script>
 </body>
 </html>
