@@ -15,6 +15,9 @@
         :root {
             --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
             --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
+            --primary-color: #4e44ff;
+            --secondary-color: #19B6D4;
+            --gradient-primary: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             --dark-bg: #0F172A;
             --darker-bg: #080d18;
             --card-bg: #182338;
@@ -58,20 +61,43 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* 导航栏 */
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
+            transform: translateX(4rem); /* 向左偏移半个 gap 距离 */
         }
 
         .nav-links a {
-            color: var(--text-color);
+            color: #f8fafc;
             text-decoration: none;
             font-weight: 500;
+            font-size: 1.05rem;
             transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         .nav-links a:hover {
-            color: var(--accent-color);
+            color: var(--secondary-color);
         }
 
         .cta-button {
@@ -88,6 +114,35 @@
         .cta-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+
+        /* 用户栏导航 */
+        .user-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome-text {
+            color: var(--secondary-text);
+        }
+
+        .username {
+            font-weight: 600;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            cursor: pointer;
         }
 
         /* 页面标题 */
@@ -417,7 +472,7 @@
         }
 
         /* 响应式设计 */
-        @media (max-width: 768px) {
+        /* @media (max-width: 768px) {
             .hamburger {
                 display: flex;
             }
@@ -448,7 +503,7 @@
             .contract-icon {
                 margin-bottom: 1rem;
             }
-        }
+        } */
 
         /* 导航栏汉堡菜单 */
         .hamburger {
@@ -483,11 +538,10 @@
         }
 
         /* 小屏幕适配 - 缩放而不是重排 */
-        @media (max-width: 992px) {
+        /* @media (max-width: 992px) {
             .animation-container {
                 transform: scale(0.9);
                 height: 540px;
-                /* 略微减小高度 */
             }
         }
 
@@ -495,7 +549,6 @@
             .animation-container {
                 transform: scale(0.8);
                 height: 480px;
-                /* 进一步减小高度 */
             }
         }
 
@@ -503,11 +556,9 @@
             .animation-container {
                 transform: scale(0.7);
                 height: 420px;
-                /* 最小高度 */
                 overflow-x: auto;
-                /* 允许水平滚动 */
             }
-        }
+        }  */
 
         /* 确保动画阶段是固定尺寸的容器 */
         .animation-phase {
@@ -811,6 +862,115 @@
             margin-bottom: 6rem;
             position: relative;
         }
+
+        /* 用户头像和下拉菜单样式 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 30px;
+            transition: background-color 0.3s;
+        }
+
+        .user-profile:hover {
+            background-color: rgba(78, 68, 255, 0.1);
+        }
+
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            margin-right: 10px;
+            box-shadow: 0 0 10px rgba(78, 68, 255, 0.4);
+        }
+
+        /* 添加渐变色边框效果 */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        #userAvatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-profile .fa-chevron-down {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            transition: transform 0.3s;
+        }
+
+        .user-profile:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .user-profile:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(78, 68, 255, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 修改原有的欢迎文本样式 */
+        .welcome-text {
+            font-size: 0.95rem;
+            margin-right: 5px;
+        }
+
+        #loggedInContent {
+            display: none; /* 默认隐藏，登录后显示 */
+        }
     </style>
 </head>
 
@@ -825,9 +985,9 @@
         </div>
         <div class="nav-links" id="navLinks">
             <a href="/home">主页</a>
+            <a href="/display">版权交易</a>
             <a href="/transaction-monitor">交易监控</a>
             <a href="/smart-contracts" class="active">合约架构</a>
-            <a href="/display">版权展示</a>
         </div>
         <!-- 修改用户区域，整体先隐藏 -->
         <div id="userArea" style="display: none;">
@@ -838,10 +998,17 @@
 
             <!-- 登录后显示的内容 -->
             <div id="loggedInContent">
-                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
-                <a class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <img id="userAvatar" src="/static/images/user.jpg" alt="用户头像">
+                    </div>
+                    <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                    <i class="fas fa-chevron-down"></i>
+                    <!-- 下拉菜单 -->
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -1244,17 +1411,26 @@
             const loggedInContent = document.getElementById('loggedInContent');
             const usernameSpan = document.getElementById('username');
 
+            // 获取用户头像元素
+            const userAvatar = document.getElementById('userAvatar');
+
             if (token && username) {
                 // 已登录状态
                 loginBtn.style.display = 'none';
                 loggedInContent.style.display = 'flex';
                 usernameSpan.textContent = username;
 
+                // 如果有用户头像信息，更新头像
+                const avatarUrl = localStorage.getItem('avatarUrl');
+                if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                }
+
                 // 添加额外的导航链接
                 const navLinks = document.getElementById('navLinks');
                 navLinks.innerHTML += `
-                <a href="/homepage">个人中心</a>
-                <a href="/statistics">统计分析</a>
+                    <a href="/homepage">个人中心</a>
+                    <a href="/statistics">统计分析</a>
                 `;
             } else {
                 // 未登录状态

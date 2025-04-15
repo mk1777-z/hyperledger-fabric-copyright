@@ -53,7 +53,7 @@
                 setTimeout(() => document.body.removeChild(alert), 300);
             }, duration);
         }
-        
+
         function showLoadingMessage(message = '加载') {
             loadingAlert = document.createElement('div');
             loadingAlert.className = `custom-alert success`;
@@ -93,6 +93,9 @@
             --text-color: #f1f1f1;
             --secondary-text: #a0aec0;
             --accent-color: #6e40ff;
+            --primary-color: #4e44ff;
+            --secondary-color: #19B6D4;
+            --gradient-primary: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
 
         body {
@@ -150,61 +153,119 @@
 
         /* 导航栏样式 */
         .navbar {
-            background: rgba(3, 2, 10, 0.6);
-            color: var(--text-color);
-            padding: 15px 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1.5rem 5%;
+            background-color: rgba(12, 10, 38, 0.85);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .navbar-brand {
-            font-size: 1.5rem;
+        .logo {
+            font-size: 1.8rem;
             font-weight: 700;
-            color: white;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .main-nav {
+        /* 导航栏 */
+        .nav-links {
             display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
+            gap: 2.5rem;
+            transform: translateX(4rem); /* 向左偏移半个 gap 距离 */
         }
 
-        .nav-item {
-            padding: 8px 16px;
-            color: rgba(255, 255, 255, 0.7);
+        .nav-links a {
+            color: #f8fafc;
             text-decoration: none;
-            border-radius: 6px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 1.05rem;
+            transition: color 0.3s ease;
             position: relative;
         }
 
-        .nav-item:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-item.active {
-            color: white;
-        }
-
-        .nav-item.active::after {
+        .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -5px;
             left: 0;
-            right: 0;
+            width: 0;
             height: 2px;
-            background: white;
-            border-radius: 4px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        .cta-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 1.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+
+        /* 汉堡菜单 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-color);
+            margin-bottom: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background-color: var(--darker-bg);
+                padding: 2rem;
+                gap: 1.5rem;
+                transform: translateY(-200%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+            }
         }
 
         /* 用户导航 */
@@ -219,7 +280,6 @@
         }
 
         .username {
-            color: var(--accent-color);
             font-weight: 600;
         }
 
@@ -759,7 +819,8 @@
             margin-top: 25px;
             padding-top: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            gap: 15px; /* 控制按钮间距 */
+            gap: 15px;
+            /* 控制按钮间距 */
         }
 
         .custom-detail-close {
@@ -932,23 +993,27 @@
         /* 自定义消息弹窗样式 */
         .custom-alert {
             position: fixed;
-            top: 50%;    
-            left: 50%;   
-            transform: translate(-50%, -50%);   
-            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(24, 35, 56, 0.95);
+            /* 半透明深蓝紫底色 */
             color: #f1f1f1;
             padding: 15px 20px;
             border-radius: 20px;
             /* box-shadow: 0 5px 10px rgba(110, 64, 255, 0.3), 
                         0 0 0 1px rgba(110, 64, 255, 0.2);  */
-            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            display: inline-flex;
+            /* inline-flex 使其宽度随内容自适应 */
             align-items: center;
             gap: 15px;
             z-index: 9999;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            max-width: 90vw;                 /* 避免内容超出屏幕 */
-            white-space: nowrap;              /* 希望不换行 */
+            max-width: 90vw;
+            /* 避免内容超出屏幕 */
+            white-space: nowrap;
+            /* 希望不换行 */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(110, 64, 255, 0.3);
         }
@@ -966,27 +1031,34 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            background: transparent !important; /* 强制透明 */
+            background: transparent !important;
+            /* 强制透明 */
             box-shadow: none !important;
             border: none !important;
         }
 
         .custom-alert.success .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.error .alert-icon-wrapper {
-            background: transparent; /* 确保完全透明 */
-            box-shadow: none; /* 去掉任何阴影 */
+            background: transparent;
+            /* 确保完全透明 */
+            box-shadow: none;
+            /* 去掉任何阴影 */
         }
 
         .custom-alert.success {
-            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+            border: 2px solid rgba(11, 220, 171, 0.7);
+            /* 成功：淡绿色边框 */
         }
 
         .custom-alert.error {
-            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+            border: 2px solid rgba(255, 85, 122, 0.7);
+            /* 失败：淡红色边框 */
         }
 
         /* #alertIcon {
@@ -994,23 +1066,24 @@
             color: #0bdcab; 
             animation: spin 2s linear infinite; 
         } */
-         
+
         .fa-check-circle {
-            font-size: 1.8rem !important; /* 与spinner和times-circle保持一致 */
+            font-size: 1.8rem !important;
+            /* 与spinner和times-circle保持一致 */
             color: #0bdcab;
         }
 
         /* 改为只对 fa-spinner 应用旋转动画 */
         .fa-spinner {
             animation: spin 2s linear infinite;
-            font-size: 1.8rem;  
-            color: #0bdcab; 
+            font-size: 1.8rem;
+            color: #0bdcab;
         }
 
         /* 确保错误图标不会旋转 */
         .fa-times-circle {
             animation: none !important;
-            font-size: 1.7rem; 
+            font-size: 1.7rem;
         }
 
         #alertMessage {
@@ -1018,44 +1091,168 @@
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
+
         .custom-alert.success #alertIcon {
             color: #0bdcab;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         .custom-alert.error #alertIcon {
             color: #ff557a;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         #alertMessage {
             font-weight: 500;
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            margin: 1px 0;  /* 上下边距改为8px，左右为0 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            margin: 1px 0;
+            /* 上下边距改为8px，左右为0 */
         }
 
         /* 旋转动画 */
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 入场动画 */
         @keyframes alertIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .custom-alert.show {
             animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
 
         .topup-size-modal {
-            width: 340px !important;  /* 调整为充值弹窗专用宽度 */
-            max-height: 70vh !important; /* 如需调整高度 */
+            width: 340px !important;
+            /* 调整为充值弹窗专用宽度 */
+            max-height: 70vh !important;
+            /* 如需调整高度 */
         }
 
+        /* 用户头像和下拉菜单样式 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 30px;
+            transition: background-color 0.3s;
+        }
+
+        .user-profile:hover {
+            background-color: rgba(78, 68, 255, 0.1);
+        }
+
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            margin-right: 10px;
+            box-shadow: 0 0 10px rgba(78, 68, 255, 0.4);
+        }
+
+        /* 添加渐变色边框效果 */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        #userAvatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+        }
+
+        .user-profile .fa-chevron-down {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            transition: transform 0.3s;
+        }
+
+        .user-profile:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .user-profile:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(78, 68, 255, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 修改原有的欢迎文本样式 */
+        .welcome-text {
+            font-size: 0.95rem;
+            margin-right: 5px;
+        }
     </style>
 </head>
 
@@ -1066,24 +1263,37 @@
 
     <!-- 导航条 -->
     <nav class="navbar">
-        <!-- 品牌标识 -->
-        <div class="navbar-brand">区块链版权</div>
-
-        <!-- 主导航 -->
-        <div class="main-nav">
-            <a href="/display" class="nav-item">版权展示</a>
-            <a href="/homepage" class="nav-item active">个人中心</a>
-            <a href="/statistics" class="nav-item">统计分析</a>
+        <div class="logo">版链云</div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/home">主页</a>
+            <a href="/display">版权交易</a>
+            <a href="/transaction-monitor">交易监控</a>
+            <a href="/smart-contracts">合约架构</a>
+            <a href="/homepage" class="active">个人中心</a>
+            <a href="/statistics">统计分析</a>
         </div>
 
-        <!-- 用户导航 -->
+        <!-- 修改用户导航部分 -->
         <div class="user-nav">
-            <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
-            <a class="nav-link logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> 退出
-            </a>
+            <div class="user-profile">
+                <div class="avatar-container">
+                    <img id="userAvatar" src="/static/images/user.jpg" alt="用户头像">
+                </div>
+                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                <i class="fas fa-chevron-down"></i>
+                <!-- 下拉菜单 -->
+                <div class="dropdown-menu">
+                    <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                </div>
+            </div>
         </div>
     </nav>
+
 
     <div class="container">
         <div class="header-section">
@@ -1192,6 +1402,13 @@
         window.onload = function () {
             const username = localStorage.getItem('username');
             document.getElementById("username").textContent = username || "未登录";
+            
+            // 加载用户头像
+            const avatarUrl = localStorage.getItem('avatarUrl');
+            if (avatarUrl) {
+                document.getElementById('userAvatar').src = avatarUrl;
+            }
+            
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('请登录');
@@ -1426,7 +1643,7 @@
             // 创建遮罩层
             const overlay = document.createElement('div');
             overlay.className = 'custom-modal-overlay';
-            
+
             // 创建弹窗（复用修改弹窗的CSS类）
             const modal = document.createElement('div');
             modal.className = 'custom-detail-modal topup-size-modal';
@@ -1443,51 +1660,51 @@
                     <button type="button" class="custom-detail-close cancel-btn">取消</button>
                 </div>
             `;
-            
+
             // 添加到DOM
             overlay.appendChild(modal);
             document.body.appendChild(overlay);
-            
+
             // 关闭弹窗函数
             const closeModal = () => {
                 document.body.removeChild(overlay);
             };
-            
+
             // 点击遮罩层关闭
             overlay.onclick = (e) => {
                 if (e.target === overlay) {
                     closeModal();
                 }
             };
-            
+
             // 取消按钮事件
             modal.querySelector('.cancel-btn').onclick = closeModal;
-            
+
             // 确认按钮事件
             modal.querySelector('.confirm-btn').onclick = () => {
                 const amountInput = document.getElementById('topupAmount');
                 const amount = amountInput.value.trim();
-                
+
                 // 验证输入
                 if (!amount || isNaN(amount) || Number(amount) <= 0) {
                     showCustomAlert('请输入有效金额（必须大于0）', 'error');
                     amountInput.focus();
                     return;
                 }
-                
+
                 const username = localStorage.getItem('username');
                 const token = localStorage.getItem('token');
-                
+
                 if (!username || !token) {
                     showCustomAlert('用户未登录或会话已过期', 'error');
                     return;
                 }
-                
+
                 // 显示加载状态
                 const confirmBtn = modal.querySelector('.confirm-btn');
                 confirmBtn.disabled = true;
                 confirmBtn.textContent = '处理中...';
-                
+
                 fetch('/balance', {
                     method: 'POST',
                     headers: {
@@ -1500,38 +1717,38 @@
                         amount: Number(amount)
                     })
                 })
-                .then(async res => {
-                    if (!res.ok) {
-                        const errorText = await res.text();
-                        throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
-                    }
-                    
-                    const contentType = res.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        throw new Error('服务器返回了非JSON格式的响应');
-                    }
-                    
-                    return res.json();
-                })
-                .then(data => {
-                    if (data && data.message && data.message.includes('success')) {
-                        // 修改按钮状态为"充值成功"
-                        confirmBtn.textContent = '充值成功';
-                        showCustomAlert('充值成功', 'success');
-                        if (typeof updateBalance === 'function') {
-                            updateBalance();
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errorText = await res.text();
+                            throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
                         }
-                        setTimeout(closeModal, 1000); // 延迟2秒关闭
-                    } else {
-                        throw new Error(data?.message || '充值操作未成功');
-                    }
-                })
-                .catch(error => {
-                    console.error('充值请求失败:', error);
-                    showCustomAlert(`充值失败: ${error.message}`, 'error');
-                })
+
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('服务器返回了非JSON格式的响应');
+                        }
+
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data && data.message && data.message.includes('success')) {
+                            // 修改按钮状态为"充值成功"
+                            confirmBtn.textContent = '充值成功';
+                            showCustomAlert('充值成功', 'success');
+                            if (typeof updateBalance === 'function') {
+                                updateBalance();
+                            }
+                            setTimeout(closeModal, 1000); // 延迟2秒关闭
+                        } else {
+                            throw new Error(data?.message || '充值操作未成功');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('充值请求失败:', error);
+                        showCustomAlert(`充值失败: ${error.message}`, 'error');
+                    })
             };
-            
+
             // 自动聚焦输入框
             setTimeout(() => {
                 modal.querySelector('#topupAmount').focus();
@@ -1543,9 +1760,9 @@
             const alert = document.createElement('div');
             alert.className = `custom-alert custom-alert-${type}`;
             alert.textContent = message;
-            
+
             document.body.appendChild(alert);
-            
+
             setTimeout(() => {
                 alert.classList.add('fade-out');
                 setTimeout(() => {
@@ -1559,7 +1776,7 @@
             // 创建遮罩层
             const overlay = document.createElement('div');
             overlay.className = 'custom-modal-overlay';
-            
+
             // 创建弹窗（复用相同CSS类）
             const modal = document.createElement('div');
             modal.className = 'custom-detail-modal topup-size-modal';
@@ -1576,51 +1793,51 @@
                     <button type="button" class="custom-detail-close cancel-btn">取消</button>
                 </div>
             `;
-            
+
             // 添加到DOM
             overlay.appendChild(modal);
             document.body.appendChild(overlay);
-            
+
             // 关闭弹窗函数
             const closeModal = () => {
                 document.body.removeChild(overlay);
             };
-            
+
             // 点击遮罩层关闭
             overlay.onclick = (e) => {
                 if (e.target === overlay) {
                     closeModal();
                 }
             };
-            
+
             // 取消按钮事件
             modal.querySelector('.cancel-btn').onclick = closeModal;
-            
+
             // 确认按钮事件
             modal.querySelector('.confirm-btn').onclick = () => {
                 const amountInput = document.getElementById('withdrawAmount');
                 const amount = amountInput.value.trim();
-                
+
                 // 验证输入
                 if (!amount || isNaN(amount) || Number(amount) <= 0) {
                     showCustomAlert('请输入有效金额（必须大于0）', 'error');
                     amountInput.focus();
                     return;
                 }
-                
+
                 const username = localStorage.getItem('username');
                 const token = localStorage.getItem('token');
-                
+
                 if (!username || !token) {
                     showCustomAlert('用户未登录或会话已过期', 'error');
                     return;
                 }
-                
+
                 // 显示加载状态
                 const confirmBtn = modal.querySelector('.confirm-btn');
                 confirmBtn.disabled = true;
                 confirmBtn.textContent = '处理中...';
-                
+
                 fetch('/balance', {
                     method: 'POST',
                     headers: {
@@ -1633,45 +1850,45 @@
                         amount: Number(amount)
                     })
                 })
-                .then(async res => {
-                    // 增强错误处理（与充值逻辑一致）
-                    if (!res.ok) {
-                        const errorText = await res.text();
-                        throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
-                    }
-                    
-                    const contentType = res.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        throw new Error('服务器返回了非JSON格式的响应');
-                    }
-                    
-                    return res.json();
-                })
-                .then(data => {
-                    if (data && data.message && data.message.includes('success')) {
-                        // 更新按钮状态为"提现成功"
-                        confirmBtn.textContent = '提现成功';
-                        showCustomAlert('提现成功', 'success');
-                        updateBalance?.();
-                        
-                        // 2秒后关闭弹窗（让用户看到成功状态）
-                        setTimeout(closeModal, 1000);
-                    } else {
-                        throw new Error(data?.message || '提现操作未成功');
-                    }
-                })
-                .catch(error => {
-                    console.error('提现请求失败:', error);
-                    
-                    // 失败时恢复按钮状态
-                    confirmBtn.disabled = false;
-                    confirmBtn.textContent = '确认';
-                    confirmBtn.style.backgroundColor = ''; // 清除背景色
-                    
-                    showCustomAlert(`提现失败: ${error.message}`, 'error');
-                });
+                    .then(async res => {
+                        // 增强错误处理（与充值逻辑一致）
+                        if (!res.ok) {
+                            const errorText = await res.text();
+                            throw new Error(`请求失败: ${res.status} - ${errorText || '无错误详情'}`);
+                        }
+
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('服务器返回了非JSON格式的响应');
+                        }
+
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data && data.message && data.message.includes('success')) {
+                            // 更新按钮状态为"提现成功"
+                            confirmBtn.textContent = '提现成功';
+                            showCustomAlert('提现成功', 'success');
+                            updateBalance?.();
+
+                            // 2秒后关闭弹窗（让用户看到成功状态）
+                            setTimeout(closeModal, 1000);
+                        } else {
+                            throw new Error(data?.message || '提现操作未成功');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('提现请求失败:', error);
+
+                        // 失败时恢复按钮状态
+                        confirmBtn.disabled = false;
+                        confirmBtn.textContent = '确认';
+                        confirmBtn.style.backgroundColor = ''; // 清除背景色
+
+                        showCustomAlert(`提现失败: ${error.message}`, 'error');
+                    });
             };
-            
+
             // 自动聚焦输入框
             setTimeout(() => {
                 modal.querySelector('#withdrawAmount').focus();
@@ -1829,7 +2046,7 @@
                 }).then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            showCustomAlert('修改成功', 'success',5000);
+                            showCustomAlert('修改成功', 'success', 5000);
                             closeModal();
                             location.reload(); // 可按需刷新数据
                         } else {
@@ -1923,6 +2140,16 @@
                 if (!img.dataset.loaded) {
                     lazyLoadObserver.observe(img);
                 }
+            });
+        }
+
+        // 汉堡菜单功能
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', function () {
+                navLinks.classList.toggle('active');
             });
         }
     </script>

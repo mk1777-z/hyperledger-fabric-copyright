@@ -20,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <style>
         :root {
+            --primary-gradient: linear-gradient(135deg, #6e40ff, #0bdcab);
             --primary-color: #4e44ff;
             --secondary-color: #19B6D4;
             --gradient-primary: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
@@ -100,8 +101,8 @@
 
         /* 导航栏 */
         .navbar {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
             padding: 1.5rem 5%;
             background-color: rgba(12, 10, 38, 0.85);
@@ -115,44 +116,56 @@
         }
 
         .logo {
-            font-size: 1.7rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            background: var(--gradient-primary);
+            background: var(--primary-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
         }
-
+        
         .nav-links {
             display: flex;
             gap: 2.5rem;
+            position: relative;
+            width: fit-content;
+            margin: 0 auto;  /* 使用 margin auto 实现居中 */
+            padding: 0;      /* 移除任何内边距 */
+            transform: translateX(1.25rem); /* 向左偏移半个 gap 距离 */
+        }
+
+        #userArea {
+            display: flex;
+            justify-content: flex-end;
         }
 
         .nav-links a {
             color: var(--text-color);
             text-decoration: none;
-            font-weight: 500;
-            font-size: 1.05rem;
-            transition: color 0.3s ease;
-            position: relative;
+            font-weight: 500;     /* 字体粗细 */
+            font-size: 1.05rem;      /* 字体大小 */
+            transition: color 0.3s ease;   /* 颜色过渡效果 */
+            position: relative;  
         }
 
+        /* 鼠标悬停时的底部横线效果 */
         .nav-links a::after {
             content: '';
             position: absolute;
             bottom: -5px;
             left: 0;
             width: 0;
-            height: 2px;
+            height: 2px;    /* 横线厚度 */
             background: var(--gradient-primary);
             transition: width 0.3s ease;
         }
 
+        /* 鼠标悬停时横线扩展到宽度 */
         .nav-links a:hover::after {
             width: 100%;
         }
 
+        /* 鼠标悬停时的文字颜色变化 */
         .nav-links a:hover {
             color: var(--secondary-color);
         }
@@ -174,6 +187,37 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(78, 68, 255, 0.4);
         }
+
+        /* 用户导航 */
+        .user-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome-text {
+            color: var(--secondary-text);
+        }
+
+        .username {
+            color: var(--gradient-primary);
+            font-weight: 600;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            cursor: pointer;
+        }
+
 
         /* 英雄部分 */
         .hero {
@@ -722,7 +766,7 @@
             .features-grid {
                 grid-template-columns: 1fr;
             }
-        }
+        } 
 
         /* 导航栏汉堡菜单 */
         .hamburger {
@@ -760,7 +804,7 @@
                 z-index: 100;
                 align-items: flex-start;
                 box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
-            }
+            } 
 
             .nav-links.active {
                 transform: translateX(0);
@@ -806,6 +850,115 @@
             transform: translateX(-50%);
             background: radial-gradient(circle, rgba(25, 182, 212, 0.2), rgba(78, 68, 255, 0.1), transparent 70%);
         }
+
+        /* 用户头像和下拉菜单样式 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 30px;
+            transition: background-color 0.3s;
+        }
+
+        .user-profile:hover {
+            background-color: rgba(78, 68, 255, 0.1);
+        }
+
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            margin-right: 10px;
+            box-shadow: 0 0 10px rgba(78, 68, 255, 0.4);
+        }
+
+        /* 添加渐变色边框效果 */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        #userAvatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-profile .fa-chevron-down {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            transition: transform 0.3s;
+        }
+
+        .user-profile:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .user-profile:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(78, 68, 255, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 修改原有的欢迎文本样式 */
+        .welcome-text {
+            font-size: 0.95rem;
+            margin-right: 5px;
+        }
+
+        #loggedInContent {
+            display: none; /* 默认隐藏，登录后显示 */
+        }
     </style>
 </head>
 
@@ -823,9 +976,9 @@
         </div>
         <div class="nav-links" id="navLinks">
             <a href="/home" class="active">主页</a>
+            <a href="/display">版权交易</a>
             <a href="/transaction-monitor">交易监控</a>
             <a href="/smart-contracts">合约架构</a>
-            <a href="/display">版权展示</a>
         </div>
         <!-- 修改用户区域，整体先隐藏 -->
         <div id="userArea" style="display: none;">
@@ -836,10 +989,17 @@
 
             <!-- 登录后显示的内容 -->
             <div id="loggedInContent">
-                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
-                <a class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <img id="userAvatar" src="/static/images/user.jpg" alt="用户头像">
+                    </div>
+                    <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                    <i class="fas fa-chevron-down"></i>
+                    <!-- 下拉菜单 -->
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -1150,18 +1310,27 @@
             const loggedInContent = document.getElementById('loggedInContent');
             const usernameSpan = document.getElementById('username');
 
+            // 获取用户头像元素
+            const userAvatar = document.getElementById('userAvatar');
+
             if (token && username) {
                 // 已登录状态
                 loginBtn.style.display = 'none';
                 loggedInContent.style.display = 'flex';
                 usernameSpan.textContent = username;
 
+                // 如果有用户头像信息，更新头像
+                const avatarUrl = localStorage.getItem('avatarUrl');
+                if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                }
+
                 // 添加额外的导航链接
                 const navLinks = document.getElementById('navLinks');
                 navLinks.innerHTML += `
-            <a href="/homepage">个人中心</a>
-            <a href="/statistics">统计分析</a>
-        `;
+                    <a href="/homepage">个人中心</a>
+                    <a href="/statistics">统计分析</a>
+                `;
             } else {
                 // 未登录状态
                 loginBtn.style.display = 'block';

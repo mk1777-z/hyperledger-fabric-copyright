@@ -93,6 +93,9 @@
             --text-color: #f1f1f1;
             --secondary-text: #a0aec0;
             --accent-color: #6e40ff;
+            --primary-color: #4e44ff;
+            --secondary-color: #19B6D4;
+            --gradient-primary: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
 
         body {
@@ -148,11 +151,12 @@
             filter: blur(200px);
         }
 
-        /* 导航栏样式 */
+        /* 导航栏样式 - 使用透明背景 */
         .navbar {
             background: rgba(3, 2, 10, 0.6);
+            /* 更暗更透明的导航栏背景 */
             color: var(--text-color);
-            padding: 15px 30px;
+            padding: 25px 30px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             position: sticky;
             top: 0;
@@ -163,11 +167,60 @@
             align-items: center;
         }
 
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 导航栏 */
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            transform: translateX(4rem); /* 向右偏移4rem */
+        }
+
+        .nav-links a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+
         /* 品牌标识区 */
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
             color: white;
+            /* 纯白色替代渐变效果 */
         }
 
         /* 主导航 */
@@ -221,7 +274,6 @@
         }
 
         .username {
-            color: var(--accent-color);
             font-weight: 600;
         }
 
@@ -774,6 +826,130 @@
                 gap: 10px;
             }
         }
+
+        /* 用户头像和下拉菜单样式 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 30px;
+            transition: background-color 0.3s;
+        }
+
+        .user-profile:hover {
+            background-color: rgba(78, 68, 255, 0.1);
+        }
+
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            margin-right: 10px;
+            box-shadow: 0 0 10px rgba(78, 68, 255, 0.4);
+        }
+
+        /* 添加渐变色边框效果 */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        #userAvatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-profile .fa-chevron-down {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            transition: transform 0.3s;
+        }
+
+        .user-profile:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .user-profile:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(78, 68, 255, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 修改原有的欢迎文本样式 */
+        .welcome-text {
+            font-size: 0.95rem;
+            margin-right: 5px;
+        }
+
+        #loggedInContent {
+            display: none; /* 默认隐藏，登录后显示 */
+        }
+
+        /* 汉堡菜单 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(#f1f1f1);
+            margin-bottom: 5px;
+            transition: transform 0.3s ease;
+        }
     </style>
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
 </head>
@@ -785,22 +961,37 @@
 
     <!-- 导航条 -->
     <nav class="navbar">
-        <!-- 品牌标识 -->
-        <div class="navbar-brand">区块链版权</div>
-
-        <!-- 主导航 - 居中 -->
-        <div class="main-nav">
-            <a href="/display" class="nav-item">版权展示</a>
-            <a href="/homepage" class="nav-item">个人中心</a>
-            <a href="/statistics" class="nav-item">统计分析</a>
+        <div class="logo">版链云</div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/home">主页</a>
+            <a href="/display" class="active">版权交易</a>
+            <a href="/transaction-monitor">交易监控</a>
+            <a href="/smart-contracts">合约架构</a>
+        </div>
+        <!-- 动态用户区域 -->
+        <div id="userArea">
+            <!-- 默认显示登录按钮 -->
+            <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
 
-        <!-- 用户导航 - 右侧 -->
-        <div class="user-nav">
-            <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
-            <a class="nav-link logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> 退出
-            </a>
+            <!-- 登录后显示的内容 -->
+            <div id="loggedInContent">
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <img id="userAvatar" src="/static/images/user.jpg" alt="用户头像">
+                    </div>
+                    <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                    <i class="fas fa-chevron-down"></i>
+                    <!-- 下拉菜单 -->
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -864,9 +1055,51 @@
             } else {
                 showCustomAlert('请输入搜索关键词', 'error');
             }
-            
+
+            // 检查登录状态
+            checkLoginStatus();
+            //fetchItemsForPage(currentPage); // 初始化加载第一页数据
             bindPaginationEvents();
         };
+
+         // 检查登录状态的函数
+         function checkLoginStatus() {
+            token = localStorage.getItem('token'); // 修复：在这里为全局变量token赋值
+            const username = localStorage.getItem('username');
+            const loginBtn = document.querySelector('#userArea .cta-button');
+            const loggedInContent = document.getElementById('loggedInContent');
+            const usernameSpan = document.getElementById('username');
+
+            // 获取用户头像元素
+            const userAvatar = document.getElementById('userAvatar');
+
+            if (token && username) {
+                // 已登录状态
+                loginBtn.style.display = 'none';
+                loggedInContent.style.display = 'flex';
+                usernameSpan.textContent = username;
+
+                // 如果有用户头像信息，更新头像
+                const avatarUrl = localStorage.getItem('avatarUrl');
+                if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                }
+
+                // 添加额外的导航链接
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML += `
+                    <a href="/homepage">个人中心</a>
+                    <a href="/statistics">统计分析</a>
+                `;
+            } else {
+                // 未登录状态
+                loginBtn.style.display = 'block';
+                loggedInContent.style.display = 'none';
+            }
+
+            // 最后再显示整个用户区域
+            userArea.style.display = 'flex';
+        }
 
         // 退出功能
         function logout() {
