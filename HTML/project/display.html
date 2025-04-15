@@ -967,9 +967,101 @@
         .custom-alert.show {
             animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
+
+        /* 导航栏 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(#080d18);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(#f1f1f1);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(#6e40ff);
+        }
+
+        .cta-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 1.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+
+        /* 汉堡菜单 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(#f1f1f1);
+            margin-bottom: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background-color: var(#0F172A);
+                padding: 2rem;
+                gap: 1.5rem;
+                transform: translateY(-200%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+            }
+        }
     </style>
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
-    <!-- <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script> -->
 </head>
 
 <body>
@@ -977,27 +1069,54 @@
     <div class="bg-gradient bg-amber"></div>
     <div class="bg-gradient bg-primary"></div>
 
-    <!-- 导航条 - 重新设计布局 -->
+    <!-- 替换为contracts页面的header -->
     <nav class="navbar">
-        <!-- 品牌标识 -->
-        <div class="navbar-brand">区块链版权</div>
+        <div class="logo">版链云</div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/home">主页</a>
+            <a href="/transaction-monitor">交易监控</a>
+            <a href="/smart-contracts">合约架构</a>
+            <a href="/display" class="active">版权展示</a>
+        </div>
+        <!-- 动态用户区域 -->
+        <div id="userArea">
+            <!-- 默认显示登录按钮 -->
+            <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
 
-        <!-- 主导航 - 居中 -->
-        <div class="main-nav">
+            <!-- 登录后显示的内容（默认隐藏） -->
+            <div id="loggedInContent" style="display: none;">
+                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                <a class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- 导航条 - 重新设计布局 -->
+    <!-- <nav class="navbar"> -->
+    <!-- 品牌标识 -->
+    <!-- <div class="navbar-brand">区块链版权</div> -->
+
+    <!-- 主导航 - 居中 -->
+    <!-- <div class="main-nav">
             <a href="/display" class="nav-item active">版权展示</a>
             <a href="/homepage" class="nav-item">个人中心</a>
             <a href="/statistics" class="nav-item">统计分析</a>
-        </div>
+        </div>  -->
 
-        <!-- 用户导航 - 右侧 -->
-        <div class="user-nav">
+    <!-- 用户导航 - 右侧 -->
+    <!-- <div class="user-nav">
             <span class="welcome-text">欢迎，<span id="username" class="username">未登录</span></span>
             <a class="nav-link logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> 退出
             </a>
         </div>
-    </nav>
-
+    </nav> -->
     <!-- 搜索表单 -->
     <div class="container">
         <div class="search-form">
@@ -1036,31 +1155,58 @@
 
         // 页面加载时初始化
         window.onload = function () {
-            const username = localStorage.getItem('username');
-            document.getElementById("username").textContent = username || "未登录";
-            token = localStorage.getItem('token');
-            if (!token) {
-                alert('请登录');
-                return (window.location.href = '/');
-            }
+            //const username = localStorage.getItem('username');
+            //document.getElementById("username").textContent = username || "未登录";
+            //token = localStorage.getItem('token');
+            // 移除登录检查，允许未登录用户浏览
 
+            // 检查登录状态
+            checkLoginStatus();
             fetchItemsForPage(currentPage); // 初始化加载第一页数据
             bindPaginationEvents();
         };
 
-        // 退出功能
+
+        // 检查登录状态的函数
+        function checkLoginStatus() {
+            token = localStorage.getItem('token'); // 修复：在这里为全局变量token赋值
+            const username = localStorage.getItem('username');
+            const loginBtn = document.querySelector('#userArea .cta-button');
+            const loggedInContent = document.getElementById('loggedInContent');
+            const usernameSpan = document.getElementById('username');
+
+            if (token && username) {
+                // 已登录状态
+                loginBtn.style.display = 'none';
+                loggedInContent.style.display = 'flex';
+                usernameSpan.textContent = username;
+
+                // 添加额外的导航链接
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML += `
+            <a href="/homepage">个人中心</a>
+            <a href="/statistics">统计分析</a>
+        `;
+            } else {
+                // 未登录状态
+                loginBtn.style.display = 'block';
+                loggedInContent.style.display = 'none';
+            }
+        }
+
+        // 退出函数
         function logout() {
             localStorage.clear();
             window.location.href = '/';
         }
 
-        // 通用fetch请求函数
+        // 通用fetch请求函数 - 修改为支持未登录状态
         const fetchData = (url, data) =>
             fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
                 body: JSON.stringify(data)
             })
@@ -1172,14 +1318,22 @@
             });
         }
 
+        // 修复：在viewDetails函数中每次重新获取token，确保实时状态
         function viewDetails(itemName) {
-            if (!token) {
-                alert('用户未登录，请先登录！');
+            if (!itemName) {
+                alert('无效的项目名称！');
                 return;
             }
 
-            if (!itemName) {
-                alert('无效的项目名称！');
+            // 重新获取token以确保使用最新状态
+            const currentToken = localStorage.getItem('token');
+
+            // 未登录时提示用户先登录
+            if (!currentToken) {
+                showCustomAlert('请先登录后查看详情', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login'; // 改为登录页而不是首页
+                }, 1500);
                 return;
             }
 
@@ -1190,7 +1344,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${currentToken}` // 使用当前最新token
                 },
                 body: JSON.stringify({ name: itemName })
             })
@@ -1282,6 +1436,16 @@
                 if (event.key === 'Enter') {
                     searchItems();
                 }
+            });
+        }
+
+        // 汉堡菜单功能
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', function () {
+                navLinks.classList.toggle('active');
             });
         }
     </script>

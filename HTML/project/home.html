@@ -8,7 +8,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- AOS 动画库 -->
@@ -46,6 +47,46 @@
             background: linear-gradient(135deg, #050518 0%, #0c0835 50%, #070420 100%);
         }
 
+        .focus-text-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .focus-text {
+            max-width: 800px;
+            padding: 20px;
+            font-size: 2.4rem;
+            line-height: 1.4;
+            text-align: center;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(8, 13, 24, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            transform: translateY(30px);
+            transition: transform 0.8s ease, opacity 0.8s ease;
+            opacity: 0;
+        }
+
+        .focus-text.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .focus-text-container.active {
+            opacity: 1;
+        }
+
         /* 点云动画容器 */
         #particles-container {
             position: fixed;
@@ -53,7 +94,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 1;
             pointer-events: none;
         }
 
@@ -140,7 +181,8 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 20rem 5% 8rem; /* 从12rem增加到20rem，使文本向下移动 */
+            padding: 20rem 5% 8rem;
+            /* 从12rem增加到20rem，使文本向下移动 */
             position: relative;
             min-height: 100vh;
         }
@@ -149,7 +191,8 @@
             position: relative;
             z-index: 2;
             max-width: 1200px;
-            margin-top: 5rem; /* 添加额外的顶部边距，进一步将内容下移 */
+            margin-top: 5rem;
+            /* 添加额外的顶部边距，进一步将内容下移 */
         }
 
         .hero h1 {
@@ -314,7 +357,7 @@
             font-size: 1.1rem;
         }
 
-        /* 工作原理部分 */
+        /* 平台功能部分 */
         .how-it-works {
             padding: 10rem 5%;
             background-color: var(--darker-bg);
@@ -383,6 +426,7 @@
             width: 100%;
             height: auto;
             display: block;
+            object-fit: cover;
         }
 
         .step-image::after {
@@ -662,7 +706,7 @@
                 margin-right: auto;
             }
 
-            .cta-button, 
+            .cta-button,
             .secondary-button {
                 width: 100%;
             }
@@ -735,57 +779,6 @@
             }
         }
 
-        /* 滚动指示器 */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 3.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.2rem;
-            color: var(--secondary-text);
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .scroll-indicator p {
-            font-size: 1rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .scroll-indicator .mouse {
-            width: 34px;
-            height: 54px;
-            border: 2px solid var(--secondary-text);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            padding-top: 12px;
-        }
-
-        .scroll-indicator .mouse-wheel {
-            width: 4px;
-            height: 10px;
-            background-color: var(--secondary-text);
-            border-radius: 2px;
-            animation: scroll 1.5s infinite;
-        }
-
-        @keyframes scroll {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(15px);
-                opacity: 0;
-            }
-        }
-
         /* 亮点效果 */
         .glow {
             position: absolute;
@@ -822,21 +815,33 @@
 
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="logo">区块链版权</div>
+        <div class="logo">版链云</div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
             <span></span>
         </div>
         <div class="nav-links" id="navLinks">
-            <a href="/home">主页</a>
+            <a href="/home" class="active">主页</a>
             <a href="/transaction-monitor">交易监控</a>
-            <a href="/smart-contracts">智能合约</a>
-            <a href="/upload">版权上传</a>
-            <a href="/statistics">数据统计</a>
-            <a href="/audit">版权审计</a>
+            <a href="/smart-contracts">合约架构</a>
+            <a href="/display">版权展示</a>
         </div>
-        <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
+        <!-- 修改用户区域，整体先隐藏 -->
+        <div id="userArea" style="display: none;">
+            <!-- 默认显示登录按钮 -->
+            <button class="cta-button" id="loginButton"
+                onclick="window.location.href='/login?redirect=' + encodeURIComponent(window.location.pathname)">
+                立即登录</button>
+
+            <!-- 登录后显示的内容 -->
+            <div id="loggedInContent">
+                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                <a class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
     </nav>
 
     <!-- 亮点效果 -->
@@ -847,22 +852,16 @@
     <!-- 英雄部分 -->
     <section class="hero">
         <div class="hero-content">
-            <h1 data-aos="fade-up">基于<span>区块链技术</span>的<br>版权管理系统</h1>
+            <h1 data-aos="fade-up">基于<span>区块链</span>的<br>智能版权交易平台</h1>
             <p data-aos="fade-up" data-aos-delay="100">
                 利用区块链不可篡改的特性，保护您的创作，简化版权交易流程，
                 让每一份创意都得到充分尊重与保护。
             </p>
             <div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
                 <button class="cta-button" onclick="window.location.href='/register'">开始使用</button>
-                <button class="secondary-button" onclick="window.location.href='#how-it-works'">了解更多</button>
+                <button class="secondary-button" onclick="window.location.href='#platform-features'">了解更多</button>
             </div>
             <!-- 删除了平台界面展示图片 -->
-        </div>
-        <div class="scroll-indicator" onclick="document.querySelector('#features').scrollIntoView({behavior: 'smooth'})">
-            <p>向下滚动</p>
-            <div class="mouse">
-                <div class="mouse-wheel"></div>
-            </div>
         </div>
     </section>
 
@@ -870,7 +869,7 @@
     <section class="features" id="features">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title">系统特性</h2>
-            <p class="section-subtitle">我们的区块链版权管理系统提供了全方位的功能，满足您的版权保护需求</p>
+            <p class="section-subtitle">我们的区块链版权交易平台提供了全方位功能，满足您的版权保护需求</p>
         </div>
         <div class="features-grid">
             <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
@@ -936,54 +935,83 @@
         </div>
     </section>
 
-    <!-- 工作原理部分 -->
-    <section class="how-it-works" id="how-it-works">
+    <!-- 平台功能部分 -->
+    <section class="how-it-works" id="platform-features">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">工作原理</h2>
-            <p class="section-subtitle">了解我们的系统如何利用区块链技术保护和管理您的版权资产</p>
+            <h2 class="section-title">平台功能</h2>
+            <p class="section-subtitle">全方位的版权管理与交易服务，满足您的各种需求</p>
         </div>
         <div class="steps-container">
             <div class="step" data-aos="fade-right">
                 <div class="step-content">
                     <div class="step-number">01</div>
-                    <h3 class="step-title">版权上传</h3>
+                    <h3 class="step-title">版权交易</h3>
                     <p class="step-text">
-                        创作者只需简单几步，即可将作品信息上传至平台，
-                        系统将自动生成唯一标识并上链存储，确保版权信息不可篡改。
-                        上传的内容将经过哈希处理，生成唯一指纹，并记录在区块链上。
+                        通过区块链技术实现版权的安全可信交易，所有交易记录自动上链，
+                        确保交易过程透明可追溯。智能合约自动执行交易条款，无需
+                        中介参与，降低交易成本，提高交易效率。
                     </p>
                 </div>
-                <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=上传界面" alt="版权上传界面">
-                </div>
+                <a href="/display" class="step-image">
+                    <!-- 使用占位图片确保显示效果 -->
+                    <img src="static/images/display.png" alt="版权交易功能展示">
+                </a>
             </div>
             <div class="step" data-aos="fade-left">
                 <div class="step-content">
                     <div class="step-number">02</div>
-                    <h3 class="step-title">版权交易</h3>
+                    <h3 class="step-title">交易监控</h3>
                     <p class="step-text">
-                        通过智能合约实现版权的安全交易，交易记录自动上链，
-                        确保交易过程透明可追溯，保障买卖双方权益。智能合约
-                        自动执行交易条款，无需第三方中介参与，降低交易成本。
+                        实时监控平台上的所有交易活动，包括版权登记、转让、授权等操作，
+                        所有交易信息可视化展示，便于用户和监管机构查看交易状态，
+                        保障交易安全，防止非法操作。
                     </p>
                 </div>
-                <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=交易界面" alt="版权交易界面">
-                </div>
+                <a href="/transaction-monitor" class="step-image">
+                    <img src="static/images/monitor.png" alt="交易监控功能展示">
+                </a>
             </div>
             <div class="step" data-aos="fade-right">
                 <div class="step-content">
                     <div class="step-number">03</div>
-                    <h3 class="step-title">数据统计</h3>
+                    <h3 class="step-title">版权管理</h3>
                     <p class="step-text">
-                        平台提供全面的统计分析功能，包括交易趋势、用户活跃度、
-                        价格分布等数据，帮助用户全面了解市场状况。通过可视化
-                        图表直观呈现数据，辅助决策和市场分析。
+                        提供完整的版权生命周期管理，从创作上传、版权登记、确权到授权管理，
+                        一站式解决您的版权管理需求。系统自动记录版权变更历史，确保
+                        版权信息准确可靠，便于维权和管理。
                     </p>
                 </div>
-                <div class="step-image">
-                    <img src="https://via.placeholder.com/500x300/101224/cccccc?text=统计界面" alt="数据统计界面">
+                <a href="/homepage" class="step-image">
+                    <img src="static/images/homepage.png" alt="版权管理功能展示">
+                </a>
+            </div>
+            <div class="step" data-aos="fade-left">
+                <div class="step-content">
+                    <div class="step-number">04</div>
+                    <h3 class="step-title">统计分析</h3>
+                    <p class="step-text">
+                        强大的数据统计与分析功能，包括交易趋势、价格分布、用户活跃度等
+                        多维度分析，帮助您了解市场动态，优化定价策略，挖掘版权价值，
+                        通过可视化图表直观呈现数据，辅助决策。
+                    </p>
                 </div>
+                <a href="/statistics" class="step-image">
+                    <img src="static/images/statistics.png" alt="统计分析功能展示">
+                </a>
+            </div>
+            <div class="step" data-aos="fade-right">
+                <div class="step-content">
+                    <div class="step-number">05</div>
+                    <h3 class="step-title">监管审查</h3>
+                    <p class="step-text">
+                        为监管机构提供专业的审查工具，对平台交易进行监督和管理，
+                        确保交易合规合法。系统自动检测异常交易行为，防范
+                        版权侵权和欺诈行为，维护市场秩序和创作者权益。
+                    </p>
+                </div>
+                <a href="/audit" class="step-image">
+                    <img src="static/images/regualtor.png" alt="监管审查功能展示">
+                </a>
             </div>
         </div>
     </section>
@@ -1086,25 +1114,14 @@
                     <li><a href="/upload"><i class="fas fa-upload"></i> 版权登记</a></li>
                     <li><a href="/transaction-monitor"><i class="fas fa-exchange-alt"></i> 版权交易</a></li>
                     <li><a href="/statistics"><i class="fas fa-chart-bar"></i> 数据分析</a></li>
-                    <li><a href="#"><i class="fas fa-building"></i> 企业解决方案</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>资源</h3>
-                <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-question-circle"></i> 帮助中心</a></li>
-                    <li><a href="#"><i class="fas fa-code"></i> API文档</a></li>
-                    <li><a href="#"><i class="fas fa-file-alt"></i> 白皮书</a></li>
-                    <li><a href="#"><i class="fas fa-newspaper"></i> 最新动态</a></li>
+                    <li><a href="/audit"><i class="fas fa-gavel"></i> 版权审计</a></li>
                 </ul>
             </div>
             <div class="footer-column">
                 <h3>关注我们</h3>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
+                    <li><a href="https://github.com/mk1777-z/hyperledger-fabric-copyright"><i class="fab fa-github"></i>
+                            GitHub</a></li>
                 </ul>
             </div>
         </div>
@@ -1116,8 +1133,56 @@
     <!-- 引入 AOS 动画库 -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+
+        // 页面加载时初始化
+        window.onload = function () {
+
+            // 检查登录状态
+            checkLoginStatus();
+        };
+
+        // 检查登录状态的函数
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            const userArea = document.getElementById('userArea');
+            const loginBtn = document.getElementById('loginButton');
+            const loggedInContent = document.getElementById('loggedInContent');
+            const usernameSpan = document.getElementById('username');
+
+            if (token && username) {
+                // 已登录状态
+                loginBtn.style.display = 'none';
+                loggedInContent.style.display = 'flex';
+                usernameSpan.textContent = username;
+
+                // 添加额外的导航链接
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML += `
+            <a href="/homepage">个人中心</a>
+            <a href="/statistics">统计分析</a>
+        `;
+            } else {
+                // 未登录状态
+                loginBtn.style.display = 'block';
+                loggedInContent.style.display = 'none';
+            }
+
+            // 最后再显示整个用户区域
+            userArea.style.display = 'flex';
+        }
+
+        // 退出函数
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
         // 初始化 AOS 动画库
         document.addEventListener('DOMContentLoaded', function () {
+            // 增加hero部分高度
+            const heroSection = document.querySelector('.hero');
+            heroSection.style.minHeight = '150vh';
+
             AOS.init({
                 duration: 1000,
                 once: false,
@@ -1158,13 +1223,13 @@
             const glow1 = document.querySelector('.glow-1');
             const glow2 = document.querySelector('.glow-2');
 
-            body.addEventListener('mousemove', function(e) {
+            body.addEventListener('mousemove', function (e) {
                 const x = e.clientX;
                 const y = e.clientY;
-                
+
                 glow1.style.left = (x / 8) + 'px';
                 glow1.style.top = (y / 10 + 100) + 'px';
-                
+
                 glow2.style.right = ((window.innerWidth - x) / 8) + 'px';
                 glow2.style.bottom = ((window.innerHeight - y) / 10 + 100) + 'px';
             });
@@ -1173,341 +1238,261 @@
             initParticles();
         });
 
-        // 改进的轻量级点云动画，使用球体点和弧面形状
+        // 改进的轻量级点云动画，水平延伸星空效果
         function initParticles() {
             // 创建场景、相机和渲染器
             const container = document.getElementById('particles-container');
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 45;
-            camera.position.y = -40; // 放置在更下方，避免遮挡标题
-            
+            camera.position.z = 40; // 调整相机距离
+            camera.position.y = 0;  // 保持居中
+
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // 限制像素比以提高性能
             container.appendChild(renderer.domElement);
-            
-            // 粒子数量，适当减少以提高性能
-            const particlesCount = 2000;
-            
-            // 数组用于存储不同形状的粒子位置
-            const arcPositions = new Float32Array(particlesCount * 3);      // 弧面形状（类似地球表面）
-            const spherePositions = new Float32Array(particlesCount * 3);   // 完整球体形状
-            const gridPositions = new Float32Array(particlesCount * 3);     // 网格形状
-            
-            // 当前使用的位置数组
-            const posArray = new Float32Array(particlesCount * 3);
-            
-            // 创建地球弧面形状（位置显著提高）
-            function createArc(samples, radius, yOffset = -20) { // 将yOffset从-60提高到-20
+
+            // 大幅增加粒子数量，提升视觉效果
+            const particlesCount = 50000;
+
+            // 数组用于存储粒子位置
+            const starPositions = new Float32Array(particlesCount * 3);
+
+            // 创建水平延展的星空效果
+            function createStarfield(samples, width, height, depth) {
                 const positions = new Float32Array(samples * 3);
-                
+
                 for (let i = 0; i < samples; i++) {
-                    // 使用球坐标方程，但仅使用上半球（类似地球表面弧度）
-                    const theta = Math.random() * Math.PI * 2;
-                    // phi范围限制在0到π/2.5之间以创建弧面效果
-                    const phi = Math.random() * (Math.PI / 2.5);
-                    
-                    positions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
-                    // 放置位置大幅提高，并倒置弧面
-                    positions[i * 3 + 1] = -Math.cos(phi) * radius + yOffset;
-                    positions[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * radius;
+                    // 在x轴上更广范围分布
+                    positions[i * 3] = (Math.random() * 2 - 1) * width;
+
+                    // 在y轴上均匀分布，但更宽广
+                    positions[i * 3 + 1] = (Math.random() * 2 - 1) * height;
+
+                    // z轴深度分布，有远有近
+                    positions[i * 3 + 2] = (Math.random() * 2 - 1) * depth;
                 }
-                
+
                 return positions;
             }
-            
-            // 创建完整球体（位置显著提高）
-            function createSphere(samples, radius, yOffset = -20) { // 将yOffset从-60提高到-20
-                const positions = new Float32Array(samples * 3);
-                
-                for (let i = 0; i < samples; i++) {
-                    // 完整球体的球坐标方程
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.random() * Math.PI;
-                    
-                    positions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
-                    // 放在更下方的位置
-                    positions[i * 3 + 1] = Math.cos(phi) * radius + yOffset;
-                    positions[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * radius;
-                }
-                
-                return positions;
-            }
-            
-            // 创建网格状分布
-            function createGrid(samples, width, height, depth, yOffset = -60) {
-                const positions = new Float32Array(samples * 3);
-                const cols = Math.floor(Math.sqrt(samples));
-                const rows = Math.floor(samples / cols);
-                
-                for (let i = 0; i < samples; i++) {
-                    // 计算网格位置但添加一些随机性
-                    const col = i % cols;
-                    const row = Math.floor(i / cols) % rows;
-                    const depth_idx = Math.floor(i / (cols * rows));
-                    
-                    positions[i * 3] = (col / cols - 0.5) * width + (Math.random() - 0.5) * 5;
-                    positions[i * 3 + 1] = (row / rows - 0.5) * height + (Math.random() - 0.5) * 5 + yOffset;
-                    positions[i * 3 + 2] = (depth_idx / Math.ceil(samples / (cols * rows)) - 0.5) * depth + (Math.random() - 0.5) * 5;
-                }
-                
-                return positions;
-            }
-            
-            // 生成各种形状
-            const arcPoints = createArc(particlesCount, 50);
+
+            // 生成星空形状
+            const starPoints = createStarfield(particlesCount, 150, 80, 150);
             for (let i = 0; i < particlesCount * 3; i++) {
-                arcPositions[i] = arcPoints[i];
+                starPositions[i] = starPoints[i];
             }
-            
-            const spherePoints = createSphere(particlesCount, 30);
-            for (let i = 0; i < particlesCount * 3; i++) {
-                spherePositions[i] = spherePoints[i];
-            }
-            
-            const gridPoints = createGrid(particlesCount, 80, 50, 50);
-            for (let i = 0; i < particlesCount * 3; i++) {
-                gridPositions[i] = gridPoints[i];
-            }
-            
-            // 初始形状：弧面
-            for (let i = 0; i < posArray.length; i++) {
-                posArray[i] = arcPositions[i];
-            }
-            
-            // 球体几何体用于点的实例化
-            const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8);
+
+            // 球体几何体用于点的实例化（更小的点）
+            const sphereGeo = new THREE.SphereGeometry(0.15, 6, 6); // 更小的点
             const sphereMat = new THREE.MeshBasicMaterial({
                 color: 0xffffff,
                 transparent: true,
                 opacity: 0.8
             });
-            
+
             // 创建实例化网格
             const instancedMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, particlesCount);
             scene.add(instancedMesh);
-            
+
             // 临时变量
             const dummy = new THREE.Object3D();
             const color = new THREE.Color();
-            
+
             // 设置每个实例的初始位置、旋转和颜色
             for (let i = 0; i < particlesCount; i++) {
                 // 设置位置
                 dummy.position.set(
-                    posArray[i * 3],
-                    posArray[i * 3 + 1],
-                    posArray[i * 3 + 2]
+                    starPositions[i * 3],
+                    starPositions[i * 3 + 1],
+                    starPositions[i * 3 + 2]
                 );
-                
+
                 // 随机旋转
                 dummy.rotation.set(
                     Math.random() * Math.PI,
                     Math.random() * Math.PI,
                     Math.random() * Math.PI
                 );
-                
-                // 随机缩放，创建不同大小的球体
-                const scale = 0.2 + Math.random() * 0.4;
+
+                // 随机缩放，创建不同大小的星点
+                const scale = 0.1 + Math.random() * 0.4;
                 dummy.scale.set(scale, scale, scale);
-                
+
                 // 应用变换到实例
                 dummy.updateMatrix();
                 instancedMesh.setMatrixAt(i, dummy.matrix);
-                
-                // 设置颜色（蓝白色调）
-                color.setHSL(0.6 + Math.random() * 0.1, 0.8, 0.6 + Math.random() * 0.4);
+
+                // 设置颜色（更多样化）
+                const colorValue = Math.random();
+                if (colorValue > 0.97) {
+                    // 少数较亮的点
+                    color.setHSL(0.6, 0.9, 1.0);
+                } else if (colorValue > 0.94) {
+                    // 中等亮度
+                    color.setHSL(0.6, 0.8, 0.7);
+                } else if (colorValue > 0.90) {
+                    // 淡蓝色点
+                    color.setHSL(0.5, 0.7, 0.5);
+                } else {
+                    // 大多数暗点
+                    color.setHSL(0.6, 0.7, 0.15 + Math.random() * 0.25);
+                }
                 instancedMesh.setColorAt(i, color);
             }
-            
+
             // 需要更新实例
             instancedMesh.instanceMatrix.needsUpdate = true;
             if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
-            
+
             // 窗口大小调整
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
-            
-            // 动画控制
+
+            // 动画控制变量
             let mouseX = 0;
             let mouseY = 0;
-            let currentShape = 0; // 0=弧面, 1=球体, 2=网格
-            let targetShape = 0;
-            let animationProgress = 0;
-            let isAnimating = false;
-            
+            let scrollSpeed = 0;
+            let lastScrollTop = 0;
+
             // 鼠标移动响应
             document.addEventListener('mousemove', (event) => {
                 mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                 mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
             });
-            
-            // 滚动响应，滚动时平滑切换形状
+
+            // 滚动响应 - 只保留前进效果，删除形状转换
             window.addEventListener('scroll', () => {
-                const scrollPercentage = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-                
-                if (scrollPercentage < 0.3) {
-                    changeShape(0); // 弧面
-                } else if (scrollPercentage < 0.7) {
-                    changeShape(1); // 球体
-                } else {
-                    changeShape(2); // 网格
+                const st = window.pageYOffset || document.documentElement.scrollTop;
+                scrollSpeed = st - lastScrollTop;
+                lastScrollTop = st;
+
+                // 控制标题显示
+                const heroContent = document.querySelector('.hero-content');
+                if (heroContent) {
+                    const scrollPercentage = window.scrollY / (window.innerHeight);
+                    // 更平滑的淡出效果
+                    if (scrollPercentage < 0.5) {
+                        heroContent.style.opacity = Math.max(0, 1 - scrollPercentage * 2);
+                    } else {
+                        heroContent.style.opacity = 0;
+                    }
                 }
             });
-            
-            // 形状切换函数
-            function changeShape(newShape) {
-                if (targetShape !== newShape) {
-                    targetShape = newShape;
-                    animationProgress = 0;
-                    isAnimating = true;
-                }
-            }
-            
-            // 更新实例化网格的位置
-            function updateInstancePositions(positions) {
-                for (let i = 0; i < particlesCount; i++) {
-                    dummy.position.set(
-                        positions[i * 3],
-                        positions[i * 3 + 1],
-                        positions[i * 3 + 2]
-                    );
-                    
-                    dummy.updateMatrix();
-                    instancedMesh.setMatrixAt(i, dummy.matrix);
-                }
-                instancedMesh.instanceMatrix.needsUpdate = true;
-            }
-            
+
             // 核心动画循环
             function animate() {
                 requestAnimationFrame(animate);
-                
-                // 缓慢的基础旋转
-                instancedMesh.rotation.y += 0.003;
-                
+
                 // 轻微的鼠标响应
-                instancedMesh.rotation.x = mouseY * 0.02;
-                instancedMesh.rotation.z = mouseX * 0.02;
-                
-                // 形状过渡动画
-                if (isAnimating) {
-                    animationProgress += 0.02; // 控制过渡速度
-                    
-                    if (animationProgress >= 1) {
-                        animationProgress = 1;
-                        isAnimating = false;
-                        currentShape = targetShape;
-                    }
-                    
-                    // 计算动画的缓动值
-                    const t = animationProgress < 0.5 ? 
-                              2 * animationProgress * animationProgress : 
-                              1 - Math.pow(-2 * animationProgress + 2, 2) / 2;
-                    
-                    let sourcePositions;
-                    let targetPositions;
-                    
-                    switch (currentShape) {
-                        case 0: sourcePositions = arcPositions; break;
-                        case 1: sourcePositions = spherePositions; break;
-                        case 2: sourcePositions = gridPositions; break;
-                    }
-                    
-                    switch (targetShape) {
-                        case 0: targetPositions = arcPositions; break;
-                        case 1: targetPositions = spherePositions; break;
-                        case 2: targetPositions = gridPositions; break;
-                    }
-                    
-                    // 创建插值后的位置数组
-                    const lerpedPositions = new Float32Array(particlesCount * 3);
-                    for (let i = 0; i < lerpedPositions.length; i++) {
-                        lerpedPositions[i] = sourcePositions[i] * (1 - t) + targetPositions[i] * t;
-                    }
-                    
-                    // 更新实例化网格位置
-                    updateInstancePositions(lerpedPositions);
-                }
-                
-                // 额外的波动效果
-                const positions = new Float32Array(particlesCount * 3);
-                const time = Date.now() * 0.0005;
-                
-                // 获取当前形状的位置
-                let currentPositions;
-                switch (currentShape) {
-                    case 0: currentPositions = arcPositions; break;
-                    case 1: currentPositions = spherePositions; break;
-                    case 2: currentPositions = gridPositions; break;
-                }
-                
-                // 应用微小的波动效果
+                instancedMesh.rotation.x = mouseY * 0.01;
+                instancedMesh.rotation.y = mouseX * 0.01;
+
+                // 星空前进效果
+                scrollSpeed *= 0.95; // 逐渐减弱滚动速度
+                const forwardSpeed = 0.15; // 基础前进速度
+
+                // 更新点云位置，创造前进感
                 for (let i = 0; i < particlesCount; i++) {
                     const i3 = i * 3;
-                    positions[i3] = currentPositions[i3] + Math.sin(time + i * 0.1) * 0.3;
-                    positions[i3 + 1] = currentPositions[i3 + 1] + Math.cos(time + i * 0.1) * 0.3;
-                    positions[i3 + 2] = currentPositions[i3 + 2] + Math.sin(time * 0.7 + i * 0.1) * 0.3;
+
+                    // 读取当前位置
+                    dummy.position.set(
+                        starPositions[i3],
+                        starPositions[i3 + 1],
+                        starPositions[i3 + 2]
+                    );
+
+                    // 应用前进动画
+                    dummy.position.z += (forwardSpeed + Math.abs(scrollSpeed) * 0.01);
+
+                    // 循环回到远处
+                    if (dummy.position.z > 50) {
+                        dummy.position.z -= 200;
+                        dummy.position.x = (Math.random() * 2 - 1) * 150;
+                        dummy.position.y = (Math.random() * 2 - 1) * 80;
+                    }
+
+                    // 更新矩阵
+                    dummy.updateMatrix();
+                    instancedMesh.setMatrixAt(i, dummy.matrix);
+
+                    // 保存位置回数组
+                    starPositions[i3] = dummy.position.x;
+                    starPositions[i3 + 1] = dummy.position.y;
+                    starPositions[i3 + 2] = dummy.position.z;
                 }
-                
-                if (!isAnimating) {
-                    updateInstancePositions(positions);
-                }
-                
+
+                instancedMesh.instanceMatrix.needsUpdate = true;
                 renderer.render(scene, camera);
             }
-            
+
             animate();
-            
+
             // 页面加载时的初始过渡动画
             setTimeout(() => {
                 // 创建一个向上移动的动画
                 const initialPositions = new Float32Array(particlesCount * 3);
-                
+
                 for (let i = 0; i < particlesCount; i++) {
                     const i3 = i * 3;
                     // 复制原始位置
-                    initialPositions[i3] = arcPositions[i3];
+                    initialPositions[i3] = starPositions[i3];
                     // 初始位置在更下方
-                    initialPositions[i3 + 1] = arcPositions[i3 + 1] - 30;
-                    initialPositions[i3 + 2] = arcPositions[i3 + 2];
+                    initialPositions[i3 + 1] = starPositions[i3 + 1] - 30;
+                    initialPositions[i3 + 2] = starPositions[i3 + 2];
                 }
-                
+
                 // 更新实例化网格到初始位置
-                updateInstancePositions(initialPositions);
-                
+                for (let i = 0; i < particlesCount; i++) {
+                    dummy.position.set(
+                        initialPositions[i * 3],
+                        initialPositions[i * 3 + 1],
+                        initialPositions[i * 3 + 2]
+                    );
+                    dummy.updateMatrix();
+                    instancedMesh.setMatrixAt(i, dummy.matrix);
+                }
+                instancedMesh.instanceMatrix.needsUpdate = true;
+
                 // 使用GSAP创建进入动画
-                gsap.to({progress: 0}, {
+                gsap.to({ progress: 0 }, {
                     progress: 1,
                     duration: 2,
                     ease: "power3.out",
-                    onUpdate: function() {
+                    onUpdate: function () {
                         const progress = this.targets()[0].progress;
-                        
+
                         for (let i = 0; i < particlesCount; i++) {
                             const i3 = i * 3;
                             // 从初始位置插值到目标位置
                             dummy.position.set(
-                                arcPositions[i3],
-                                arcPositions[i3 + 1] - 30 * (1 - progress),
-                                arcPositions[i3 + 2]
+                                starPositions[i3],
+                                starPositions[i3 + 1] - 30 * (1 - progress),
+                                starPositions[i3 + 2]
                             );
-                            
+
                             dummy.updateMatrix();
                             instancedMesh.setMatrixAt(i, dummy.matrix);
                         }
-                        
+
                         instancedMesh.instanceMatrix.needsUpdate = true;
                     }
                 });
             }, 500);
+
+            // 在创建新实例前释放旧资源
+            if (window.prevInstancedMesh) {
+                window.prevInstancedMesh.geometry.dispose();
+                window.prevInstancedMesh.material.dispose();
+                scene.remove(window.prevInstancedMesh);
+            }
+            // 保存当前实例以便后续清理
+            window.prevInstancedMesh = instancedMesh;
         }
     </script>
 </body>
 
 </html>
-

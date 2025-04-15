@@ -31,6 +31,11 @@ func setupRouter(h *server.Hertz) {
 		ctx.File("/home/hyperledger-fabric-copyright/HTML/project/peer_orderer.html")
 	})
 
+	h.GET("/flowchart.html", func(c context.Context, ctx *app.RequestContext) {
+		// 直接提供文件
+		ctx.HTML(http.StatusOK, "flowchart.html", nil)
+	})
+
 	// 余额相关API
 	h.POST("/balance", middle.HandleAccount)
 	h.POST("/getbalance", middle.GetBalance)
@@ -78,6 +83,7 @@ func setupRouter(h *server.Hertz) {
 	h.GET("/smart-contracts", func(c context.Context, ctx *app.RequestContext) {
 		ctx.HTML(http.StatusOK, "smart-contracts.html", nil)
 	})
+
 }
 
 func main() {

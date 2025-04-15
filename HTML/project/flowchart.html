@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(90deg, #6e40ff, #0bdcab);
+            --secondary-gradient: linear-gradient(90deg, #6172ff, #ff557a);
+            --dark-bg: #0F172A;
+            --darker-bg: #080d18;
+            --card-bg: #182338;
+            --text-color: #f1f1f1;
+            --secondary-text: #a0aec0;
+            --accent-color: #6e40ff;
+            --accent-hover: #5930d8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* 动画容器样式 */
+        .animation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 600px;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(24, 35, 56, 0.8), rgba(8, 13, 24, 0.9));
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 阶段样式和过渡动画 */
+        .animation-phase {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+            z-index: 1;
+        }
+
+        .animation-phase.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 每个阶段的内容容器 */
+        .phase-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            padding-top: 100px;
+        }
+
+        /* 流程图行 - 水平排列元素 */
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 流程图列 - 垂直排列元素 */
+        .flow-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 水平流程图增强 - 向右移动并居中 */
+        .flow-horizontal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 0 10px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        /* 增强组件间箭头 */
+        .component-arrow {
+            position: relative;
+            height: 6px;
+            background: linear-gradient(90deg, rgba(110, 64, 255, 0.7), rgba(11, 220, 171, 0.7));
+            width: 60px;
+            margin: 0 5px;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(110, 64, 255, 0.4);
+            z-index: 5;
+        }
+
+        .component-arrow::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -7px;
+            border-left: 14px solid rgba(11, 220, 171, 0.9);
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            filter: drop-shadow(0 0 5px rgba(110, 64, 255, 0.6));
+        }
+
+        .vertical-arrow {
+            height: 60px;
+            width: 6px;
+            transform: rotate(90deg);
+            margin: 30px 0;
+        }
+
+        /* 左侧用户组 */
+        .users-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 30px;
+        }
+
+        .users-group .animation-element {
+            margin: 10px 5px;
+        }
+
+        /* 箭头标签样式修改 - 移除背景色 */
+        .arrow-label {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #ffffff;
+            background: transparent;
+            padding: 3px 10px;
+            border-radius: 4px;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 区块链和合约组件颜色区分 - 深色底彩色边框 */
+        .block-blockchain {
+            background: #101827 !important;
+            border: 2px solid #22d3ee !important;
+            box-shadow: 0 10px 30px rgba(34, 211, 238, 0.15) !important;
+        }
+
+        .block-contract {
+            background: #101827 !important;
+            border: 2px solid #8b5cf6 !important;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15) !important;
+        }
+
+        .block-upload {
+            background: #101827 !important;
+            border: 2px solid #ec4899 !important;
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.15) !important;
+        }
+
+        /* 优化块组件图标颜色 */
+        .block-blockchain .icon {
+            background: linear-gradient(90deg, #22d3ee, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .block-contract .icon {
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .block-upload .icon {
+            background: linear-gradient(90deg, #f472b6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 用户角色名称备注 */
+        .user-role {
+            position: relative;
+            white-space: nowrap;
+            background: rgba(24, 35, 56, 0.7);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            border: none;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+            text-align: center;
+            width: max-content;
+        }
+
+        .user-role.seller,
+        .user-role.buyer,
+        .user-role.regulator {
+            border-color: transparent;
+        }
+
+        /* 调整第三阶段用户组布局 */
+        .stage-3-users .animation-element {
+            margin: 20px 5px;
+        }
+
+        /* 调整垂直箭头样式 */
+        .vertical-arrow-container {
+            position: relative;
+            height: 80px;
+            width: 20px;
+            margin: 0 auto;
+        }
+
+        /* 阶段间箭头 */
+        .stage-arrow {
+            position: absolute;
+            bottom: 60px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(110, 64, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            box-shadow: 0 0 15px rgba(110, 64, 255, 0.4);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stage-arrow:hover {
+            transform: scale(1.1);
+            background: rgba(110, 64, 255, 0.3);
+        }
+
+        .stage-arrow.prev {
+            right: auto;
+            left: 30px;
+        }
+
+        /* 相对位置调整 */
+        .animation-element {
+            position: relative;
+            margin: 15px;
+        }
+
+        /* 角色标签样式调整 */
+        .animation-user {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .element-seller {
+            background: linear-gradient(135deg, #6e40ff, #5930d8);
+        }
+
+        .element-buyer {
+            background: linear-gradient(135deg, #0bdcab, #09a480);
+        }
+
+        .element-regulator {
+            background: linear-gradient(135deg, #ff557a, #d1365b);
+        }
+
+        .animation-user .icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .animation-user .label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            white-space: nowrap;
+            color: var(--text-color);
+            background-color: rgba(24, 35, 56, 0.7);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* 箭头居中连接调整 */
+        .arrow-container {
+            position: relative;
+            height: 20px;
+            width: 100px;
+            margin: 0 10px;
+        }
+
+        .arrow-container.vertical {
+            height: 80px;
+            width: 20px;
+            margin: 5px 0;
+        }
+
+        .animation-arrow {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+        }
+
+        .vertical .animation-arrow {
+            transform: translateX(-50%) rotate(90deg);
+            width: 80px;
+            left: 50%;
+            top: 0;
+            transform-origin: center;
+        }
+
+        /* 添加粒子效果背景 */
+        .particles-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(110, 64, 255, 0.2);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(-20px) translateX(10px);
+            }
+
+            50% {
+                transform: translateY(-10px) translateX(-15px);
+            }
+
+            75% {
+                transform: translateY(-25px) translateX(5px);
+            }
+        }
+
+        /* 改进动画块样式 */
+        .animation-block {
+            width: 130px;
+            height: 160px;
+            background: linear-gradient(135deg, #303b4d, #1d2736);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 1.2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .animation-block .icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 动画控制按钮美化 */
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .animation-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0.8rem 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(110, 64, 255, 0.3);
+        }
+
+        .animation-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(110, 64, 255, 0.4);
+        }
+
+        .animation-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--text-color);
+            box-shadow: none;
+        }
+
+        .animation-btn.secondary:hover {
+            background: rgba(110, 64, 255, 0.1);
+        }
+
+        /* 阶段指示器 */
+        .phase-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .phase-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .phase-indicator.active {
+            background: var(--accent-color);
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(110, 64, 255, 0.7);
+        }
+
+        /* 更美观的高亮效果 */
+        @keyframes highlight {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px 0 rgba(110, 64, 255, 0.4);
+                transform: translateY(0);
+            }
+
+            50% {
+                box-shadow: 0 0 30px 10px rgba(110, 64, 255, 0.7);
+                transform: translateY(-5px);
+            }
+        }
+
+        .highlight {
+            animation: highlight 3s infinite ease-in-out;
+        }
+
+        /* 更流畅的箭头动画 */
+        @keyframes arrowMove {
+            0% {
+                transform: scaleX(0);
+            }
+
+            100% {
+                transform: scaleX(1);
+            }
+        }
+
+        .arrow-animate {
+            animation: arrowMove 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 美化每个阶段的介绍文字 */
+        .phase-description {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 80%;
+            width: 70%;
+            padding: 1rem 1.5rem;
+            background: rgba(16, 24, 39, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 20;
+            transition: all 0.3s ease;
+            border-top: 3px solid;
+            border-image: linear-gradient(90deg, #6e40ff, #0bdcab) 1;
+        }
+
+        .phase-description h3 {
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .phase-description p {
+            color: var(--secondary-text);
+            line-height: 1.5;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* 增强各阶段的视觉区分 */
+        #phase1 .phase-description {
+            border-image: linear-gradient(90deg, #6e40ff, #0bdcab) 1;
+        }
+
+        #phase2 .phase-description {
+            border-image: linear-gradient(90deg, #22d3ee, #8b5cf6) 1;
+        }
+
+        #phase3 .phase-description {
+            border-image: linear-gradient(90deg, #0bdcab, #ff557a) 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animation-container">
+        <!-- 粒子背景 -->
+        <div class="particles-bg" id="particles"></div>
+
+        <!-- 阶段1: 版权上传 -->
+        <div class="animation-phase phase-1 active" id="phase1">
+            <div class="phase-description">
+                <h3>阶段1: 版权上传</h3>
+                <p>卖方向平台提交新版权信息，完成版权上传后信息存储上链</p>
+            </div>
+
+            <div class="phase-content">
+                <!-- 水平流程行 -->
+                <div class="flow-row">
+                    <!-- 卖方 -->
+                    <div class="animation-element" style="position: relative;">
+                        <div class="animation-user element-seller highlight">
+                            <div class="icon"><i class="fas fa-user-edit"></i></div>
+                            <div class="label">卖方</div>
+                        </div>
+                        <div class="user-role">版权持有者</div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow">
+                        <div class="arrow-label">新版权信息</div>
+                    </div>
+
+                    <!-- 版权上传 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-upload highlight">
+                            <div class="icon"><i class="fas fa-upload"></i></div>
+                            <div class="label">版权上传</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow">
+                        <div class="arrow-label">上链存储</div>
+                    </div>
+
+                    <!-- 区块链 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-blockchain highlight">
+                            <div class="icon"><i class="fas fa-cubes"></i></div>
+                            <div class="label">区块链</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下一阶段箭头 -->
+            <div class="stage-arrow next" onclick="document.getElementById('animationNext').click()">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <!-- 阶段2: 版权信息审核 -->
+        <div class="animation-phase phase-2" id="phase2">
+            <div class="phase-description">
+                <h3>阶段2: 版权信息审核</h3>
+                <p>区块链上的版权信息被分别传送给监管审核智能合约和监管者，监管者作出决策后上链存储</p>
+            </div>
+
+            <div class="phase-content">
+                <!-- 上层流程行 -->
+                <div class="flow-row" style="margin-bottom: 50px;">
+                    <!-- 区块链 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-blockchain highlight">
+                            <div class="icon"><i class="fas fa-cubes"></i></div>
+                            <div class="label">区块链</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow" style="width: 100px;">
+                        <div class="arrow-label">版权信息</div>
+                    </div>
+
+                    <!-- 监管审核智能合约 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-contract highlight">
+                            <div class="icon"><i class="fas fa-balance-scale"></i></div>
+                            <div class="label">监管审核智能合约</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow" style="width: 100px;">
+                        <div class="arrow-label">上链存储</div>
+                    </div>
+
+                    <!-- 第二个区块链 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-blockchain highlight">
+                            <div class="icon"><i class="fas fa-cubes"></i></div>
+                            <div class="label">区块链</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 监管者到智能合约部分 -->
+                <div style="position: relative; width: 100%; height: 150px;">
+                    <!-- 监管者 -->
+                    <div class="animation-element"
+                        style="position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); text-align: center;">
+                        <div class="animation-user element-regulator highlight">
+                            <div class="icon"><i class="fas fa-user-shield"></i></div>
+                            <div class="label">监管者</div>
+                        </div>
+                        <div class="user-role">行业监管部门</div>
+                    </div>
+
+                    <div style="position: absolute; left: 50%; top: 0; height: 60px; transform: translateX(-50%);">
+                        <!-- 箭头（居中） -->
+                        <div class="component-arrow"
+                            style="position: absolute; left: 50%; top: -35%; transform: translate(-50%, -50%) rotate(-90deg); width: 60px; height: 6px;">
+                        </div>
+
+                        <!-- 文字（横排，紧贴箭头左侧） -->
+                        <div class="arrow-label"
+                            style="position: absolute; left: calc(50% - 65px); top: -35%; transform: translateY(-50%); white-space: nowrap;">
+                            审核决策
+                        </div>
+                    </div>
+
+                    <!-- 添加从区块链到监管者的箭头 -->
+                    <div class="component-arrow"
+                        style="position: absolute; width: 120px; top: 20px; left: 30%; transform: rotate(45deg);">
+                        <div class="arrow-label">版权信息</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 阶段箭头 -->
+            <div class="stage-arrow prev" onclick="document.getElementById('animationPrev').click()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="stage-arrow next" onclick="document.getElementById('animationNext').click()">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <!-- 阶段3: 完成交易并记录交易信息 - 右移居中 -->
+        <div class="animation-phase phase-3" id="phase3">
+            <div class="phase-description">
+                <h3>阶段3: 完成交易并记录交易信息</h3>
+                <p>卖方和买方通过账户与资产管理合约，经由版权交易智能合约完成交易，并将信息上链存储</p>
+            </div>
+
+            <div class="phase-content" style="padding: 20px 60px;">
+                <!-- 水平流程图 - 右移并居中 -->
+                <div class="flow-row" style="justify-content: center; padding: 0 20px;">
+                    <!-- 左侧用户组 - 增加间距 -->
+                    <div class="users-group stage-3-users" style="position: relative;">
+                        <!-- 卖方 -->
+                        <div class="animation-element" style="margin-bottom: 30px;">
+                            <div class="animation-user element-seller highlight">
+                                <div class="icon"><i class="fas fa-user-edit"></i></div>
+                                <div class="label">卖方</div>
+                            </div>
+                            <div class="user-role">版权持有者</div>
+                        </div>
+
+                        <!-- 买方 -->
+                        <div class="animation-element" style="margin-top: 30px;">
+                            <div class="animation-user element-buyer highlight">
+                                <div class="icon"><i class="fas fa-user"></i></div>
+                                <div class="label">买方</div>
+                            </div>
+                            <div class="user-role">版权购买者</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow" style="margin: 0 15px;">
+                        <div class="arrow-label">交易信息</div>
+                    </div>
+
+                    <!-- 账户与资产管理合约 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-contract highlight">
+                            <div class="icon"><i class="fas fa-wallet"></i></div>
+                            <div class="label">账户与资产管理合约</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow">
+                        <div class="arrow-label">完成交易</div>
+                    </div>
+
+                    <!-- 版权交易智能合约 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-contract highlight">
+                            <div class="icon"><i class="fas fa-file-contract"></i></div>
+                            <div class="label">版权交易智能合约</div>
+                        </div>
+                    </div>
+
+                    <!-- 增强连接箭头 -->
+                    <div class="component-arrow">
+                        <div class="arrow-label">交易信息上链</div>
+                    </div>
+
+                    <!-- 区块链 -->
+                    <div class="animation-element">
+                        <div class="animation-block block-blockchain highlight">
+                            <div class="icon"><i class="fas fa-cubes"></i></div>
+                            <div class="label">区块链</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上一阶段箭头 -->
+            <div class="stage-arrow prev" onclick="document.getElementById('animationPrev').click()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+        </div>
+
+        <!-- 阶段指示器 -->
+        <div class="phase-indicators">
+            <div class="phase-indicator active" data-phase="0"></div>
+            <div class="phase-indicator" data-phase="1"></div>
+            <div class="phase-indicator" data-phase="2"></div>
+        </div>
+    </div>
+
+    <!-- 控制按钮 -->
+    <div class="animation-controls">
+        <button class="animation-btn" id="animationPlay">
+            <i class="fas fa-play"></i> 播放动画
+        </button>
+        <button class="animation-btn secondary" id="animationPause">
+            <i class="fas fa-pause"></i> 暂停
+        </button>
+        <button class="animation-btn secondary" id="animationPrev">
+            <i class="fas fa-step-backward"></i> 上一步
+        </button>
+        <button class="animation-btn secondary" id="animationNext">
+            <i class="fas fa-step-forward"></i> 下一步
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 动画相关变量
+            const phases = document.querySelectorAll('.animation-phase');
+            const playButton = document.getElementById('animationPlay');
+            const pauseButton = document.getElementById('animationPause');
+            const prevButton = document.getElementById('animationPrev');
+            const nextButton = document.getElementById('animationNext');
+            const indicators = document.querySelectorAll('.phase-indicator');
+            let currentPhase = 0;
+            let animationInterval;
+            let isPlaying = false;
+
+            // 切换到指定阶段
+            function setPhase(phase) {
+                currentPhase = phase;
+
+                // 隐藏所有阶段
+                phases.forEach((p, index) => {
+                    p.classList.remove('active');
+                    indicators[index].classList.remove('active');
+                });
+
+                // 显示当前阶段
+                phases[currentPhase].classList.add('active');
+                indicators[currentPhase].classList.add('active');
+
+                // 重置箭头动画
+                const arrows = phases[currentPhase].querySelectorAll('.animation-arrow');
+                arrows.forEach(arrow => {
+                    arrow.classList.remove('arrow-animate');
+                    setTimeout(() => arrow.classList.add('arrow-animate'), 50);
+                });
+            }
+
+            // 播放下一阶段
+            function nextPhase() {
+                currentPhase = (currentPhase + 1) % phases.length;
+                setPhase(currentPhase);
+            }
+
+            // 播放前一阶段
+            function prevPhase() {
+                currentPhase = (currentPhase - 1 + phases.length) % phases.length;
+                setPhase(currentPhase);
+            }
+
+            // 开始播放动画
+            function startAnimation() {
+                if (!isPlaying) {
+                    isPlaying = true;
+                    animationInterval = setInterval(nextPhase, 5000); // 每5秒切换一次阶段
+                    playButton.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> 正在播放';
+                }
+            }
+
+            // 暂停动画
+            function pauseAnimation() {
+                if (isPlaying) {
+                    isPlaying = false;
+                    clearInterval(animationInterval);
+                    playButton.innerHTML = '<i class="fas fa-play"></i> 播放动画';
+                }
+            }
+
+            // 绑定按钮事件
+            playButton.addEventListener('click', function () {
+                if (isPlaying) {
+                    pauseAnimation();
+                } else {
+                    startAnimation();
+                }
+            });
+
+            pauseButton.addEventListener('click', pauseAnimation);
+            nextButton.addEventListener('click', function () {
+                pauseAnimation();
+                nextPhase();
+            });
+
+            prevButton.addEventListener('click', function () {
+                pauseAnimation();
+                prevPhase();
+            });
+
+            // 绑定指示器点击事件
+            indicators.forEach(indicator => {
+                indicator.addEventListener('click', function () {
+                    pauseAnimation();
+                    setPhase(parseInt(this.getAttribute('data-phase')));
+                });
+            });
+
+            // 初始化第一阶段
+            setPhase(0);
+
+            // 页面加载后自动开始动画
+            setTimeout(startAnimation, 1500);
+
+            // 添加粒子效果
+            const particlesContainer = document.getElementById('particles');
+            if (particlesContainer) {
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    // 随机大小和位置
+                    const size = Math.random() * 6 + 2;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+
+                    // 随机透明度和动画
+                    particle.style.opacity = Math.random() * 0.5 + 0.1;
+
+                    const animDuration = Math.random() * 20 + 10;
+                    const animDelay = Math.random() * 10;
+
+                    particle.style.animation = `float ${animDuration}s ${animDelay}s infinite ease-in-out`;
+
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            // 添加动画效果
+            const animationContainer = document.querySelector('.animation-container');
+            if (animationContainer) {
+                animationContainer.addEventListener('mousemove', function (e) {
+                    const { left, top, width, height } = this.getBoundingClientRect();
+                    const x = (e.clientX - left) / width - 0.5;
+                    const y = (e.clientY - top) / height - 0.5;
+
+                    // 添加视差效果
+                    document.querySelectorAll('.animation-block').forEach(block => {
+                        const depth = parseFloat(block.getAttribute('data-depth') || 0.1);
+                        block.style.transform = `translate3d(${x * depth * 30}px, ${y * depth * 30}px, 0)`;
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

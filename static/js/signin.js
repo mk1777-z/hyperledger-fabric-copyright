@@ -39,14 +39,14 @@ function showAlert(message, type = 'success', duration = 2000) {
     // 设置内容
     messageEl.textContent = message;
     alert.className = `custom-alert ${type}`;
-    icon.className = type === 'success' 
-        ? 'fas fa-check-circle' 
+    icon.className = type === 'success'
+        ? 'fas fa-check-circle'
         : 'fas fa-times-circle';
-    
+
     // 显示弹窗（带动画）
     alert.style.display = 'flex';
     setTimeout(() => alert.classList.add('show'), 10);
-    
+
     // 自动隐藏
     setTimeout(() => {
         alert.classList.remove('show');
@@ -127,6 +127,8 @@ function handleUserLogin(username, password) {
     // 对普通用户的密码进行哈希
     const encryptedPassword = hashPassword(password);
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect') || '/display'; // 默认跳转到display页面
     fetch('/login', {
         method: 'POST',
         headers: {
@@ -158,7 +160,8 @@ function handleUserLogin(username, password) {
                 showAlert('登录成功！', 'success', 1000);
 
                 setTimeout(() => {
-                    window.location.href = '/display'; // 普通用户跳转页面
+                    // window.location.href = '/display'; // 普通用户跳转页面
+                    window.location.href = redirectUrl;
                 }, 1000);
 
                 // 清空输入框

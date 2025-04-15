@@ -114,9 +114,9 @@ func Information(ctx context.Context, c *app.RequestContext) {
 			"id":           id,
 			"name":         name,
 			"description":  simple_des,
+			"dsc":          dsc, // 确保详细描述被传递给前端
 			"price":        price,
 			"owner":        owner,
-			"dsc":          dsc,
 			"img":          img,
 			"start_time":   start_time,
 			"transactions": transactions, // 如果 transID 为空，则 transactions 为空切片

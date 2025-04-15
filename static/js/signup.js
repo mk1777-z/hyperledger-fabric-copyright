@@ -12,14 +12,14 @@ function showAlert(message, type = 'success', duration = 2000) {
     // 设置内容
     messageEl.textContent = message;
     alert.className = `custom-alert ${type}`;
-    icon.className = type === 'success' 
-        ? 'fas fa-check-circle' 
+    icon.className = type === 'success'
+        ? 'fas fa-check-circle'
         : 'fas fa-times-circle';
-    
+
     // 显示弹窗（带动画）
     alert.style.display = 'flex';
     setTimeout(() => alert.classList.add('show'), 10);
-    
+
     // 自动隐藏
     setTimeout(() => {
         alert.classList.remove('show');
@@ -42,13 +42,6 @@ document.getElementById('signup-btn').addEventListener('click', async function (
         showAlert('两次输入的密码不一致', 'error', 2000);
         return;
     }
-
-    // // 验证用户名是否符合真实姓名要求
-    // const realNamePattern = /^[a-zA-Z\s]+$/;
-    // if (!realNamePattern.test(username)) {
-    //     alert('用户名必须是您的真实姓名，只能包含字母和空格。');
-    //     return;
-    // }
 
     // 加密密码
     const encryptedPassword = hashPassword(password);

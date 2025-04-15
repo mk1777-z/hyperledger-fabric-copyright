@@ -153,23 +153,27 @@
         /* 自定义消息弹窗样式 */
         .custom-alert {
             position: fixed;
-            top: 50%;    
-            left: 50%;   
-            transform: translate(-50%, -50%);   
-            background: rgba(24, 35, 56, 0.95); /* 半透明深蓝紫底色 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(24, 35, 56, 0.95);
+            /* 半透明深蓝紫底色 */
             color: #f1f1f1;
             padding: 20px 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(110, 64, 255, 0.3), 
-                        0 0 0 1px rgba(110, 64, 255, 0.2);
-            display: inline-flex;  /* inline-flex 使其宽度随内容自适应 */
+            box-shadow: 0 10px 30px rgba(110, 64, 255, 0.3),
+                0 0 0 1px rgba(110, 64, 255, 0.2);
+            display: inline-flex;
+            /* inline-flex 使其宽度随内容自适应 */
             align-items: center;
             gap: 15px;
             z-index: 9999;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            max-width: 90vw;                 /* 避免内容超出屏幕 */
-            white-space: nowrap;              /* 希望不换行 */
+            max-width: 90vw;
+            /* 避免内容超出屏幕 */
+            white-space: nowrap;
+            /* 希望不换行 */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(110, 64, 255, 0.3);
         }
@@ -200,11 +204,13 @@
         }
 
         .custom-alert.success {
-            border: 2px solid rgba(11, 220, 171, 0.7);  /* 成功：淡绿色边框 */
+            border: 2px solid rgba(11, 220, 171, 0.7);
+            /* 成功：淡绿色边框 */
         }
 
         .custom-alert.error {
-            border: 2px solid rgba(255, 85, 122, 0.7);  /* 失败：淡红色边框 */
+            border: 2px solid rgba(255, 85, 122, 0.7);
+            /* 失败：淡红色边框 */
         }
 
         #alertIcon {
@@ -213,24 +219,33 @@
 
         .custom-alert.success #alertIcon {
             color: #0bdcab;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         .custom-alert.error #alertIcon {
             color: #ff557a;
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); /* 添加阴影，立体感 */
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+            /* 添加阴影，立体感 */
         }
 
         #alertMessage {
             font-weight: 500;
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         /* 入场动画 */
         @keyframes alertIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
 
         .custom-alert.show {
@@ -239,6 +254,8 @@
     </style>
     <!-- 先确保 layui.js 加载完成 -->
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+
     <!-- 然后加载自己的脚本 -->
     <script src="/static/js/signup.js" defer></script>
 </head>
@@ -267,7 +284,7 @@
         <i id="alertIcon" class="fas fa-check-circle"></i>
         <span id="alertMessage">提示内容</span>
     </div>
-      
+
 </body>
 
 </html>

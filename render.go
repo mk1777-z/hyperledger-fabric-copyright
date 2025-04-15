@@ -11,11 +11,11 @@ import (
 )
 
 func renderHTML(h *server.Hertz) {
-	// 加载HTML模板文件
-	h.LoadHTMLGlob("HTML/project/*")
+	// 修改模板加载方式，只加载HTML文件
+	h.LoadHTMLGlob("HTML/project/*.html")
 
-	// 注释或删除这行静态文件注册代码，因为在main.go中已经注册了
-	// h.Static("/static", "./")
+	// 配置静态文件目录，使图片和其他资源文件可以正常访问
+	h.Static("/HTML", "./HTML")
 
 	// 默认根路径返回一个 JSON 响应
 	h.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {

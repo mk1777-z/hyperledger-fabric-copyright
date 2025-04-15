@@ -364,14 +364,25 @@
         .footer-content {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
+            justify-content: space-evenly;
+            /* 改为space-evenly使列间距均匀 */
             gap: 3rem;
-            margin-bottom: 4rem;
+            /* 固定列间距 */
+            max-width: 1200px;
+            margin: 0 auto 4rem auto;
+            /* 恢复底部外边距并保持居中 */
+            padding: 0 1rem;
         }
 
         .footer-column {
-            flex: 1;
+            flex: 0 1 30%;
+            /* 改为百分比宽度而不是伸缩 */
             min-width: 200px;
+        }
+
+        /* 中间列居中样式 */
+        .footer-column:nth-child(2) {
+            text-align: center;
         }
 
         .footer-column h3 {
@@ -806,7 +817,7 @@
 <body>
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="logo">区块链版权</div>
+        <div class="logo">版链云</div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
@@ -815,30 +826,49 @@
         <div class="nav-links" id="navLinks">
             <a href="/home">主页</a>
             <a href="/transaction-monitor">交易监控</a>
-            <a href="/smart-contracts" class="active">智能合约</a>
-            <a href="#">产品</a>
-            <a href="#">文档</a>
-            <a href="#">关于我们</a>
+            <a href="/smart-contracts" class="active">合约架构</a>
+            <a href="/display">版权展示</a>
         </div>
-        <button class="cta-button" onclick="window.location.href='/login'">立即登录</button>
+        <!-- 修改用户区域，整体先隐藏 -->
+        <div id="userArea" style="display: none;">
+            <!-- 默认显示登录按钮 -->
+            <button class="cta-button" id="loginButton"
+                onclick="window.location.href='/login?redirect=' + encodeURIComponent(window.location.pathname)">
+                立即登录</button>
+
+            <!-- 登录后显示的内容 -->
+            <div id="loggedInContent">
+                <span class="welcome-text">欢迎，<span id="username" class="username"></span></span>
+                <a class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
     </nav>
 
     <!-- 页面标题 -->
     <div class="page-title">
-        <h1 data-aos="fade-up">智能合约说明</h1>
+        <h1 data-aos="fade-up">合约架构说明</h1>
         <p data-aos="fade-up" data-aos-delay="100">
-            了解支撑我们版权管理系统的智能合约，以及它们如何保证交易的安全性与透明度。
+            了解支撑我们版权管理系统的网络架构及智能合约，以及它们如何保证交易的安全性与透明度。
         </p>
     </div>
 
     <!-- 内容容器 -->
     <div class="content-container">
-        <section class="network-diagram" data-aos="fade-up">
-            <!-- 修改iframe的src路径 -->
-            <iframe src="/peer_orderer.html" style="width:100%; height:650px; border:none; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.4); overflow-x: auto; overflow-y: hidden; min-height: 200px;"></iframe>
-        
-        <!-- 智能合约简介 -->
-        <section class="introduction" data-aos="fade-up">
+        <!-- 网络结构展示区域 -->
+        <section class="network-showcase" data-aos="fade-up" style="margin-top: 2.5rem; margin-bottom: 4rem;">
+            <h2 class="showcase-title">版链云区块链网络架构</h2>
+            <p class="showcase-description"
+                style="text-align: center; margin-bottom: 1.5rem; color: var(--secondary-text);">
+                下图展示了支持我们版权系统的Hyperledger Fabric网络架构，包括各种节点类型及其交互方式。
+            </p>
+            <iframe src="/peer_orderer.html"
+                style="width:100%; height:650px; border:none; border-radius:0; box-shadow:none; overflow-x: auto; overflow-y: hidden; min-height: 200px; background: transparent;"></iframe>
+        </section>
+
+        <!-- 智能合约介绍部分 -->
+        <section class="introduction" data-aos="fade-up" style="margin-bottom: 4rem;">
             <h2>什么是智能合约？</h2>
             <p>
                 智能合约是在区块链上运行的自动执行的计算机程序，可以实施、验证或执行可靠的合约协议。它们可以在满足预设条件时自动执行，无需第三方介入，
@@ -846,177 +876,16 @@
             </p>
         </section>
 
-        <!-- 动画展示区域 - 美化阶段显示 -->
-        <section class="animation-showcase" data-aos="fade-up">
-            <h2 class="animation-title">智能合约工作流程动画展示</h2>
-            <div class="animation-container">
-                <!-- 粒子背景 -->
-                <div class="particles-bg" id="particles"></div>
-
-                <!-- 阶段1: 版权登记与监管审核 -->
-                <div class="animation-phase phase-1" id="phase1">
-                    <div class="phase-description">
-                        <h3>阶段1: 版权上传与监管审核</h3>
-                        <p>创作者提交版权上传申请，必须通过监管审核智能合约由监管方进行审核批准</p>
-                    </div>
-
-                    <!-- 用户角色 -->
-                    <div class="animation-element animation-user element-creator highlight"
-                        style="bottom: 100px; left: 220px;">
-                        <div class="icon"><i class="fas fa-user-edit"></i></div>
-                    </div>
-
-                    <!-- 合约与功能元素 -->
-                    <div class="animation-element animation-block element-upload highlight"
-                        style="top: 200px; left: 200px;">
-                        <div class="icon"><i class="fas fa-upload"></i></div>
-                        <div class="label">版权上传</div>
-                    </div>
-
-                    <div class="animation-element animation-block element-audit highlight"
-                        style="top: 200px; left: 700px;">
-                        <div class="icon"><i class="fas fa-balance-scale"></i></div>
-                        <div class="label">监管审核智能合约</div>
-                    </div>
-
-                    <div class="animation-element animation-user element-regulator highlight"
-                        style="bottom: 100px; left: 730px;">
-                        <div class="icon"><i class="fas fa-user-shield"></i></div>
-                    </div>
-
-                    <!-- 连接箭头 -->
-                    <div class="animation-element animation-arrow arrow-creator-to-upload arrow-animate"
-                        style="width: 330px; top: 450px; left: 350px; transform: rotate(-90deg);"></div>
-
-                    <div class="animation-element animation-arrow arrow-upload-to-audit arrow-animate"
-                        style="width: 290px; top: 270px; left: 370px;"></div>
-
-                    <div class="animation-element animation-arrow arrow-audit-to-regulator arrow-animate"
-                        style="width: 120px; top: 335px; right: 200px; transform: rotate(90deg);"></div>
-
-                    <!-- 流程标签 -->
-                    <div class="animation-element direction-arrow" style="top: 230px; left: 470px;">
-                        <i class="fas fa-long-arrow-alt-right"></i> <span style="font-size: 14px;">提交审核</span>
-                    </div>
-                </div>
-
-                <!-- 阶段2: 审核通过信息上链 -->
-                <div class="animation-phase phase-2" id="phase2">
-                    <div class="phase-description">
-                        <h3>阶段2: 审核信息上链</h3>
-                        <p>将监管者的审核决定记录上链</p>
-                    </div>
-
-                    <div class="animation-element animation-user element-regulator highlight"
-                        style="bottom: 300px; left: 150px;">
-                        <div class="icon"><i class="fas fa-user-shield"></i></div>
-                    </div>
-
-                    <div class="animation-element animation-block element-blockchain highlight"
-                        style="bottom: 250px; left: 700px; transform: translate3d(1.45408px, -0.359909px, 0px);">
-                        <div class="icon"><i class="fas fa-cubes"></i></div>
-                        <div class="label">区块链</div>
-                    </div>
-
-                    <div class="animation-element animation-arrow arrow-regulator-to-blockchain arrow-animate"
-                        style="width: 350px; top: 260px; left: 300px; transform: rotate(-45deg);"></div>
-
-                    <div class="animation-element direction-arrow" style="top: 220px; left: 430px;">
-                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 14px;">审核意见上链存储</span>
-                    </div>
-                </div>
-
-                <!-- 阶段3: 版权交易基础合约 -->
-                <div class="animation-phase phase-3" id="phase3">
-                    <div class="phase-description">
-                        <h3>阶段3: 记录版权交易信息</h3>
-                        <p>卖方和买方之间的版权交易，通过版权交易智能合约记录交易详情和所有权转移</p>
-                    </div>
-
-                    <div class="animation-element animation-user element-creator highlight"
-                        style="bottom: 250px; left: 120px;">
-                        <div class="icon"><i class="fas fa-user-edit"></i></div>
-                    </div>
-
-                    <div class="animation-element animation-block element-contract highlight"
-                        style="top: 250px; left: 300px; transform: translate3d(1.49587px, 0.395106px, 0px);">
-                        <div class="icon"><i class="fas fa-file-contract"></i></div>
-                        <div class="label">版权交易智能合约</div>
-                    </div>
-
-
-                    <div class="animation-element animation-user element-buyer highlight"
-                        style="bottom: 250px; left: 820px;">
-                        <div class="icon"><i class="fas fa-user"></i></div>
-                    </div>
-
-                    <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
-                        style="width: 60px; top: 310px; left: 220px; transform: rotate(-90deg);"></div>
-
-                    <div class="animation-element direction-arrow" style="top: 280px; left: 205px;">
-                        <i class="fas fa-long-arrow-alt-up"></i> <span style="font-size: 12px;">记录交易信息</span>
-                    </div>
-
-                    <div class="animation-element direction-arrow" style="top: 280px; left: 750px;">
-                        <span style="font-size: 12px;">完成交易</span>
-                    </div>
-
-                    <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
-                        style="width: 120px; top: 310px; left: 450px; transform: rotate(-90deg);"></div>
-
-                    <div class="animation-element animation-arrow arrow-transfer-to-contract arrow-animate"
-                        style="width: 60px; top: 310px; left: 745px; transform: rotate(-90deg);"></div>
-
-
-                </div>
-
-                <!-- 阶段4: 交易资金流动 -->
-                <div class="animation-phase phase-4" id="phase4">
-                    <div class="phase-description">
-                        <h3>阶段4: 交易资金流动</h3>
-                        <p>资金合约处理买卖双方的付款结算，确保交易完整性和资金安全</p>
-                    </div>
-
-                    <div class="animation-element animation-user element-creator highlight"
-                        style="bottom: 250px; left: 120px;">
-                        <div class="icon"><i class="fas fa-user-edit"></i></div>
-                    </div>
-
-                    <div class="animation-element animation-block element-funds highlight"
-                        style="top: 230px; left: 450px;">
-                        <div class="icon"><i class="fas fa-wallet"></i></div>
-                        <div class="label">账户与资产管理合约</div>
-                    </div>
-
-                    <div class="animation-element animation-user element-buyer highlight"
-                        style="bottom: 250px; left: 820px;">
-                        <div class="icon"><i class="fas fa-user"></i></div>
-                    </div>
-
-                    <div class="animation-element animation-arrow arrow-creator-to-funds arrow-animate"
-                        style="width: 180px; top: 300px; left: 620px; transform: rotate(-45deg);"></div>
-
-                    <div class="animation-element animation-arrow arrow-buyer-to-funds arrow-animate"
-                        style="width: 200px; top: 300px; right: -220px; transform: rotate(-135deg);"></div>
-
-                    <div class="animation-element direction-arrow" style="top: 400px; left: 480px;">
-                        <i class="fas fa-exchange-alt"></i> <span style="font-size: 14px;">资金结算</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="animation-controls">
-                <button class="animation-btn" id="animationPlay">
-                    <i class="fas fa-play"></i> 播放动画
-                </button>
-                <button class="animation-btn secondary" id="animationPause">
-                    <i class="fas fa-pause"></i> 暂停
-                </button>
-            </div>
+        <!-- 工作流程动画展示区域 -->
+        <section class="animation-showcase" data-aos="fade-up" style="margin-bottom: 4rem;">
+            <h2 class="animation-title">版权交易流程动画展示</h2>
+            <p class="showcase-description"
+                style="text-align: center; margin-bottom: 1.5rem; color: var(--secondary-text);">
+                以下动画展示了版权从上传、审核到交易的完整流程，展现了区块链如何确保整个过程的安全性和可追溯性。
+            </p>
+            <iframe src="/flowchart.html"
+                style="width:100%; height:800px; border:none; border-radius:0; box-shadow:none; overflow-x: auto; overflow-y: hidden; min-height: 200px; background: transparent;"></iframe>
         </section>
-
-        <!-- 添加一个间隔元素 -->
-        <div style="height: 3rem;"></div>
 
         <!-- 智能合约标题 -->
         <h2 class="section-title" data-aos="fade-up">智能合约详解</h2>
@@ -1323,23 +1192,6 @@
         </div>
     </section>
 
-    <!-- 图解区块链智能合约 -->
-    <div class="content-container">
-        <section class="diagram-section" data-aos="fade-up">
-            <h2 class="diagram-title">区块链智能合约工作流程</h2>
-            <div class="diagram-container">
-                <p>
-                    以下图解展示了区块链智能合约在我们版权系统中的工作流程，从版权登记到交易执行，再到监管审核的完整过程。
-                    通过这种自动化、透明的流程，我们确保了版权交易的安全性、可靠性和合规性。
-                </p>
-                <div class="diagram">
-                    <img src="https://via.placeholder.com/800x400/182338/cccccc?text=区块链智能合约工作流程图" alt="区块链智能合约工作流程"
-                        class="diagram-image">
-                </div>
-            </div>
-        </section>
-    </div>
-
     <!-- 页脚 -->
     <footer class="footer">
         <div class="footer-content">
@@ -1352,28 +1204,17 @@
             <div class="footer-column">
                 <h3>产品</h3>
                 <ul class="footer-links">
-                    <li><a href="#">版权登记</a></li>
-                    <li><a href="#">版权交易</a></li>
-                    <li><a href="#">数据分析</a></li>
-                    <li><a href="#">企业解决方案</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>资源</h3>
-                <ul class="footer-links">
-                    <li><a href="#">帮助中心</a></li>
-                    <li><a href="#">API文档</a></li>
-                    <li><a href="#">白皮书</a></li>
-                    <li><a href="#">最新动态</a></li>
+                    <li><a href="/upload">版权登记</a></li>
+                    <li><a href="/transaction-monitor">版权交易</a></li>
+                    <li><a href="/statistics">数据分析</a></li>
+                    <li><a href="/audit">版权审计</a></li>
                 </ul>
             </div>
             <div class="footer-column">
                 <h3>关注我们</h3>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
+                    <li><a href="https://github.com/mk1777-z/hyperledger-fabric-copyright"><i class="fab fa-github"></i>
+                            GitHub</a></li>
                 </ul>
             </div>
         </div>
@@ -1389,6 +1230,48 @@
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script>
+        window.onload = function () {
+            // 检查登录状态
+            checkLoginStatus();
+        };
+
+        // 检查登录状态的函数
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            const userArea = document.getElementById('userArea');
+            const loginBtn = document.getElementById('loginButton');
+            const loggedInContent = document.getElementById('loggedInContent');
+            const usernameSpan = document.getElementById('username');
+
+            if (token && username) {
+                // 已登录状态
+                loginBtn.style.display = 'none';
+                loggedInContent.style.display = 'flex';
+                usernameSpan.textContent = username;
+
+                // 添加额外的导航链接
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML += `
+                <a href="/homepage">个人中心</a>
+                <a href="/statistics">统计分析</a>
+                `;
+            } else {
+                // 未登录状态
+                loginBtn.style.display = 'block';
+                loggedInContent.style.display = 'none';
+            }
+
+            // 最后再显示整个用户区域
+            userArea.style.display = 'flex';
+        }
+
+        // 退出函数
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
         // 初始化 AOS 动画库
         document.addEventListener('DOMContentLoaded', function () {
             AOS.init({
