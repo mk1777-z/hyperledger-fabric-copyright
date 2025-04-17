@@ -117,6 +117,8 @@
         }
 
         .logo {
+            display: flex;
+            align-items: center;
             font-size: 1.8rem;
             font-weight: 700;
             background: var(--primary-gradient);
@@ -125,11 +127,18 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .logo-img {
+            height: 32px;
+            margin-right: 10px;
+            /* 图片与文字的间距 */
+        }
+
         /* 导航栏 */
         .nav-links {
             display: flex;
             gap: 2.5rem;
-            transform: translateX(4rem); /* 向左偏移半个 gap 距离 */
+            transform: translateX(2.5rem);
+            /* 向左偏移半个 gap 距离 */
         }
 
         .nav-links a {
@@ -393,6 +402,7 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+
         }
 
         .stat-card:hover {
@@ -412,21 +422,22 @@
 
         .stat-label {
             color: var(--secondary-text);
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .stat-icon {
             margin-bottom: 10px;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             background: rgba(110, 64, 255, 0.2);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 1.5rem;
         }
 
         /* 表格样式 */
@@ -497,7 +508,8 @@
         /* 响应式设计 */
         @media screen and (max-width: 768px) {
             .user-profile {
-                flex-direction: row !important;  /* 强制在移动设备上保持水平排列 */
+                flex-direction: row !important;
+                /* 强制在移动设备上保持水平排列 */
             }
 
             .filter-section {
@@ -671,7 +683,8 @@
         /* 用户头像和下拉菜单样式 */
         .user-profile {
             display: flex;
-            flex-direction: row;  /* 明确指定水平排列 */
+            flex-direction: row;
+            /* 明确指定水平排列 */
             align-items: center;
             position: relative;
             cursor: pointer;
@@ -775,8 +788,10 @@
             font-size: 0.95rem;
             margin-right: 5px;
             margin-right: 5px;
-            margin-top: 0;  /* 移除任何可能的顶部边距 */
-            margin-bottom: 0;  /* 移除任何可能的底部边距 */
+            margin-top: 0;
+            /* 移除任何可能的顶部边距 */
+            margin-bottom: 0;
+            /* 移除任何可能的底部边距 */
         }
     </style>
     <!-- 添加 ECharts 和其他需要的脚本 -->
@@ -790,7 +805,9 @@
 
     <!-- 导航条 -->
     <nav class="navbar">
-        <div class="logo">版链云</div>
+        <div class="logo">
+            <img src="/static/images/logo.png" alt="版链云Logo" class="logo-img">版链云
+        </div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
@@ -906,7 +923,7 @@
             if (avatarUrl) {
                 document.getElementById('userAvatar').src = avatarUrl;
             }
-            
+
 
             // 验证登录状态
             const token = localStorage.getItem('token');

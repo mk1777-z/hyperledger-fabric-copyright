@@ -780,45 +780,6 @@
             text-align: center;
         }
 
-        /* 响应式设计 */
-        /* @media screen and (max-width: 768px) {
-            .grid-container {
-                grid-template-columns: 1fr;
-            }
-
-            .search-container {
-                width: 100%;
-            }
-
-            .navbar {
-                flex-direction: column;
-                padding: 10px;
-            }
-
-            .main-nav {
-                margin: 10px 0;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .user-nav {
-                margin-top: 10px;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-            }
-
-            .welcome-text {
-                display: block;
-                width: 100%;
-                text-align: center;
-            }
-
-            .pagination-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-        } */
 
         /* 自定义消息弹窗样式 */
         .custom-alert {
@@ -983,22 +944,34 @@
         }
 
         .logo {
+            display: flex;
+            align-items: center;
             font-size: 1.8rem;
             font-weight: 700;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            transform: translateZ(0); /* 强制GPU渲染 */
-            backface-visibility: hidden; /* 修复闪烁 */
-            animation: forceGradient 0.1s; /* 触发重绘 */
+            transform: translateZ(0);
+            /* 强制GPU渲染 */
+            backface-visibility: hidden;
+            /* 修复闪烁 */
+            animation: forceGradient 0.1s;
+            /* 触发重绘 */
+        }
+
+        .logo-img {
+            height: 32px;
+            margin-right: 10px;
+            /* 图片与文字的间距 */
         }
 
         /* 导航栏 */
         .nav-links {
             display: flex;
             gap: 2.5rem;
-            transform: translateX(4rem); /* 向左偏移半个 gap 距离 */
+            transform: translateX(2.5rem);
+            /* 向左偏移半个 gap 距离 */
         }
 
         .nav-links a {
@@ -1195,7 +1168,8 @@
         }
 
         #loggedInContent {
-            display: none; /* 默认隐藏，登录后显示 */
+            display: none;
+            /* 默认隐藏，登录后显示 */
         }
     </style>
     <script src="https://unpkg.com/layui@2.9.16/dist/layui.js"></script>
@@ -1208,7 +1182,9 @@
 
     <!-- 替换为contracts页面的header -->
     <nav class="navbar">
-        <div class="logo">版链云</div>
+        <div class="logo">
+            <img src="/static/images/logo.png" alt="版链云Logo" class="logo-img">版链云
+        </div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>

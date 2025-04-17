@@ -180,7 +180,8 @@
         .nav-links {
             display: flex;
             gap: 2.5rem;
-            transform: translateX(4rem); /* 向右偏移4rem */
+            transform: translateX(4rem);
+            /* 向右偏移4rem */
         }
 
         .nav-links a {
@@ -694,9 +695,9 @@
         /* 自定义消息弹窗样式 */
         .custom-alert {
             position: fixed;
-            top: 50%;    
-            left: 50%;   
-            transform: translate(-50%, -50%);   
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: rgba(24, 35, 56, 0.95);
             color: #f1f1f1;
             padding: 15px 20px;
@@ -751,8 +752,8 @@
 
         .fa-spinner {
             animation: spin 2s linear infinite;
-            font-size: 1.8rem;  
-            color: #0bdcab; 
+            font-size: 1.8rem;
+            color: #0bdcab;
         }
 
         .fa-check-circle {
@@ -762,7 +763,7 @@
 
         .fa-times-circle {
             animation: none !important;
-            font-size: 1.8rem; 
+            font-size: 1.8rem;
             color: #ff557a;
         }
 
@@ -774,15 +775,27 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes alertIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .custom-alert.show {
             animation: alertIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
@@ -933,7 +946,8 @@
         }
 
         #loggedInContent {
-            display: none; /* 默认隐藏，登录后显示 */
+            display: none;
+            /* 默认隐藏，登录后显示 */
         }
 
         /* 汉堡菜单 */
@@ -1062,8 +1076,8 @@
             bindPaginationEvents();
         };
 
-         // 检查登录状态的函数
-         function checkLoginStatus() {
+        // 检查登录状态的函数
+        function checkLoginStatus() {
             token = localStorage.getItem('token'); // 修复：在这里为全局变量token赋值
             const username = localStorage.getItem('username');
             const loginBtn = document.querySelector('#userArea .cta-button');
@@ -1109,7 +1123,7 @@
 
         // 通用fetch请求函数 - 增强错误处理
         const fetchData = (url, data) =>
-            fetch(url, {    
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1117,19 +1131,19 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(res => {
-                // 检查响应状态
-                if (!res.ok) {
-                    throw new Error(`请求失败: ${res.status} ${res.statusText}`);
-                }
-                return res.json();
-            })
-            .catch(error => {
-                console.error(`API请求错误 (${url}):`, error);
-                showCustomAlert('数据加载失败，请稍后重试', 'error');
-                // 返回空对象以避免后续处理错误
-                return { items: [], totalPages: 1 };
-            });
+                .then(res => {
+                    // 检查响应状态
+                    if (!res.ok) {
+                        throw new Error(`请求失败: ${res.status} ${res.statusText}`);
+                    }
+                    return res.json();
+                })
+                .catch(error => {
+                    console.error(`API请求错误 (${url}):`, error);
+                    showCustomAlert('数据加载失败，请稍后重试', 'error');
+                    // 返回空对象以避免后续处理错误
+                    return { items: [], totalPages: 1 };
+                });
 
         // 请求项目数据
         function fetchItemsForPage(page, searchQuery) {
@@ -1140,12 +1154,12 @@
 
             // 显示加载状态
             showLoadingMessage('搜索中...');
-            
+
             // 发送请求
             fetchData('/api/search', params)
                 .then(data => {
                     closeLoadingMessage();
-                    
+
                     if (data?.items && data?.totalPages) {
                         renderItems(data.items);
                         totalPages = data.totalPages;
@@ -1184,7 +1198,7 @@
                                 
                                 <!-- 右列：描述、价格和操作按钮 -->
                                 <div class="card-col card-col-right">
-                                    <div class="item-desc">${truncateText(item.description || "暂无描述", 40)}</div>
+                                    <div class="item-desc">${truncateText(item.simple_dsc || "暂无描述", 40)}</div>
                                     <div class="item-price">￥ ${item.price}</div>
                                     <a href="#" onclick="viewDetails('${item.name}')" class="action-btn">查看详情</a>
                                 </div>

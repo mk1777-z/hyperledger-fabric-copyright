@@ -101,8 +101,8 @@
 
         /* 导航栏 */
         .navbar {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 1.5rem 5%;
             background-color: rgba(12, 10, 38, 0.85);
@@ -112,10 +112,11 @@
             left: 0;
             right: 0;
             z-index: 100;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .logo {
+            display: flex;
+            align-items: center;
             font-size: 1.8rem;
             font-weight: 700;
             background: var(--primary-gradient);
@@ -123,15 +124,24 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
+        .logo-img {
+            height: 32px;
+            margin-right: 10px;
+            /* 图片与文字的间距 */
+        }
+
         .nav-links {
             display: flex;
             gap: 2.5rem;
             position: relative;
             width: fit-content;
-            margin: 0 auto;  /* 使用 margin auto 实现居中 */
-            padding: 0;      /* 移除任何内边距 */
-            transform: translateX(1.25rem); /* 向左偏移半个 gap 距离 */
+            margin: 0 auto;
+            /* 使用 margin auto 实现居中 */
+            padding: 0;
+            /* 移除任何内边距 */
+            transform: translateX(2.5rem);
+            /* 向左偏移半个 gap 距离 */
         }
 
         #userArea {
@@ -142,10 +152,13 @@
         .nav-links a {
             color: var(--text-color);
             text-decoration: none;
-            font-weight: 500;     /* 字体粗细 */
-            font-size: 1.05rem;      /* 字体大小 */
-            transition: color 0.3s ease;   /* 颜色过渡效果 */
-            position: relative;  
+            font-weight: 500;
+            /* 字体粗细 */
+            font-size: 1.05rem;
+            /* 字体大小 */
+            transition: color 0.3s ease;
+            /* 颜色过渡效果 */
+            position: relative;
         }
 
         /* 鼠标悬停时的底部横线效果 */
@@ -155,7 +168,8 @@
             bottom: -5px;
             left: 0;
             width: 0;
-            height: 2px;    /* 横线厚度 */
+            height: 2px;
+            /* 横线厚度 */
             background: var(--gradient-primary);
             transition: width 0.3s ease;
         }
@@ -217,7 +231,6 @@
         .logout-btn {
             cursor: pointer;
         }
-
 
         /* 英雄部分 */
         .hero {
@@ -484,53 +497,145 @@
             pointer-events: none;
         }
 
-        /* 统计部分 */
-        .stats {
+        /* 区块链动画部分 */
+        .blockchain-animation {
             padding: 10rem 5%;
-            text-align: center;
             position: relative;
             overflow: hidden;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 3.5rem;
-            margin-top: 6rem;
+        .chain-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 4rem;
             position: relative;
             z-index: 2;
         }
 
-        .stat-item {
+        .chain-animation {
+            width: 100%;
+            height: 300px;
             position: relative;
-            background-color: rgba(20, 18, 58, 0.7);
-            backdrop-filter: blur(15px);
-            border-radius: 16px;
-            padding: 3rem;
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s ease;
+            margin-bottom: 3rem;
         }
 
-        .stat-item:hover {
-            transform: translateY(-10px);
-            border-color: rgba(78, 68, 255, 0.3);
+        #blockchain-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
-        .stat-number {
-            font-size: 4.2rem;
-            font-weight: 700;
-            margin-bottom: 1.2rem;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
+        .chain-description {
+            max-width: 800px;
+            text-align: center;
         }
 
-        .stat-label {
-            font-size: 1.4rem;
+        .chain-description p {
             color: var(--secondary-text);
-            font-weight: 500;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .block {
+            position: absolute;
+            width: 120px;
+            height: 160px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+
+        .block.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(78, 68, 255, 0.3);
+            border-color: rgba(78, 68, 255, 0.4);
+        }
+
+        .block-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color);
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .block-hash {
+            font-size: 0.7rem;
+            color: var(--accent-color);
+            word-break: break-all;
+            margin-top: 5px;
+            background: rgba(78, 68, 255, 0.1);
+            padding: 5px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .block-data {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--secondary-text);
+        }
+
+        .block-link {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+
+        @media (max-width: 992px) {
+            .block {
+                width: 100px;
+                height: 140px;
+                padding: 10px;
+            }
+
+            .block-header {
+                font-size: 0.8rem;
+            }
+
+            .block-hash {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .block {
+                width: 80px;
+                height: 120px;
+                padding: 8px;
+            }
+
+            .block-header {
+                font-size: 0.7rem;
+            }
+
+            .block-hash {
+                font-size: 0.6rem;
+            }
         }
 
         /* 常见问题 */
@@ -631,7 +736,7 @@
 
         /* 页脚 */
         .footer {
-            padding: 8rem 5% 3rem;
+            padding: 3rem 5% 1rem;
             background-color: var(--darker-bg);
             border-top: 1px solid var(--border-color);
         }
@@ -640,8 +745,8 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 5rem;
-            margin-bottom: 6rem;
+            gap: 3rem;
+            margin-bottom: 1rem;
         }
 
         .footer-column {
@@ -684,10 +789,27 @@
 
         .copyright {
             text-align: center;
-            padding-top: 3rem;
-            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
             color: var(--secondary-text);
             font-size: 1.05rem;
+        }
+
+        /* 链接行样式 */
+        .footer-links .link-row {
+            display: flex;
+            /* 弹性布局使链接水平排列 */
+            gap: 2rem;
+            /* 链接间距（可根据需要调整） */
+            margin-bottom: 1.2rem;
+            /* 行间距（与原li样式一致） */
+        }
+
+        /* 调整链接样式（覆盖原a标签样式） */
+        .footer-links .link-row a {
+            margin-bottom: 0;
+            /* 移除原li的下边距 */
+            white-space: nowrap;
+            /* 防止链接文字换行 */
         }
 
         /* 响应式设计 */
@@ -766,7 +888,7 @@
             .features-grid {
                 grid-template-columns: 1fr;
             }
-        } 
+        }
 
         /* 导航栏汉堡菜单 */
         .hamburger {
@@ -804,7 +926,7 @@
                 z-index: 100;
                 align-items: flex-start;
                 box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
-            } 
+            }
 
             .nav-links.active {
                 transform: translateX(0);
@@ -957,7 +1079,8 @@
         }
 
         #loggedInContent {
-            display: none; /* 默认隐藏，登录后显示 */
+            display: none;
+            /* 默认隐藏，登录后显示 */
         }
     </style>
 </head>
@@ -968,7 +1091,9 @@
 
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="logo">版链云</div>
+        <div class="logo">
+            <img src="/static/images/logo.png" alt="版链云Logo" class="logo-img">版链云
+        </div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
@@ -1176,28 +1301,20 @@
         </div>
     </section>
 
-    <!-- 统计部分 -->
-    <section class="stats" id="stats">
+    <!-- 区块链动画部分 -->
+    <section class="blockchain-animation" id="stats">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">平台数据</h2>
-            <p class="section-subtitle">我们的平台已经积累了丰富的用户基础和交易记录</p>
+            <h2 class="section-title">区块链技术</h2>
+            <p class="section-subtitle">安全、透明、不可篡改的分布式账本技术</p>
         </div>
-        <div class="stats-grid">
-            <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
-                <div class="stat-number" id="user-count">5000+</div>
-                <div class="stat-label">注册用户</div>
+        <div class="chain-container" data-aos="fade-up" data-aos-delay="200">
+            <div class="chain-animation">
+                <!-- 区块链动画会在这里显示 -->
+                <div id="blockchain-canvas"></div>
             </div>
-            <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
-                <div class="stat-number" id="copyright-count">25000+</div>
-                <div class="stat-label">版权登记</div>
-            </div>
-            <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
-                <div class="stat-number" id="transaction-count">8000+</div>
-                <div class="stat-label">成功交易</div>
-            </div>
-            <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
-                <div class="stat-number" id="daily-active">1200+</div>
-                <div class="stat-label">日活跃用户</div>
+            <div class="chain-description">
+                <p>区块链是一种分布式数据存储技术，通过密码学方式将数据区块链接成一个不断增长的记录列表。每个区块都包含前一个区块的密码学哈希值，确保数据一旦写入就无法篡改。</p>
+                <p>在我们的版权管理系统中，区块链技术为创作者提供了作品的不可篡改证明，保障创作者权益，简化版权确权与交易流程。</p>
             </div>
         </div>
     </section>
@@ -1271,10 +1388,13 @@
             <div class="footer-column">
                 <h3>产品</h3>
                 <ul class="footer-links">
-                    <li><a href="/upload"><i class="fas fa-upload"></i> 版权登记</a></li>
-                    <li><a href="/transaction-monitor"><i class="fas fa-exchange-alt"></i> 版权交易</a></li>
-                    <li><a href="/statistics"><i class="fas fa-chart-bar"></i> 数据分析</a></li>
-                    <li><a href="/audit"><i class="fas fa-gavel"></i> 版权审计</a></li>
+                    <div class="link-row"> <!-- 第一行 -->
+                        <a href="/upload"><i class="fas fa-upload"></i> 版权登记</a>
+                        <a href="/transaction-monitor"><i class="fas fa-exchange-alt"></i> 版权交易</a>
+                    </div>
+                    <div class="link-row"> <!-- 第二行 -->
+                        <a href="/statistics"><i class="fas fa-chart-bar"></i> 数据分析</a>
+                        <a href="/audit"><i class="fas fa-gavel"></i> 版权审计</a>
                 </ul>
             </div>
             <div class="footer-column">
@@ -1299,6 +1419,12 @@
 
             // 检查登录状态
             checkLoginStatus();
+
+            // 初始化区块链动画
+            initBlockchainAnimation();
+
+            // 监听窗口大小变化，重新初始化动画
+            window.addEventListener('resize', initBlockchainAnimation);
         };
 
         // 检查登录状态的函数
@@ -1405,6 +1531,20 @@
 
             // 初始化3D点云动画
             initParticles();
+
+            // 监听滚动事件，当区块链动画进入视野时初始化
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        initBlockchainAnimation();
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            const blockchainSection = document.getElementById('stats');
+            if (blockchainSection) {
+                observer.observe(blockchainSection);
+            }
         });
 
         // 改进的轻量级点云动画，水平延伸星空效果
@@ -1660,6 +1800,67 @@
             }
             // 保存当前实例以便后续清理
             window.prevInstancedMesh = instancedMesh;
+        }
+
+        // 初始化区块链动画
+        function initBlockchainAnimation() {
+            const canvas = document.getElementById('blockchain-canvas');
+            if (!canvas) return;
+
+            // 区块数据
+            const blockData = [
+                { id: 1, title: "创世区块", hash: "0x71c3...", data: "版权系统初始化" },
+                { id: 2, title: "区块 #2", hash: "0x98a2...", data: "版权登记" },
+                { id: 3, title: "区块 #3", hash: "0x43b7...", data: "转让交易" },
+                { id: 4, title: "区块 #4", hash: "0xf29d...", data: "监管记录" },
+                { id: 5, title: "区块 #5", hash: "0xc4b8...", data: "新增版权" }
+            ];
+
+            // 清空画布
+            canvas.innerHTML = '';
+
+            // 计算位置 - 修正居中计算方法
+            const canvasWidth = canvas.offsetWidth;
+            const blockWidth = Math.min(120, canvasWidth / 8);
+            const spacing = Math.min(80, canvasWidth / 10);
+
+            // 计算整个链的总宽度(所有区块的宽度 + 所有间距)
+            const totalChainWidth = blockData.length * blockWidth + (blockData.length - 1) * spacing;
+            // 从画布中心减去链宽的一半，得到起始位置
+            const startX = (canvasWidth - totalChainWidth) / 2;
+            const centerY = canvas.offsetHeight / 2;
+
+            // 创建区块和连接线
+            blockData.forEach((block, index) => {
+                // 创建区块元素
+                const blockElement = document.createElement('div');
+                blockElement.className = 'block';
+                blockElement.innerHTML = `
+                    <div class="block-header">${block.title}</div>
+                    <div class="block-data">${block.data}</div>
+                    <div class="block-hash">${block.hash}</div>
+                `;
+                blockElement.style.left = `${startX + index * (blockWidth + spacing)}px`;
+                blockElement.style.top = `${centerY - 80}px`;
+
+                // 添加到画布
+                canvas.appendChild(blockElement);
+
+                // 创建连接线(除第一个区块外)
+                if (index > 0) {
+                    const link = document.createElement('div');
+                    link.className = 'block-link';
+                    link.style.left = `${startX + (index - 1) * (blockWidth + spacing) + blockWidth}px`;
+                    link.style.width = `${spacing}px`;
+                    link.style.top = `${centerY}px`;
+                    canvas.appendChild(link);
+                }
+
+                // 延迟显示每个区块，创造连锁效果
+                setTimeout(() => {
+                    blockElement.classList.add('active');
+                }, 300 * index);
+            });
         }
     </script>
 </body>
