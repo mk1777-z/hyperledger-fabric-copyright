@@ -787,29 +787,15 @@
             font-size: 1.2rem;
         }
 
-        .copyright {
-            text-align: center;
-            padding-top: 1rem;
-            color: var(--secondary-text);
-            font-size: 1.05rem;
-        }
-
-        /* 链接行样式 */
         .footer-links .link-row {
             display: flex;
-            /* 弹性布局使链接水平排列 */
             gap: 2rem;
-            /* 链接间距（可根据需要调整） */
             margin-bottom: 1.2rem;
-            /* 行间距（与原li样式一致） */
         }
 
-        /* 调整链接样式（覆盖原a标签样式） */
         .footer-links .link-row a {
             margin-bottom: 0;
-            /* 移除原li的下边距 */
             white-space: nowrap;
-            /* 防止链接文字换行 */
         }
 
         /* 响应式设计 */
@@ -1122,6 +1108,7 @@
                     <i class="fas fa-chevron-down"></i>
                     <!-- 下拉菜单 -->
                     <div class="dropdown-menu">
+                        <a href="/chat"><i class="fas fa-comments"></i> 聊天</a>
                         <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出</a>
                     </div>
                 </div>

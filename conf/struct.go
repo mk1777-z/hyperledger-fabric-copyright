@@ -1,6 +1,10 @@
 package conf
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"time" //确保导入 time 包
+
+	"github.com/dgrijalva/jwt-go"
+)
 
 type Mysql struct {
 	DbUser     string `yaml:"dbUser"`
@@ -75,4 +79,26 @@ type AuditRecord struct {
 	Comment   string `json:"comment"`
 	Regulator string `json:"regulator"`
 	Timestamp int64  `json:"timestamp"`
+}
+
+// ChatMessage represents a message in a conversation
+type ChatMessage struct {
+	ID             uint      `json:"id" gorm:"primaryKey;autoIncrement"`
+	ConversationID string    `json:"conversation_id" gorm:"index"` // Unique ID for a conversation pair
+	SenderUserID   string    `json:"sender_user_id" gorm:"index"`
+	ReceiverUserID string    `json:"receiver_user_id" gorm:"index"`
+	Content        string    `json:"content"`
+	Timestamp      time.Time `json:"timestamp"`
+	IsRead         bool      `json:"is_read" gorm:"default:false"`
+}
+
+// Conversation represents an overview of a chat for the conversation list
+type Conversation struct {
+	ConversationID       string    `json:"conversation_id"`
+	OtherUserID          string    `json:"other_user_id"`  // The user the current user is chatting with
+	OtherUsername        string    `json:"other_username"` // Display name of the other user
+	LastMessage          string    `json:"last_message"`   // Snippet of the last message
+	LastMessageTimestamp time.Time `json:"last_message_timestamp"`
+	UnreadCount          int       `json:"unread_count"` // Unread messages for the current user in this conversation
+	// Consider adding OtherUserProfilePic string `json:"other_user_profile_pic"` if you implement user profiles
 }

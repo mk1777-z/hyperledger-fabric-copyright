@@ -282,6 +282,12 @@
             border: none;
         }
 
+        .action-button.chat {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+        }
+
         .action-button:hover:not(:disabled) {
             transform: translateY(-2px);
         }
@@ -296,6 +302,10 @@
 
         .action-button.back:hover {
             box-shadow: 0 4px 12px rgba(11, 220, 171, 0.3);
+        }
+
+        .action-button.chat:hover {
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
         }
 
         .action-button:active:not(:disabled) {
@@ -1516,6 +1526,105 @@
         .action-button.favorite.active {
             background: linear-gradient(135deg, #ff4757, #ff6b6b);
         }
+
+        /* 聊天按钮样式 */
+        .action-button.chat {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+        }
+
+        .action-button.chat:hover {
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        /* 聊天模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            background: rgba(15, 25, 40, 0.95);
+            color: var(--text-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            transition: opacity 0.3s, transform 0.3s;
+            border: 1px solid rgba(110, 64, 255, 0.3);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .modal::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 10px 10px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .modal:hover::before {
+            opacity: 1;
+        }
+
+        .modal.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .chat-textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            margin: 15px 0;
+            resize: vertical;
+            font-family: 'Roboto', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .chat-textarea:focus {
+            outline: none;
+            border-color: rgba(110, 64, 255, 0.5);
+            box-shadow: 0 0 0 2px rgba(110, 64, 255, 0.2);
+        }
+
+        /* 当有4个按钮时调整宽度 */
+        .embedded-buttons .action-button {
+            width: calc((100% - 24px) / 4); /* 4个按钮，3个8px间距 */
+        }
     </style>
 </head>
 
@@ -1571,6 +1680,7 @@
                 <div class="embedded-buttons">
                     <button id="buy-button" class="action-button buy" disabled>立即购买</button>
                     <button id="favorite-button" class="action-button favorite">加入购物车</button>
+                    <button id="chat-with-seller-button" class="action-button chat">联系卖家</button>
                     <a href="/display" class="action-button back">返回列表</a>
                 </div>
             </div>
@@ -1631,6 +1741,18 @@
             <div class="modal-buttons">
                 <button id="confirm-button" class="layui-btn">确认</button>
                 <button id="cancel-button" class="layui-btn">取消</button>
+            </div>
+        </div>
+
+        <!-- 聊天模态框 -->
+        <div id="chat-modal-overlay" class="modal-overlay"></div>
+        <div id="chat-modal" class="modal">
+            <h3>联系卖家</h3>
+            <p>向 <span id="seller-name"></span> 发送消息:</p>
+            <textarea id="seller-message" class="chat-textarea" placeholder="请输入您想发送的消息..." rows="5"></textarea>
+            <div class="modal-buttons">
+                <button id="send-to-seller-button" class="layui-btn">发送</button>
+                <button id="cancel-chat-button" class="layui-btn">取消</button>
             </div>
         </div>
 
@@ -2034,34 +2156,29 @@
                         },
                         lineStyle: {
                             width: 3,
-                            color: '#8a66ff' // 更改线条颜色为紫色
-                        },
-                        areaStyle: {
                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(138, 102, 255, 0.3)' },
-                                { offset: 1, color: 'rgba(138, 102, 255, 0.05)' }
-                            ])
-                        }
+                                { offset: 0, color: '#6e40ff' },
+                                { offset: 1, color: '#0bdcab' }
+                            ], false),
+                            borderRadius: [4, 4, 0, 0] // 与交易金额分析图表一致
+                        },
                     },
                     {
                         name: '交易量',
                         type: 'bar',
-                        yAxisIndex: 1,
                         data: volumes,
-                        barWidth: '50%',
+                        yAxisIndex: 1,
                         itemStyle: {
-                            color: {
-                                type: 'linear',
-                                x: 0,
-                                y: 0,
-                                x2: 0,
-                                y2: 1,
-                                colorStops: [
-                                    { offset: 0, color: '#6e40ff' },
-                                    { offset: 1, color: '#0bdcab' }
-                                ]
-                            },
-                            borderRadius: [4, 4, 0, 0] // 与交易金额分析图表一致
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 1, color: 'rgba(138, 102, 255, 0.05)' },
+                                { offset: 0, color: 'rgba(138, 102, 255, 0.3)' },
+                            ]),
+                            borderRadius: [4, 4, 0, 0]
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                color: '#0bdcab'
+                            }
                         }
                     }
                 ]
@@ -2069,6 +2186,13 @@
 
             myChart.setOption(option);
             window.addEventListener('resize', () => myChart.resize());
+        };
+
+        function handleEnter(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendButton.click();
+            }
         }
 
         function initializeSystemPrompt(item) {
@@ -2102,6 +2226,11 @@
             document.getElementById('buy-button').addEventListener('click', handleBuyButtonClick);
             confirmButton.onclick = handleConfirmButtonClick;
             cancelButton.onclick = handleCancelButtonClick;
+            
+            // 添加聊天按钮事件监听
+            document.getElementById('chat-with-seller-button').addEventListener('click', openChatModal);
+            document.getElementById('send-to-seller-button').addEventListener('click', sendMessageToSeller);
+            document.getElementById('cancel-chat-button').addEventListener('click', closeChatModal);
         }
 
         function handleEnter(event) {
@@ -2169,6 +2298,73 @@
         function handleCancelButtonClick() {
             modalOverlay.style.display = 'none';
             contractModal.style.display = 'none';
+        }
+
+        // 打开聊天模态框
+        function openChatModal() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showCustomAlert('请先登录后再联系卖家！', 'error');
+                return;
+            }
+            
+            // 填充卖家信息
+            document.getElementById('seller-name').textContent = currentItem.owner;
+            
+            // 显示模态框
+            document.getElementById('chat-modal-overlay').classList.add('active');
+            document.getElementById('chat-modal').classList.add('active');
+        }
+        
+        // 关闭聊天模态框
+        function closeChatModal() {
+            document.getElementById('chat-modal-overlay').classList.remove('active');
+            document.getElementById('chat-modal').classList.remove('active');
+            // 清空输入框
+            document.getElementById('seller-message').value = '';
+        }
+        
+        // 发送消息给卖家
+        async function sendMessageToSeller() {
+            const token = localStorage.getItem('token');
+            const senderUsername = localStorage.getItem('username');
+            const receiverUsername = currentItem.owner;
+            const message = document.getElementById('seller-message').value.trim();
+            
+            if (!message) {
+                showCustomAlert('消息不能为空！', 'error');
+                return;
+            }
+            
+            try {
+                showLoadingMessage('发送中...');
+                
+                const response = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        receiver_user_id: receiverUsername,
+                        content: `关于 "${currentItem.name}" 项目：${message}`
+                    })
+                });
+                
+                closeLoadingMessage();
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showCustomAlert('消息已成功发送！', 'success');
+                    closeChatModal();
+                } else {
+                    showCustomAlert(result.message || '发送失败，请稍后再试', 'error');
+                }
+            } catch (error) {
+                closeLoadingMessage();
+                console.error('发送消息失败:', error);
+                showCustomAlert('网络错误，发送失败', 'error');
+            }
         }
 
         async function sendMessage() {

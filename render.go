@@ -83,4 +83,10 @@ func renderHTML(h *server.Hertz) {
 			"title": "区块链版权管理系统",
 		})
 	})
+
+	h.GET("/chat", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "chat.html", utils.H{
+			"title": "站内信",
+		})
+	})
 }

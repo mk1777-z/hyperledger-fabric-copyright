@@ -27,6 +27,15 @@ func RegisterRoutes(h *server.Hertz) {
 
 		// 图片代理API
 		api.GET("/proxy/image", middle.ProxyImage)
+
+		// 聊天功能路由组
+		chatApi := api.Group("/chat")
+		{
+			chatApi.POST("/send", middle.SendMessageHandler)
+			chatApi.GET("/messages/:conversation_id", middle.GetMessagesHandler)
+			chatApi.GET("/conversations", middle.GetConversationsHandler)
+			chatApi.POST("/messages/read", middle.MarkAsReadHandler)
+		}
 	}
 
 	// 统计分析相关路由

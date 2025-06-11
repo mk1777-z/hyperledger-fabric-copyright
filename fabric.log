@@ -32905,3 +32905,104 @@ main.main()
 	/home/hyperledger-fabric-copyright/main.go:113 +0x19e
 exit status 2
 2025/06/11 14:41:15 返回第 1 页项目，每页 12 个，总项目数: 33, 总页数: 3
+middle/chat_service.go:10:2: cannot find module providing package gorm.io/gorm: import lookup disabled by -mod=vendor
+	(Go version in go.mod is at least 1.14 and vendor directory exists.)
+middle/chat_service.go:10:2: cannot find module providing package gorm.io/gorm: import lookup disabled by -mod=vendor
+	(Go version in go.mod is at least 1.14 and vendor directory exists.)
+middle/chat_service.go:10:2: cannot find module providing package gorm.io/gorm: import lookup disabled by -mod=vendor
+	(Go version in go.mod is at least 1.14 and vendor directory exists.)
+middle/chat_service.go:10:2: cannot find module providing package gorm.io/gorm: import lookup disabled by -mod=vendor
+	(Go version in go.mod is at least 1.14 and vendor directory exists.)
+middle/chat_service.go:10:2: cannot find module providing package gorm.io/gorm: import lookup disabled by -mod=vendor
+	(Go version in go.mod is at least 1.14 and vendor directory exists.)
+router/router.go:5:2: package hyperledger-fabric-copyright/HTML/project is not in std (/root/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.7.linux-amd64/src/hyperledger-fabric-copyright/HTML/project)
+router/router.go:5:2: package hyperledger-fabric-copyright/HTML/project is not in std (/root/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.7.linux-amd64/src/hyperledger-fabric-copyright/HTML/project)
+router/router.go:5:2: package hyperledger-fabric-copyright/HTML/project is not in std (/root/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.7.linux-amd64/src/hyperledger-fabric-copyright/HTML/project)
+router/router.go:5:2: package hyperledger-fabric-copyright/HTML/project is not in std (/root/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.7.linux-amd64/src/hyperledger-fabric-copyright/HTML/project)
+# hyperledger-fabric-copyright/router
+router/router.go:107:27: undefined: middle.EnsureLoggedIn
+router/router.go:112:45: undefined: middle.CreateTrans
+router/router.go:123:42: undefined: middle.Favorite
+router/router.go:124:41: undefined: middle.GetFavorite
+router/router.go:125:44: undefined: middle.DeleteFavorite
+router/router.go:128:39: undefined: middle.Export
+router/router.go:129:43: undefined: middle.GetStatisticsData
+router/router.go:132:45: undefined: middle.GetTransactionsHandler
+router/router.go:133:48: undefined: middle.GetTransactionByIDHandler
+router/router.go:134:52: undefined: middle.MonitorTransactionsHandler
+router/router.go:134:52: too many errors
+middle/auth_middleware.go:1:1: expected 'package', found 'EOF'
+2025/06/11 22:48:02 正在初始化系统配置...
+正在执行Init
+2025/06/11 22:48:02 开始初始化数据库连接...
+2025/06/11 22:48:02 数据库连接成功
+2025/06/11 22:48:02 数据库初始化成功
+2025/06/11 22:48:02 正在初始化监管者专用区块链连接...
+2025/06/11 22:48:02 监管者区块链连接初始化成功
+2025/06/11 22:48:02 监管者专用连接初始化成功
+2025/06/11 22:48:02 系统配置初始化完成
+2025/06/11 22:48:02.921606 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/static/*filepath         --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/06/11 22:48:02.921630 engine.go:669: [Debug] HERTZ: Method=HEAD   absolutePath=/static/*filepath         --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/06/11 22:48:02.926264 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/HTML/*filepath           --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/06/11 22:48:02.926445 engine.go:669: [Debug] HERTZ: Method=HEAD   absolutePath=/HTML/*filepath           --> handlerName=github.com/cloudwego/hertz/pkg/app.(*fsHandler).handleRequest-fm (num=2 handlers)
+2025/06/11 22:48:02.926475 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/homepage                 --> handlerName=main.renderHTML.func1 (num=2 handlers)
+2025/06/11 22:48:02.926499 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/search                   --> handlerName=main.renderHTML.func2 (num=2 handlers)
+2025/06/11 22:48:02.926532 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/                         --> handlerName=main.renderHTML.func3 (num=2 handlers)
+2025/06/11 22:48:02.926554 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/login                    --> handlerName=main.renderHTML.func4 (num=2 handlers)
+2025/06/11 22:48:02.926576 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/register                 --> handlerName=main.renderHTML.func5 (num=2 handlers)
+2025/06/11 22:48:02.926607 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/information              --> handlerName=main.renderHTML.func6 (num=2 handlers)
+2025/06/11 22:48:02.926652 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/display                  --> handlerName=main.renderHTML.func7 (num=2 handlers)
+2025/06/11 22:48:02.926684 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/upload                   --> handlerName=main.renderHTML.func8 (num=2 handlers)
+2025/06/11 22:48:02.926706 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/favorites                --> handlerName=main.renderHTML.func9 (num=2 handlers)
+2025/06/11 22:48:02.926738 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/statistics               --> handlerName=hyperledger-fabric-copyright/middle.StatisticsPage (num=2 handlers)
+2025/06/11 22:48:02.926785 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/home                     --> handlerName=main.renderHTML.func10 (num=2 handlers)
+2025/06/11 22:48:02.926816 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/items                --> handlerName=hyperledger-fabric-copyright/middle.GetItems (num=2 handlers)
+2025/06/11 22:48:02.926840 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/information          --> handlerName=hyperledger-fabric-copyright/middle.GetItemInfo (num=2 handlers)
+2025/06/11 22:48:02.926871 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/search               --> handlerName=hyperledger-fabric-copyright/middle.SearchItems (num=2 handlers)
+2025/06/11 22:48:02.926900 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/favorites            --> handlerName=hyperledger-fabric-copyright/middle.GetFavorites (num=2 handlers)
+2025/06/11 22:48:02.926923 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/favorites/add        --> handlerName=hyperledger-fabric-copyright/middle.AddFavorite (num=2 handlers)
+2025/06/11 22:48:02.926955 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/favorites/remove     --> handlerName=hyperledger-fabric-copyright/middle.RemoveFavorite (num=2 handlers)
+2025/06/11 22:48:02.926978 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/proxy/image          --> handlerName=hyperledger-fabric-copyright/middle.ProxyImage (num=2 handlers)
+2025/06/11 22:48:02.927012 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/chat/send            --> handlerName=hyperledger-fabric-copyright/middle.SendMessageHandler (num=2 handlers)
+2025/06/11 22:48:02.927045 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/chat/messages/:conversation_id --> handlerName=hyperledger-fabric-copyright/middle.GetMessagesHandler (num=2 handlers)
+2025/06/11 22:48:02.927072 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/chat/conversations   --> handlerName=hyperledger-fabric-copyright/middle.GetConversationsHandler (num=2 handlers)
+2025/06/11 22:48:02.927094 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/chat/messages/read   --> handlerName=hyperledger-fabric-copyright/middle.MarkAsReadHandler (num=2 handlers)
+2025/06/11 22:48:02.927125 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/chartData     --> handlerName=hyperledger-fabric-copyright/middle.GetChartData (num=2 handlers)
+2025/06/11 22:48:02.927148 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/exportData    --> handlerName=hyperledger-fabric-copyright/middle.ExportData (num=2 handlers)
+2025/06/11 22:48:02.927170 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/statistics/datasources --> handlerName=hyperledger-fabric-copyright/middle.GetDataSourceInfo (num=2 handlers)
+2025/06/11 22:48:02.927202 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/summary       --> handlerName=hyperledger-fabric-copyright/middle.GetStatisticsSummaryAPI (num=2 handlers)
+2025/06/11 22:48:02.927239 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/copyright-trend --> handlerName=hyperledger-fabric-copyright/middle.GetCopyrightTrendAPI (num=2 handlers)
+2025/06/11 22:48:02.927276 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/copyright-types --> handlerName=hyperledger-fabric-copyright/middle.GetCopyrightTypesAPI (num=2 handlers)
+2025/06/11 22:48:02.927309 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/transaction-amount --> handlerName=hyperledger-fabric-copyright/middle.GetTransactionAmountAPI (num=2 handlers)
+2025/06/11 22:48:02.927332 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/user-activity --> handlerName=hyperledger-fabric-copyright/middle.GetUserActivityAPI (num=2 handlers)
+2025/06/11 22:48:02.927364 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/statistics/detail-data   --> handlerName=hyperledger-fabric-copyright/middle.GetDetailTableDataAPI (num=2 handlers)
+2025/06/11 22:48:02.927392 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/statistics/export-excel  --> handlerName=hyperledger-fabric-copyright/middle.ExportExcelAPI (num=2 handlers)
+2025/06/11 22:48:02.927416 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/statistics/export-pdf    --> handlerName=hyperledger-fabric-copyright/middle.ExportPDFAPI (num=2 handlers)
+2025/06/11 22:48:02.927451 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/peer_orderer.html        --> handlerName=main.setupRouter.func1 (num=2 handlers)
+2025/06/11 22:48:02.928104 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/flowchart.html           --> handlerName=main.setupRouter.func2 (num=2 handlers)
+2025/06/11 22:48:02.928247 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/balance                  --> handlerName=hyperledger-fabric-copyright/middle.HandleAccount (num=2 handlers)
+2025/06/11 22:48:02.928286 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/getbalance               --> handlerName=hyperledger-fabric-copyright/middle.GetBalance (num=2 handlers)
+2025/06/11 22:48:02.928330 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/account/balance          --> handlerName=hyperledger-fabric-copyright/middle.GetBalance (num=2 handlers)
+2025/06/11 22:48:02.928357 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/register                 --> handlerName=hyperledger-fabric-copyright/middle.Register (num=2 handlers)
+2025/06/11 22:48:02.928380 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/login                    --> handlerName=hyperledger-fabric-copyright/middle.Login (num=2 handlers)
+2025/06/11 22:48:02.928414 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/login                --> handlerName=hyperledger-fabric-copyright/middle.RegulatorLogin (num=2 handlers)
+2025/06/11 22:48:02.928437 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/myproject                --> handlerName=hyperledger-fabric-copyright/middle.Myproject (num=2 handlers)
+2025/06/11 22:48:02.928458 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/display                  --> handlerName=hyperledger-fabric-copyright/middle.Display (num=2 handlers)
+2025/06/11 22:48:02.928490 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/upload                   --> handlerName=hyperledger-fabric-copyright/middle.Upload (num=2 handlers)
+2025/06/11 22:48:02.928512 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/information              --> handlerName=hyperledger-fabric-copyright/middle.Information (num=2 handlers)
+2025/06/11 22:48:02.928534 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/updateItem               --> handlerName=hyperledger-fabric-copyright/middle.UpdateItem (num=2 handlers)
+2025/06/11 22:48:02.928563 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/transaction              --> handlerName=hyperledger-fabric-copyright/middle.Transaction (num=2 handlers)
+2025/06/11 22:48:02.928585 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/search                   --> handlerName=hyperledger-fabric-copyright/middle.Search (num=2 handlers)
+2025/06/11 22:48:02.928607 engine.go:669: [Debug] HERTZ: Method=POST   absolutePath=/api/audit                --> handlerName=hyperledger-fabric-copyright/middle.AuditTrade (num=2 handlers)
+2025/06/11 22:48:02.928652 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/audit/history        --> handlerName=hyperledger-fabric-copyright/middle.GetAuditHistory (num=2 handlers)
+2025/06/11 22:48:02.928692 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/audit/info           --> handlerName=hyperledger-fabric-copyright/middle.GetTradeInfoForAudit (num=2 handlers)
+2025/06/11 22:48:02.928727 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/audit/categorized-items --> handlerName=hyperledger-fabric-copyright/middle.GetCategorizedItems (num=2 handlers)
+2025/06/11 22:48:02.928751 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/audit                    --> handlerName=main.setupRouter.func3 (num=2 handlers)
+2025/06/11 22:48:02.928792 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/chat_ws                  --> handlerName=hyperledger-fabric-copyright/middle.ChatWebsocket (num=2 handlers)
+2025/06/11 22:48:02.928814 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/transaction-monitor      --> handlerName=main.setupRouter.func4 (num=2 handlers)
+2025/06/11 22:48:02.928835 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/api/transactions         --> handlerName=hyperledger-fabric-copyright/middle.GetAllTransactions (num=2 handlers)
+2025/06/11 22:48:02.928868 engine.go:669: [Debug] HERTZ: Method=GET    absolutePath=/smart-contracts          --> handlerName=main.setupRouter.func5 (num=2 handlers)
+2025/06/11 22:48:02.928897 engine.go:397: [Info] HERTZ: Using network library=netpoll
+2025/06/11 22:48:02.929047 transport.go:140: [Info] HERTZ: HTTP server listening on address=[::]:8888
+2025/06/11 23:22:14.408696 engine.go:470: [Error] HERTZ: Error=connection read timeout 45.134.26.50:64432, remoteAddr=45.134.26.50:64432
+signal: terminated
