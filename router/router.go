@@ -19,6 +19,14 @@ func RegisterRoutes(h *server.Hertz) {
 
 		// 搜索API
 		api.POST("/search", middle.SearchItems)
+
+		// 收藏相关API
+		api.GET("/favorites", middle.GetFavorites)
+		api.POST("/favorites/add", middle.AddFavorite)
+		api.POST("/favorites/remove", middle.RemoveFavorite)
+
+		// 图片代理API
+		api.GET("/proxy/image", middle.ProxyImage)
 	}
 
 	// 统计分析相关路由

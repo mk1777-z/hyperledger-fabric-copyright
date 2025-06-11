@@ -228,23 +228,87 @@
         /* 移除按钮背景并调整样式 */
         .embedded-buttons {
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            justify-content: space-between;
+            gap: 8px;
             margin-top: 15px;
             padding: 12px 0;
             background: transparent;
-            /* 移除背景 */
             border-radius: 12px;
-            backdrop-filter: none;
-            /* 移除模糊效果 */
             border: none;
-            /* 移除边框 */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 统一按钮样式 */
+        .action-button {
+            width: calc((100% - 16px) / 3); /* 3个按钮，2个8px间距 */
+            padding: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 13px;
+            min-width: 0;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .action-button.buy {
+            background: linear-gradient(135deg, #6e40ff, #8866ff);
+            color: white;
+            border: none;
+        }
+
+        .action-button.buy:disabled {
+            background: linear-gradient(135deg, #4a4a4a, #666666);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .action-button.favorite {
+            background: linear-gradient(135deg, #6e40ff, #8866ff);
+            color: white;
+            border: none;
+        }
+
+        .action-button.back {
+            background: linear-gradient(135deg, #0bdcab, #0fefbc);
+            color: white;
+            border: none;
+        }
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .action-button.buy:hover:not(:disabled) {
+            box-shadow: 0 4px 12px rgba(110, 64, 255, 0.3);
+        }
+
+        .action-button.favorite:hover {
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .action-button.back:hover {
+            box-shadow: 0 4px 12px rgba(11, 220, 171, 0.3);
+        }
+
+        .action-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .action-button.favorite.active {
+            background: linear-gradient(135deg, #ff4757, #ff6b6b);
         }
 
         /* 图片尺寸调整 */
         .item-info img {
             max-height: 250px;
-            /* 限制图片高度 */
             object-fit: contain;
         }
 
@@ -1428,6 +1492,30 @@
         .chat-container h3 {
             margin-bottom: 25px;
         }
+
+        .action-button.favorite {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-button.favorite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .action-button.favorite:active {
+            transform: translateY(0);
+        }
+
+        .action-button.favorite.active {
+            background: linear-gradient(135deg, #ff4757, #ff6b6b);
+        }
     </style>
 </head>
 
@@ -1482,6 +1570,7 @@
                 <!-- 将按钮移到AI助手内部 -->
                 <div class="embedded-buttons">
                     <button id="buy-button" class="action-button buy" disabled>立即购买</button>
+                    <button id="favorite-button" class="action-button favorite">加入购物车</button>
                     <a href="/display" class="action-button back">返回列表</a>
                 </div>
             </div>
@@ -1490,11 +1579,10 @@
         <div id="modal-overlay"></div>
         <div id="contract-modal">
             <h3>合同协议</h3>
-            <p>请仔细阅读以下协议内容并点击“确认”以完成购买：</p>
+            <p>请仔细阅读以下协议内容并点击"确认"以完成购买：</p>
             <p><strong>合同条款：</strong></p>
             <p>
-                1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为“<span
-                    id="item-name-contract"></span>”，其具体描述为：<span id="item-description-contract"></span>。
+                1. <strong style="color: red;">交易标的物：</strong>本合同项下的交易标的物为"${item.name}"，其具体描述为：<span id="item-description-contract"></span>。
             </p>
             <p>
                 2. <strong style="color: red;">交易价格：</strong>买方应支付的交易价格为人民币<span id="item-price-contract"></span>元。
@@ -1570,31 +1658,31 @@
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
-                    <div class="progress-percentage">0%</< /div>
-                    </div>
+                    <div class="progress-percentage">0%</div>
+                </div>
 
-                    <div class="step-container">
-                        <div class="current-step">初始化交易...</div>
-                        <div class="step-details">正在准备交易数据</div>
-                    </div>
+                <div class="step-container">
+                    <div class="current-step">初始化交易...</div>
+                    <div class="step-details">正在准备交易数据</div>
+                </div>
 
-                    <div class="transaction-details">
-                        <div class="detail-row">
-                            <div class="detail-label">交易ID:</div>
-                            <div class="detail-value" id="tx-hash">生成中...</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">区块高度:</div>
-                            <div class="detail-value" id="block-height">等待中...</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">网络状态:</div>
-                            <div class="detail-value" id="network-status"><span class="status-indicator"></span>处理中
-                            </div>
+                <div class="transaction-details">
+                    <div class="detail-row">
+                        <div class="detail-label">交易ID:</div>
+                        <div class="detail-value" id="tx-hash">生成中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">区块高度:</div>
+                        <div class="detail-value" id="block-height">等待中...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">网络状态:</div>
+                        <div class="detail-value" id="network-status"><span class="status-indicator"></span>处理中
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
     </main>
 
     <!-- 现有依赖 -->
@@ -1764,16 +1852,17 @@
         }
 
         function populateItemDetails(item) {
-            itemNameElement.textContent = `名称：${item.name}`;
-            itemDescriptionElement.textContent = item.description;
-            document.getElementById('item-detail-description').textContent = item.dsc; // 新增详细描述显示
-            itemPriceElement.textContent = item.price;
-            itemOwnerElement.textContent = item.owner;
-            itemNameContractElement.textContent = item.name;
-            itemDescriptionContractElement.textContent = item.description;
-            itemPriceContractElement.textContent = item.price;
-            itemOwnerContractElement.textContent = item.owner;
-            buyerNameElement.textContent = localStorage.getItem("username");
+            if (itemNameElement) itemNameElement.textContent = `名称：${item.name}`;
+            if (itemDescriptionElement) itemDescriptionElement.textContent = item.description;
+            const detailEl = document.getElementById('item-detail-description');
+            if (detailEl) detailEl.textContent = item.dsc;
+            if (itemPriceElement) itemPriceElement.textContent = item.price;
+            if (itemOwnerElement) itemOwnerElement.textContent = item.owner;
+            if (itemNameContractElement) itemNameContractElement.textContent = item.name;
+            if (itemDescriptionContractElement) itemDescriptionContractElement.textContent = item.description;
+            if (itemPriceContractElement) itemPriceContractElement.textContent = item.price;
+            if (itemOwnerContractElement) itemOwnerContractElement.textContent = item.owner;
+            if (buyerNameElement) buyerNameElement.textContent = localStorage.getItem("username");
 
             itemImageElement.src = item.img && item.img.length >= 10 ? item.img : 'https://api.iconify.design/icon-park:fail-picture.svg';
             itemImageElement.alt = '版权图片';
@@ -2336,6 +2425,43 @@
             // 开始执行第一步
             executeNextStep();
         }
+
+        // 收藏按钮逻辑
+        const favoriteButton = document.getElementById('favorite-button');
+        favoriteButton.addEventListener('click', async function() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            if (!token || !username) {
+                showCustomAlert('请先登录后再收藏！', 'error');
+                return;
+            }
+            if (!currentItem || !currentItem.id) {
+                showCustomAlert('未获取到商品信息，无法收藏', 'error');
+                return;
+            }
+            try {
+                showLoadingMessage('正在收藏...');
+                const response = await fetch('/api/favorites/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username: username, item_id: currentItem.id })
+                });
+                closeLoadingMessage();
+                const result = await response.json();
+                if (response.ok && result.message === '收藏成功') {
+                    showCustomAlert('收藏成功！', 'success');
+                    favoriteButton.classList.add('active');
+                } else {
+                    showCustomAlert(result.message || '收藏失败', 'error');
+                }
+            } catch (error) {
+                closeLoadingMessage();
+                showCustomAlert('网络错误，收藏失败', 'error');
+            }
+        });
     </script>
 
 </body>

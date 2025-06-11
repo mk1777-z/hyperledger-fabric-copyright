@@ -446,6 +446,37 @@
                 0 2px 5px rgba(255, 255, 255, 0.1);
         }
 
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* 分页容器样式 */
         .pagination-container {
             display: flex;
@@ -1195,6 +1226,7 @@
             <a href="/display" class="active">版权交易</a>
             <a href="/transaction-monitor">交易监控</a>
             <a href="/smart-contracts">合约架构</a>
+            <a href="/favorites">购物车</a>
         </div>
         <!-- 动态用户区域 -->
         <div id="userArea">
@@ -1445,7 +1477,7 @@
             if (!currentToken) {
                 showCustomAlert('请先登录后查看详情', 'error');
                 setTimeout(() => {
-                    window.location.href = '/login'; // 改为登录页而不是首页
+                    window.location.href = '/login';
                 }, 1500);
                 return;
             }
@@ -1453,41 +1485,41 @@
             // 显示加载状态
             showLoadingMessage('加载详情...');
 
+            // 先获取商品详情
             fetch('/api/information', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentToken}` // 使用当前最新token
+                    'Authorization': `Bearer ${currentToken}`
                 },
                 body: JSON.stringify({ name: itemName })
             })
-                .then(response => {
-                    closeLoadingMessage();
-
-                    if (!response.ok) {
-                        throw new Error(`请求失败: ${response.status} ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data && data.items && data.items.length > 0) {
-                        const item = data.items[0];
-                        const processedItem = {
-                            ...item,
-                            img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
-                        };
-                        sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
-                        window.location.href = '/information';
-                    } else {
-                        console.error('未找到相关项');
-                        showCustomAlert('未找到项目详情', 'error');
-                    }
-                })
-                .catch(error => {
-                    closeLoadingMessage();
-                    console.error('获取详情失败:', error);
-                    showCustomAlert('获取详情失败，请稍后重试', 'error');
-                });
+            .then(response => {
+                closeLoadingMessage();
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.items && data.items.length > 0) {
+                    const item = data.items[0];
+                    const processedItem = {
+                        ...item,
+                        img: item.img === "NULL" ? "https://via.placeholder.com/200x140/182338/cccccc?text=暂无图片" : item.img
+                    };
+                    sessionStorage.setItem('itemDetails', JSON.stringify(processedItem));
+                    window.location.href = '/information';
+                } else {
+                    console.error('未找到相关项');
+                    showCustomAlert('未找到项目详情', 'error');
+                }
+            })
+            .catch(error => {
+                closeLoadingMessage();
+                console.error('获取商品详情失败:', error);
+                showCustomAlert('获取商品详情失败，请稍后重试', 'error');
+            });
         }
 
         // 更新分页信息
@@ -1511,6 +1543,31 @@
         // 监听键盘事件
         function handleSearchKey(event) {
             if (event.key === 'Enter') searchItems();
+        }
+
+        // 显示加载状态
+        function showLoadingMessage(message) {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.id = 'loading-overlay';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'loading-spinner';
+            
+            const text = document.createElement('div');
+            text.textContent = message;
+            
+            overlay.appendChild(spinner);
+            overlay.appendChild(text);
+            document.body.appendChild(overlay);
+        }
+
+        // 关闭加载状态
+        function closeLoadingMessage() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
         }
 
         // 绑定分页按钮事件

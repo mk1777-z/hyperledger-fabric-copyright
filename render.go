@@ -67,6 +67,13 @@ func renderHTML(h *server.Hertz) {
 		})
 	})
 
+	// 添加收藏页面路由
+	h.GET("/favorites", func(ctx context.Context, c *app.RequestContext) {
+		c.HTML(consts.StatusOK, "favorites.html", utils.H{
+			"title": "我的收藏",
+		})
+	})
+
 	// 添加对statistics页面的支持
 	h.GET("/statistics", middle.StatisticsPage)
 

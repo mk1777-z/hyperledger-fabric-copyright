@@ -97,6 +97,7 @@
             color: var(--text-color);
             font-size: 1rem;
             transition: all 0.3s ease;
+            /* 移除可能影响点击的样式，采用与注册页面相同的简洁样式 */
         }
 
         .input-item:focus {
@@ -279,9 +280,15 @@
             </div>
         </div>
     </div>
-    <div id="customAlert" class="custom-alert">
+    <!-- <div id="customAlert" class="custom-alert">
         <i id="alertIcon" class="fas fa-check-circle icon-success"></i>
         <span id="alertMessage">消息内容</span>
+    </div> -->
+
+    <!-- 自定义消息弹窗 -->
+    <div id="customAlert" class="custom-alert" style="display: none;">
+        <i id="alertIcon" class="fas fa-check-circle"></i>
+        <span id="alertMessage">提示内容</span>
     </div>
 </body>
 
