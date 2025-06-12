@@ -86,7 +86,6 @@ func (s *ChatService) GetMessages(conversationID string, userID string, page, pa
 	var messages []conf.ChatMessage
 	var total int64
 
-	// Count total messages for pagination
 	row := conf.DB.QueryRow("SELECT COUNT(*) FROM chat_messages WHERE conversation_id = ?", conversationID)
 	err := row.Scan(&total)
 	if err != nil {
@@ -97,7 +96,6 @@ func (s *ChatService) GetMessages(conversationID string, userID string, page, pa
 		return messages, 0, nil // No messages, return empty slice
 	}
 
-	// Get messages
 	query := "SELECT id, conversation_id, sender_user_id, receiver_user_id, content, timestamp, is_read FROM chat_messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?"
 	rows, err := conf.DB.Query(query, conversationID, pageSize, offset)
 	if err != nil {
@@ -108,7 +106,6 @@ func (s *ChatService) GetMessages(conversationID string, userID string, page, pa
 	for rows.Next() {
 		var msg conf.ChatMessage
 		if err := rows.Scan(&msg.ID, &msg.ConversationID, &msg.SenderUserID, &msg.ReceiverUserID, &msg.Content, &msg.Timestamp, &msg.IsRead); err != nil {
-			log.Printf("Error scanning message row: %v", err) // Log and continue if possible
 			continue
 		}
 		messages = append(messages, msg)
@@ -119,14 +116,10 @@ func (s *ChatService) GetMessages(conversationID string, userID string, page, pa
 
 	// Mark messages as read for the current user in this conversation
 	stmt, err := conf.DB.Prepare("UPDATE chat_messages SET is_read = ? WHERE conversation_id = ? AND receiver_user_id = ? AND is_read = ?")
-	if err != nil {
-		log.Printf("Warning: failed to prepare statement for marking messages as read: %v\n", err)
-	} else {
+	if err == nil {
 		defer stmt.Close()
 		_, updateErr := stmt.Exec(true, conversationID, userID, false)
-		if updateErr != nil {
-			fmt.Printf("Warning: failed to mark messages as read for conversation %s, user %s: %v\n", conversationID, userID, updateErr)
-		}
+		_ = updateErr // 忽略错误
 	}
 
 	// Reverse messages to display in chronological order (oldest first)

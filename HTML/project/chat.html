@@ -369,21 +369,6 @@
     let selectedReceiverId=null;
     let conversationsCache=[];
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
-    function loadConversations(){
-        fetch('/api/chat/conversations', {headers:{'Authorization':`Bearer ${token}`}})
-            .then(res=>res.json())
-            .then(data=>{
-                conversationsCache=data||[];
-                renderConversationList();
-                const urlParams=new URLSearchParams(window.location.search);
-                const cid=urlParams.get('conversation_id');
-                if(cid && !selectedConversationId){
-                    const conv=conversationsCache.find(c=>c.conversation_id===cid);
-                    if(conv){openConversation(conv);}else{selectedConversationId=null;}
-                }
-            })
-            .catch(err=>console.error('获取会话失败',err));
-    }
     function renderConversationList(){
         const container=document.getElementById('conversationList');
         container.innerHTML='';
@@ -393,7 +378,11 @@
             item.innerHTML=`<span class="other-name">${conv.other_username||conv.other_user_id}</span>
                 ${conv.unread_count>0?`<span class="badge">${conv.unread_count}</span>`:''}
                 <div class="last-message">${conv.last_message?conv.last_message.substring(0,32):''}</div>`;
-            item.addEventListener('click',()=>openConversation(conv));
+            item.addEventListener('click',()=>{
+                if(selectedConversationId!==conv.conversation_id){
+                    openConversation(conv);
+                }
+            });
             container.appendChild(item);
         });
     }
@@ -402,16 +391,55 @@
         selectedReceiverId=conv.other_user_id;
         document.getElementById('chatHeader').textContent=`与 ${conv.other_username||conv.other_user_id} 的对话`;
         renderConversationList();
-        loadMessages();
+        // 切换时立即清空消息区，防止异步错乱
+        document.getElementById('chatMessages').innerHTML='';
+        loadMessages(selectedConversationId, 1, 100, true); // 只在切换时显示加载中
         fetch('/api/chat/messages/read', {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body:JSON.stringify({conversation_id:selectedConversationId})}).catch(()=>{});
     }
-    function loadMessages(page=1,pageSize=100){
-        if(!selectedConversationId){return;}
-        fetch(`/api/chat/messages/${selectedConversationId}?page=${page}&page_size=${pageSize}`, {headers:{'Authorization':`Bearer ${token}`}})
+    function loadConversations(){
+        fetch('/api/chat/conversations', {headers:{'Authorization':`Bearer ${token}`}})
             .then(res=>res.json())
             .then(data=>{
-                renderMessages(data.messages||[]);
-            }).catch(err=>console.error('获取消息失败',err));
+                conversationsCache=data||[];
+                // 若URL带conversation_id且首次加载，自动打开
+                const urlParams=new URLSearchParams(window.location.search);
+                const cid=urlParams.get('conversation_id');
+                if(cid && !selectedConversationId){
+                    const conv=conversationsCache.find(c=>c.conversation_id===cid);
+                    if(conv){openConversation(conv);}else{selectedConversationId=null;}
+                    return;
+                }
+                // 检查当前选中的会话是否还存在
+                const stillExists = conversationsCache.some(c=>c.conversation_id===selectedConversationId);
+                if((!selectedConversationId || !stillExists) && conversationsCache.length>0){
+                    // 没有选中任何会话或当前会话已不存在，自动选第一个
+                    openConversation(conversationsCache[0]);
+                } else {
+                    // 保持原有选中，只刷新列表和消息
+                    renderConversationList();
+                    if(selectedConversationId) loadMessages(selectedConversationId, 1, 100, false); // 定时刷新不显示加载中
+                }
+            })
+            .catch(err=>console.error('获取会话失败',err));
+    }
+    function loadMessages(conversationId, page=1, pageSize=100, showLoading=false){
+        if(!conversationId){return;}
+        const box = document.getElementById('chatMessages');
+        if (showLoading === true) {
+            box.innerHTML = '<div style="color:#a0aec0;text-align:center;margin-top:40px;font-size:1.1rem;">加载中...</div>';
+        }
+        fetch(`/api/chat/messages/${conversationId}?page=${page}&page_size=${pageSize}`, {headers:{'Authorization':`Bearer ${token}`}})
+            .then(res=>res.json())
+            .then(data=>{
+                if(conversationId===selectedConversationId){
+                    renderMessages(data.messages||[]);
+                }
+            }).catch(err=>{
+                if (showLoading === true) {
+                    box.innerHTML = '<div style="color:#a0aec0;text-align:center;margin-top:40px;font-size:1.1rem;">加载失败</div>';
+                }
+                console.error('获取消息失败',err);
+            });
     }
     function renderMessages(msgs){
         const box=document.getElementById('chatMessages');
@@ -432,14 +460,14 @@
             .then(res=>res.json())
             .then(()=>{
                 input.value='';
-                loadMessages();
                 loadConversations();
             })
             .catch(err=>console.error('发送失败',err));
     }
+    // 定时刷新
     setInterval(()=>{
         loadConversations();
-        if(selectedConversationId){loadMessages();}
+        if(selectedConversationId){loadMessages(selectedConversationId, 1, 100, false);}
     },5000);
     loadConversations();
 </script>
