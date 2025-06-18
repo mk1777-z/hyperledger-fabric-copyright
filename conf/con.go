@@ -97,4 +97,7 @@ func Init() {
 	} else {
 		log.Println("监管者专用连接初始化成功")
 	}
+
+	InitRecommendationConfig("config.yaml")
+	InitCategory("config.yaml")
 }

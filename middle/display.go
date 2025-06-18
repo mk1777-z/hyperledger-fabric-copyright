@@ -7,14 +7,28 @@ import (
 	"hyperledger-fabric-copyright/conf"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/dgrijalva/jwt-go"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type Paging struct {
 	Page     int `json:"page"`
 	PageSize int `json:"pageSize"`
+}
+
+type DisplayResponseItem struct {
+	Id        int    `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	Name      string `json:"name" gorm:"column:name;type:varchar(50);not null"`
+	Owner     string `json:"owner" gorm:"column:owner;type:varchar(255);not null"`
+	SimpleDsc string `json:"description" gorm:"column:simple_dsc;type:varchar(30);default:null"`
+	Price     int    `json:"price" gorm:"column:price;type:int;not null"`
+	Img       string `json:"img" gorm:"column:img;type:longblob;default:null"`
 }
 
 func Display(_ context.Context, c *app.RequestContext) {
@@ -108,6 +122,98 @@ func Display(_ context.Context, c *app.RequestContext) {
 	// 返回结果
 	c.JSON(http.StatusOK, utils.H{
 		"items":      approvedItems,
+		"totalPages": totalPages,
+		"totalItems": totalItems,
+	})
+}
+
+func Display2(_ context.Context, c *app.RequestContext) {
+	// 通过tokan获取用户名
+	tokenBytes := c.GetHeader("Authorization")
+	if len(tokenBytes) == 0 {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "Authorization token is missing"})
+		return
+	}
+	tokenString := string(tokenBytes)
+	if !strings.HasPrefix(tokenString, "Bearer ") {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的授权头格式"})
+		return
+	}
+
+	// 提取 Bearer token
+	token_String := strings.Replace(tokenString, "Bearer ", "", -1)
+
+	// 解析 token
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		// 返回 JWT 密钥
+		return conf.Con.Jwtkey, nil
+	})
+	if err != nil {
+		// 如果 token 无效，返回 401 未授权错误
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token"})
+		return
+	}
+
+	// 验证 token 是否有效
+	claims, ok := token.Claims.(*conf.UserClaims)
+	if !ok || !token.Valid {
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token claims"})
+		return
+	}
+	username := claims.Username
+
+	var pageData Paging
+	pageData.Page = 1
+	pageData.PageSize = 12 // 设置为12个项目每页
+	// 绑定请求参数
+	err = c.Bind(&pageData)
+	// 计算分页的偏移量
+	offset := (pageData.Page - 1) * pageData.PageSize
+
+	if err != nil {
+		log.Fatal("Bind parameter error")
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Bind parameter error"})
+		return
+	}
+
+	// 获取推荐内容
+	gorseClient := conf.GorseClient
+	recommandedItems, err := gorseClient.GetRecommendOffSet(context.Background(), username, "", pageData.PageSize, offset)
+	recommandedItemsId := make([]int, len(recommandedItems))
+	for i := range recommandedItems {
+		recommandedItemsId[i], _ = strconv.Atoi(recommandedItems[i])
+	}
+
+	// 连接数据库(实际是复用连接)
+	db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
+		return
+	}
+	// 查询总数和推荐的items
+	var totalItems int64
+	db.Model(&conf.Item{}).Where("on_sale = ? AND decision = ?", 1, "APPROVE").Count(&totalItems)
+	itemSlice := []DisplayResponseItem{}
+	db.Table("item").Where("id in ?", recommandedItemsId).Select("id", "name", "simple_dsc", "owner", "price", "img").Find(&itemSlice)
+
+	// 计算总页数
+	totalPages := (totalItems + int64(pageData.PageSize) - 1) / int64(pageData.PageSize)
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	log.Printf("返回第 %d 页项目，每页 %d 个，总项目数: %d, 总页数: %d",
+		pageData.Page, pageData.PageSize, totalItems, totalPages)
+
+	// 返回结果
+	c.JSON(http.StatusOK, utils.H{
+		"items":      itemSlice,
 		"totalPages": totalPages,
 		"totalItems": totalItems,
 	})

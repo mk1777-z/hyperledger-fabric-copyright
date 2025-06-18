@@ -1,2 +1,5 @@
 config.yaml
 vendor/
+recommendation/*
+!recommendation/docker-compose.yaml
+fabric.log

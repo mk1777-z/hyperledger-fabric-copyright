@@ -4,7 +4,6 @@ import (
 	"context"
 	"hyperledger-fabric-copyright/conf"
 	"hyperledger-fabric-copyright/middle"
-	"hyperledger-fabric-copyright/router"
 	"log"
 	"net/http"
 
@@ -41,7 +40,8 @@ func setupRouter(h *server.Hertz) {
 	h.POST("/getbalance", middle.GetBalance)
 	h.POST("/account/balance", middle.GetBalance)
 
-	h.POST("/register", middle.Register)
+	// h.POST("/register", middle.Register)
+	h.POST("/register", middle.Register2)
 
 	h.POST("/login", middle.Login)
 	h.POST("/api/login", middle.RegulatorLogin)
@@ -50,11 +50,13 @@ func setupRouter(h *server.Hertz) {
 
 	h.POST("/display", middle.Display)
 
-	h.POST("/upload", middle.Upload)
+	// h.POST("/upload", middle.Upload)
+	h.POST("/upload", middle.Upload2)
 
 	h.POST("/information", middle.Information)
 
-	h.POST("/updateItem", middle.UpdateItem)
+	// h.POST("/updateItem", middle.UpdateItem)
+	h.POST("/updateItem", middle.UpdateItem2)
 
 	h.POST("/transaction", middle.Transaction)
 
@@ -84,6 +86,45 @@ func setupRouter(h *server.Hertz) {
 		ctx.HTML(http.StatusOK, "smart-contracts.html", nil)
 	})
 
+	// 其他路由注册
+	api := h.Group("/api")
+	{
+		// 项目列表API
+		api.POST("/items", middle.GetItems)
+
+		// 项目详情API
+		api.POST("/information", middle.GetItemInfo)
+
+		// 搜索API
+		api.POST("/search", middle.SearchItems)
+
+		// 收藏相关API
+		api.GET("/favorites", middle.GetFavorites)
+		// api.POST("/favorites/add", middle.AddFavorite)
+		api.POST("/favorites/add", middle.AddFavorite2)
+		// api.POST("/favorites/remove", middle.RemoveFavorite)
+		api.POST("/favorites/remove", middle.RemoveFavorite2)
+
+		// 图片代理API
+		api.GET("/proxy/image", middle.ProxyImage)
+
+		// 聊天功能路由组
+		chatApi := api.Group("/chat")
+		{
+			chatApi.POST("/send", middle.SendMessageHandler)
+			chatApi.GET("/messages/:conversation_id", middle.GetMessagesHandler)
+			chatApi.GET("/conversations", middle.GetConversationsHandler)
+			chatApi.POST("/messages/read", middle.MarkAsReadHandler)
+		}
+	}
+
+	// 统计分析相关路由
+	h.POST("/statistics/chartData", middle.GetChartData)
+	h.POST("/statistics/exportData", middle.ExportData)
+
+	// 添加数据源信息检查接口
+	h.GET("/api/statistics/datasources", middle.GetDataSourceInfo)
+
 }
 
 func main() {
@@ -91,7 +132,7 @@ func main() {
 	conf.Init()
 	log.Println("系统配置初始化完成")
 
-	h := server.Default()
+	h := server.Default(server.WithHostPorts("0.0.0.0:8888"))
 
 	// 修改静态文件服务根目录，避免路径重复
 	h.Static("/static", "/home/hyperledger-fabric-copyright")
@@ -101,9 +142,6 @@ func main() {
 
 	// renderHTML函数中不应再注册静态文件
 	renderHTML(h)
-
-	// 确保调用路由注册函数
-	router.RegisterRoutes(h)
 
 	// 使用setupRouter函数注册API路由
 	setupRouter(h)

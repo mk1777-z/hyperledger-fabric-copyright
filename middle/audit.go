@@ -10,6 +10,7 @@ import (
 	"hyperledger-fabric-copyright/conf"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // 验证和解析交易ID
@@ -145,6 +148,59 @@ func submitAuditTransaction(contract *client.Contract, tradeID string, decision 
 
 		rowsAffected, _ := result.RowsAffected()
 		log.Printf("已将项目 %s 的decision字段更新为APPROVE，影响行数: %d", itemName, rowsAffected)
+	}
+
+	return nil
+}
+
+// 创建审核记录
+func submitAuditTransaction2(contract *client.Contract, tradeID string, decision string, comment string) error {
+	log.Printf("--> 提交审核交易: ID=%s, Decision=%s", tradeID, decision)
+
+	// 直接调用智能合约的审核功能
+	_, err := contract.SubmitTransaction("AuditTrade", tradeID, decision, comment)
+	if err != nil {
+		log.Printf("审核交易提交失败: %v", err)
+		return fmt.Errorf("审核交易失败: %v", err)
+	}
+
+	log.Printf("审核记录提交成功")
+
+	// 当审核决定是APPROVE时，更新数据库中对应项目的decision字段
+	if decision == "APPROVE" {
+		// 从基础链获取交易信息，找到对应项目
+		tradeInfo, err := getTradeInfoFromBasic(tradeID)
+		if err != nil {
+			log.Printf("获取交易信息失败，无法更新数据库: %v", err)
+			return nil // 不影响主流程，所以返回nil
+		}
+
+		// 从交易信息中获取项目名称
+		itemName, ok := tradeInfo["Name"].(string)
+		if !ok || itemName == "" {
+			log.Printf("交易信息中未找到有效的项目名称，无法更新数据库")
+			return nil
+		}
+
+		// 连接数据库
+		db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+		if err != nil {
+			log.Printf("数据库连接失败，无法更新项目状态: %v", err)
+			return nil
+		}
+
+		// 更新项目的decision字段为APPROVE
+		updateResult := db.Model(&conf.Item{}).Where("name = ?", itemName).Update("decision", "APPROVE")
+		if updateResult.Error != nil {
+			log.Printf("更新项目状态失败: %v", err)
+			return nil
+		}
+		var dbItem conf.Item
+		if err := db.Model(&conf.Item{}).Where("name = ?", itemName).Select("id", "on_sale").Scan(&dbItem).Error; err != nil {
+			conf.SetItemHidden(strconv.Itoa(dbItem.Id), !dbItem.OnSale)
+		}
+
+		log.Printf("已将项目 %s 的decision字段更新为APPROVE，影响行数: %d", itemName, updateResult.RowsAffected)
 	}
 
 	return nil
@@ -374,7 +430,8 @@ func AuditTrade(_ context.Context, c *app.RequestContext) {
 	log.Printf("交易准备完成，开始审核...")
 
 	// 提交审核
-	err = submitAuditTransaction(regulatorContract, req.TradeID, req.Decision, req.Comment)
+	// err = submitAuditTransaction(regulatorContract, req.TradeID, req.Decision, req.Comment)
+	err = submitAuditTransaction2(regulatorContract, req.TradeID, req.Decision, req.Comment)
 	if err != nil {
 		log.Printf("审核失败: %v", err)
 		c.Status(http.StatusInternalServerError)

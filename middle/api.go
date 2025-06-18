@@ -8,7 +8,8 @@ import (
 
 // GetItems 是 Display 函数的包装器，用于获取版权项目列表
 func GetItems(ctx context.Context, c *app.RequestContext) {
-	Display(ctx, c)
+	// Display(ctx, c)
+	Display2(ctx, c)
 }
 
 // GetItemInfo 是 Information 函数的包装器，用于获取版权项目详情

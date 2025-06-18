@@ -102,3 +102,71 @@ type Conversation struct {
 	UnreadCount          int       `json:"unread_count"` // Unread messages for the current user in this conversation
 	// Consider adding OtherUserProfilePic string `json:"other_user_profile_pic"` if you implement user profiles
 }
+
+// 推荐系统的ORM
+// 不要直接放数据库，用api,不然推荐系统可能不会刷新
+// type Items struct {
+// 	ItemId     string    `gorm:"primaryKey;type:varchar(256);not null;column:item_id"`
+// 	IsHidden   bool      `gorm:"type:tinyint(1);not null;default:0;column:is_hidden"`
+// 	Categories string    `gorm:"type:json;not null;column:categories"`
+// 	TimeStamp  time.Time `gorm:"type:datetime;not null;column:time_stamp"`
+// 	Labels     string    `gorm:"type:json;not null;column:labels"`
+// 	Comment    string    `gorm:"type:text;not null;column:comment"`
+// }
+
+// type Feedback struct {
+// 	FeedbackType string    `gorm:"primaryKey;type:varchar(256);not null;column:feedback_type"`
+// 	UserId       string    `gorm:"primaryKey;type:varchar(256);not null;column:user_id"`
+// 	ItemId       string    `gorm:"primaryKey;type:varchar(256);not null;column:item_id"`
+// 	TimeStamp    time.Time `gorm:"type:datetime;not null;column:time_stamp"`
+// 	Comment      string    `gorm:"type:text;not null;column:comment"`
+// }
+
+// type Users struct {
+// 	UserId    string `gorm:"primaryKey;column:user_id;type:varchar(256);not null"`
+// 	Labels    string `gorm:"type:json;not null"`
+// 	Subscribe string `gorm:"type:json;not null"`
+// 	Comment   string `gorm:"type:text;not null"`
+// }
+
+type Item struct {
+	Id        int       `gorm:"column:id;primaryKey;autoIncrement"`
+	Name      string    `gorm:"column:name;type:varchar(50);not null"`
+	Owner     string    `gorm:"column:owner;type:varchar(255);not null"`
+	SimpleDsc string    `gorm:"column:simple_dsc;type:varchar(30);default:null"`
+	Dsc       string    `gorm:"column:dsc;type:text;default:null"`
+	Price     int       `gorm:"column:price;type:int;not null"`
+	Img       []byte    `gorm:"column:img;type:longblob;default:null"`
+	OnSale    bool      `gorm:"column:on_sale;type:tinyint(1);default:0"`
+	StartTime time.Time `gorm:"column:start_time;type:date;default:null"`
+	TransID   string    `gorm:"column:transID;type:text;default:null"`
+	Category  string    `gorm:"column:category;type:varchar(50);default:'其他'"`
+	Decision  string    `gorm:"column:decision;type:varchar(255);default:null"`
+}
+
+func (Item) TableName() string {
+	return "item"
+}
+
+type DbUser struct {
+	Username          string    `gorm:"primaryKey;column:username;type:varchar(255);not null"`
+	Password          string    `gorm:"column:password;type:varchar(255);default:NULL"`
+	Location          string    `gorm:"column:location;type:varchar(255);default:'未知地点'"`
+	Last_active_time  time.Time `gorm:"column:last_active_time;type:datetime;default:CURRENT_TIMESTAMP"`
+	Registration_time time.Time `gorm:"column:registration_time;type:datetime;default:NULL"`
+}
+
+func (DbUser) TableName() string {
+	return "user"
+}
+
+type Favorites struct {
+	Id         int       `gorm:"primaryKey;autoIncrement;column:id"`
+	Username   string    `gorm:"type:varchar(255);not null;index;column:username"`
+	ItemId     int       `gorm:"type:int;not null;index;column:item_id"`
+	CreateTime time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;autoCreateTime;column:create_time"`
+}
+
+func (Favorites) TableName() string {
+	return "favorites"
+}

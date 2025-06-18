@@ -13,6 +13,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/dgrijalva/jwt-go"
+	gorseCli "github.com/gorse-io/gorse-go"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func Register(ctx context.Context, c *app.RequestContext) {
@@ -55,6 +58,74 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	// 插入新用户，同时记录注册时间
 	if _, err := db.Exec("INSERT INTO user (username, password, registration_time, last_active_time) VALUES (?, ?, ?, ?)",
 		user.Username, user.Password, currentTime, currentTime); err != nil {
+		log.Printf("Error inserting new user: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	// 初始化区块链账户（初始余额设为 0）
+	initAccount(conf.FundsContract, user.Username, 0.0) // 确保 conf.FundsContract 已正确初始化
+
+	log.Printf("User %s registered successfully", user.Username)
+	c.Status(consts.StatusOK)
+}
+
+func Register2(_ context.Context, c *app.RequestContext) {
+	var user conf.User
+	if err := c.Bind(&user); err != nil {
+		log.Printf("Error binding user data: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
+		return
+	}
+
+	// 检查用户名是否存在
+	var exists bool
+	// 使用 SELECT EXISTS 子查询
+	if err := db.Model(&conf.DbUser{}).
+		Select("1").
+		Where("username = ?", user.Username).
+		Limit(1).
+		Scan(&exists).Error; err != nil {
+		log.Printf("Error querying database: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	if exists {
+		log.Printf("用户名%s已存在", user.Username)
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "用户名已存在",
+		})
+		return
+	}
+
+	currentTime := time.Now()
+	userToInsert := conf.DbUser{
+		Username:          user.Username,
+		Password:          user.Password,
+		Registration_time: currentTime,
+		Last_active_time:  currentTime,
+	}
+	recommandationUserToInsert := gorseCli.User{
+		UserId:    userToInsert.Username,
+		Labels:    []string{},
+		Subscribe: []string{},
+	}
+
+	err = db.Create(&userToInsert).Error
+	if err == nil {
+		_, err = conf.GorseClient.InsertUser(context.Background(), recommandationUserToInsert)
+		if err != nil {
+			db.Delete(&userToInsert) // 回滚数据库操作
+		}
+	}
+	if err != nil {
 		log.Printf("Error inserting new user: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return

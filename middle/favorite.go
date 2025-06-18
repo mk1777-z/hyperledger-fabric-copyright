@@ -14,6 +14,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/dgrijalva/jwt-go"
+	gorseCli "github.com/gorse-io/gorse-go"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // AddFavorite 添加收藏
@@ -85,6 +88,94 @@ func AddFavorite(_ context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, utils.H{"message": "收藏成功"})
 }
 
+func AddFavorite2(_ context.Context, c *app.RequestContext) {
+	var req struct {
+		ItemID int `json:"item_id"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的请求参数"})
+		return
+	}
+
+	tokenString := c.GetHeader("Authorization")
+	if string(tokenString) == "" {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "缺少授权令牌"})
+		return
+	}
+	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return conf.Con.Jwtkey, nil
+	})
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌"})
+		return
+	}
+	claims, ok := token.Claims.(*conf.UserClaims)
+	if !ok || !token.Valid {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌声明"})
+		return
+	}
+	//===
+	db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
+		return
+	}
+
+	var exists bool
+	if db.Model(&conf.Item{}).
+		Select("1").
+		Where("id = ?", req.ItemID).
+		Limit(1).
+		Scan(&exists).Error != nil {
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "数据库查询错误"})
+		return
+	}
+	if !exists {
+		c.JSON(http.StatusNotFound, utils.H{"message": "商品不存在"})
+		return
+	}
+
+	exists = false
+	if db.Model(&conf.Favorites{}).
+		Select("1").
+		Where("username = ? AND item_id = ?", claims.Username, req.ItemID).
+		Limit(1).
+		Scan(&exists).Error != nil {
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "数据库查询错误"})
+	}
+	if exists {
+		c.JSON(http.StatusConflict, utils.H{"message": "已经收藏过该商品"})
+		return
+	}
+
+	// 创建收藏记录
+	favorites := conf.Favorites{
+		Username:   claims.Username,
+		ItemId:     req.ItemID,
+		CreateTime: time.Now(),
+	}
+	err = db.Create(&favorites).Error
+	if err == nil {
+		feedbacks := []gorseCli.Feedback{
+			{FeedbackType: "favorites",
+				UserId:    favorites.Username,
+				ItemId:    strconv.Itoa(favorites.ItemId),
+				Timestamp: favorites.CreateTime.Format("2006-01-02 15:04:05")},
+		}
+		_, err = conf.GorseClient.InsertFeedback(context.Background(), feedbacks)
+		if err != nil {
+			db.Delete(&favorites) // 回滚数据库操作
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "添加收藏失败"})
+	} else {
+		c.JSON(http.StatusOK, utils.H{"message": "收藏成功"})
+	}
+}
+
 // RemoveFavorite 取消收藏
 func RemoveFavorite(_ context.Context, c *app.RequestContext) {
 	var req struct {
@@ -135,6 +226,58 @@ func RemoveFavorite(_ context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusNotFound, utils.H{"message": "未找到该收藏记录"})
 		return
 	}
+
+	c.JSON(http.StatusOK, utils.H{"message": "取消收藏成功"})
+}
+
+func RemoveFavorite2(_ context.Context, c *app.RequestContext) {
+	var req struct {
+		ItemID int `json:"item_id"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的请求参数"})
+		return
+	}
+	tokenString := c.GetHeader("Authorization")
+	if string(tokenString) == "" {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "缺少授权令牌"})
+		return
+	}
+	token_String := strings.Replace(string(tokenString), "Bearer ", "", -1)
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return conf.Con.Jwtkey, nil
+	})
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌"})
+		return
+	}
+	claims, ok := token.Claims.(*conf.UserClaims)
+	if !ok || !token.Valid {
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效的令牌声明"})
+		return
+	}
+
+	//===
+	db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
+		return
+	}
+
+	deleteResult := db.Where("username = ? AND item_id = ?", claims.Username, req.ItemID).Delete(&conf.Favorites{})
+	if deleteResult.Error != nil {
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "取消收藏失败"})
+		return
+	}
+	if deleteResult.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, utils.H{"message": "未找到该收藏记录"})
+		return
+	}
+
+	// 删除收藏记录后，向推荐系统发送反馈，我懒得失败后回滚了
+	_, err = conf.GorseClient.DeleteItem(context.Background(), strconv.Itoa(req.ItemID))
+	//===
 
 	c.JSON(http.StatusOK, utils.H{"message": "取消收藏成功"})
 }

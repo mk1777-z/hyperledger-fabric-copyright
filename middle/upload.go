@@ -19,8 +19,11 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
+	gorseCli "github.com/gorse-io/gorse-go"
 	obs "github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 	"gopkg.in/yaml.v3"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // 华为云OBS凭证配置
@@ -271,6 +274,182 @@ func Upload(_ context.Context, c *app.RequestContext) {
 		c.Status(http.StatusInternalServerError)
 		c.JSON(http.StatusInternalServerError, utils.H{"message": "保存项目详情失败", "error": err.Error()})
 		return
+	}
+
+	// 区块链交易
+	_, err = conf.BasicContract.SubmitTransaction(
+		"CreateCreatetrans",
+		assetID,
+		uploadInfo.Name,
+		"admin",
+		claims.Username,
+		"0",
+		startTime.Format("2006-01-02 15:04:05"),
+	)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message": "项目已保存并上传图片，但区块链记录失败",
+			"assetID": assetID,
+			"itemID":  uploadInfo.ID,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, utils.H{"message": "创建项目成功", "assetID": assetID, "itemID": uploadInfo.ID, "imageURL": imageURL})
+}
+
+func Upload2(_ context.Context, c *app.RequestContext) {
+	var uploadInfo conf.Upload
+	if err := c.Bind(&uploadInfo); err != nil {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效请求体", "error": err.Error()})
+		log.Printf("请求体绑定错误: %v", err)
+		return
+	}
+
+	InitializeOBSClient()
+	// 检查OBS客户端是否成功初始化
+	if obsClient == nil || initObsErr != nil {
+		log.Printf("OBS服务不可用: %v", initObsErr)
+		obsStatus := CheckOBSStatus()
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{
+			"message":    "图片存储服务不可用",
+			"obs_status": obsStatus,
+		})
+		return
+	}
+
+	// JWT认证
+	tokenBytes := c.GetHeader("Authorization")
+	if tokenBytes == nil {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "缺少授权令牌"})
+		return
+	}
+	tokenString := string(tokenBytes)
+	if !strings.HasPrefix(tokenString, "Bearer ") {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的授权头格式"})
+		return
+	}
+	token_String := strings.Replace(tokenString, "Bearer ", "", -1)
+
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("意外的签名方法: %v", t.Header["alg"])
+		}
+		return []byte(conf.Con.Jwtkey), nil
+	})
+
+	if err != nil || !token.Valid {
+		var validationErr *jwt.ValidationError
+		if errors.As(err, &validationErr) {
+			if validationErr.Errors&jwt.ValidationErrorExpired != 0 {
+				c.Status(http.StatusUnauthorized)
+				c.JSON(http.StatusUnauthorized, utils.H{"message": "令牌已过期"})
+				return
+			}
+		}
+		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, utils.H{"message": "无效令牌", "error": err.Error()})
+		return
+	}
+	claims := token.Claims.(*conf.UserClaims)
+
+	// 图片处理
+	if uploadInfo.Img == "" {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "缺少图片数据"})
+		return
+	}
+
+	// 解码Base64图片
+	base64Image := uploadInfo.Img
+	if commaIndex := strings.Index(base64Image, ","); commaIndex != -1 {
+		base64Image = base64Image[commaIndex+1:]
+	}
+	imageData, err := base64.StdEncoding.DecodeString(base64Image)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的Base64图片数据", "error": err.Error()})
+		return
+	}
+	if len(imageData) == 0 {
+		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, utils.H{"message": "解码后的图片数据为空"})
+		return
+	}
+
+	// 上传到OBS
+	objectKey := strconv.Itoa(uploadInfo.ID)
+	input := &obs.PutObjectInput{}
+	input.Bucket = obsBucket
+	input.Key = objectKey
+	input.Body = bytes.NewReader(imageData)
+	_, err = obsClient.PutObject(input)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "上传图片到存储失败", "error": err.Error()})
+		return
+	}
+
+	// 构建公共OBS URL
+	obsDomain := strings.TrimPrefix(obsEndPoint, "https://")
+	imageURL := fmt.Sprintf("https://%s.%s/%s", obsBucket, obsDomain, objectKey)
+
+	// 数据库交互
+	db, err := gorm.Open(mysql.New(mysql.Config{Conn: conf.DB}))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "Database connection error"})
+		return
+	}
+
+	startTime := time.Now()
+	assetID := fmt.Sprintf("asset%d", startTime.UnixNano()/1e6)
+	itemToAdd := conf.Item{
+		Id:        uploadInfo.ID,
+		Name:      uploadInfo.Name,
+		Owner:     claims.Username,
+		SimpleDsc: uploadInfo.Simple_dsc,
+		Dsc:       uploadInfo.Dsc,
+		Price:     int(uploadInfo.Price),
+		Img:       []byte(imageURL),
+		OnSale:    uploadInfo.On_sale,
+		StartTime: startTime,
+		TransID:   assetID,
+		Category:  conf.CategoryDecode[uploadInfo.Category],
+	}
+
+	categoriesString := []string{fmt.Sprintf("[\"%s\"]", itemToAdd.Category)}
+	recommandationItem := gorseCli.Item{
+		ItemId:     strconv.Itoa(itemToAdd.Id),
+		Categories: categoriesString,
+		Timestamp:  itemToAdd.StartTime.Format("2006-01-02 15:04:05"),
+		Labels:     categoriesString,
+		Comment:    itemToAdd.SimpleDsc,
+	}
+	if itemToAdd.OnSale && itemToAdd.Decision == "APPROVE" {
+		recommandationItem.IsHidden = false
+	} else {
+		recommandationItem.IsHidden = true
+	}
+
+	err = db.Create(&itemToAdd).Error
+	if err == nil {
+		// 要用api,直接insert db,推荐系统不会更新
+		_, err = conf.GorseClient.InsertItem(context.Background(), recommandationItem)
+		if err != nil {
+			db.Delete(&itemToAdd) // 回滚数据库操作
+		}
+	}
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, utils.H{"message": "保存项目详情失败", "error": err.Error()})
 	}
 
 	// 区块链交易
