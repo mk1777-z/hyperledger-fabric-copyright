@@ -228,8 +228,8 @@
         /* 移除按钮背景并调整样式 */
         .embedded-buttons {
             display: flex;
-            justify-content: space-between;
-            gap: 8px;
+            justify-content: center;
+            gap: 8px; /* 原 gap: 15px，改为 8px，节省空间 */
             margin-top: 15px;
             padding: 12px 0;
             background: transparent;
@@ -392,13 +392,14 @@
         .embedded-buttons {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 8px; /* 原 gap: 15px，改为 8px，节省空间 */
             margin-top: 15px;
             padding: 12px 0;
             background: transparent;
             border-radius: 12px;
-            backdrop-filter: none;
             border: none;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* 用户消息样式优化 - 增加自然弧度 */
@@ -1624,6 +1625,9 @@
         /* 当有4个按钮时调整宽度 */
         .embedded-buttons .action-button {
             width: calc((100% - 24px) / 4); /* 4个按钮，3个8px间距 */
+            min-width: 0;
+            padding: 10px 0;
+            font-size: 14px;
         }
     </style>
 </head>

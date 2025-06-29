@@ -129,48 +129,13 @@ func Display(_ context.Context, c *app.RequestContext) {
 
 func Display2(_ context.Context, c *app.RequestContext) {
 	// 通过tokan获取用户名
-	tokenBytes := c.GetHeader("Authorization")
-	if len(tokenBytes) == 0 {
-		c.Status(http.StatusBadRequest)
-		c.JSON(http.StatusBadRequest, utils.H{"message": "Authorization token is missing"})
-		return
-	}
-	tokenString := string(tokenBytes)
-	if !strings.HasPrefix(tokenString, "Bearer ") {
-		c.Status(http.StatusBadRequest)
-		c.JSON(http.StatusBadRequest, utils.H{"message": "无效的授权头格式"})
-		return
-	}
-
-	// 提取 Bearer token
-	token_String := strings.Replace(tokenString, "Bearer ", "", -1)
-
-	// 解析 token
-	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
-		// 返回 JWT 密钥
-		return conf.Con.Jwtkey, nil
-	})
-	if err != nil {
-		// 如果 token 无效，返回 401 未授权错误
-		c.Status(http.StatusUnauthorized)
-		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token"})
-		return
-	}
-
-	// 验证 token 是否有效
-	claims, ok := token.Claims.(*conf.UserClaims)
-	if !ok || !token.Valid {
-		c.Status(http.StatusUnauthorized)
-		c.JSON(http.StatusUnauthorized, utils.H{"message": "Invalid token claims"})
-		return
-	}
-	username := claims.Username
+	username := getUsernameFromToken(c.GetHeader("Authorization"))
 
 	var pageData Paging
 	pageData.Page = 1
 	pageData.PageSize = 12 // 设置为12个项目每页
 	// 绑定请求参数
-	err = c.Bind(&pageData)
+	err := c.Bind(&pageData)
 	// 计算分页的偏移量
 	offset := (pageData.Page - 1) * pageData.PageSize
 
@@ -217,4 +182,33 @@ func Display2(_ context.Context, c *app.RequestContext) {
 		"totalPages": totalPages,
 		"totalItems": totalItems,
 	})
+}
+
+func getUsernameFromToken(tokenBytes []byte) string {
+	if len(tokenBytes) == 0 {
+		return conf.NewRecommendationUsername
+	}
+	tokenString := string(tokenBytes)
+	if !strings.HasPrefix(tokenString, "Bearer ") {
+		return conf.NewRecommendationUsername
+	}
+
+	// 提取 Bearer token
+	token_String := strings.Replace(tokenString, "Bearer ", "", -1)
+
+	// 解析 token
+	token, err := jwt.ParseWithClaims(token_String, &conf.UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		// 返回 JWT 密钥
+		return conf.Con.Jwtkey, nil
+	})
+	if err != nil {
+		return conf.NewRecommendationUsername
+	}
+
+	// 验证 token 是否有效
+	claims, ok := token.Claims.(*conf.UserClaims)
+	if !ok || !token.Valid {
+		return conf.NewRecommendationUsername
+	}
+	return claims.Username
 }

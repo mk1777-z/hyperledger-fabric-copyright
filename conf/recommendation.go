@@ -13,6 +13,7 @@ import (
 
 var RecommendationCfg *RecommendationConfig
 var GorseClient *gorseCli.GorseClient
+var NewRecommendationUsername string
 
 const sleepTime = 10 * time.Second
 
@@ -46,6 +47,7 @@ func GetRecommandationConfig(configPath string) (*RecommendationConfig, error) {
 		Host:     recommandationMap["host"].(string),
 		Port:     recommandationMap["port"].(int),
 	}
+	NewRecommendationUsername = recommandationMap["new_username"].(string)
 
 	return cfg, nil
 }
